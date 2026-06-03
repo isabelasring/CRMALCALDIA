@@ -1,0 +1,47 @@
+{
+    "relationshipPanels": {
+        "assignedUser": {
+            "selectPrimaryFilterName": "patrulleros"
+        }
+    },
+    "fields": {
+        "assignedUser": {
+            "selectPrimaryFilterName": "patrulleros"
+        }
+    },
+    "dynamicLogic": {
+        "fields": {
+            "cExpediente": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Radicado"
+                                },
+                                {
+                                    "type": "isNotEmpty",
+                                    "attribute": "cExpediente"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "assignedUser": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "equals",
+                            "attribute": "status",
+                            "value": "Radicado"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

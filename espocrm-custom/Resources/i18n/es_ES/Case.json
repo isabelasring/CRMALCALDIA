@@ -1,0 +1,39 @@
+{
+    "fields": {
+        "cNombreDelPeticionario": "Nombre del peticionario",
+        "cApellido": "Apellido",
+        "cTipoDeDocumento": "Tipo de documento",
+        "cNumeroDeDocumento": "Número de documento",
+        "cCanalDeReporte": "Canal de reporte",
+        "cTelefono": "Teléfono",
+        "cCorreo": "Correo",
+        "cMunicipio": "Municipio",
+        "cBarrioResidencia": "Barrio residencia",
+        "cDireccion": "Dirección",
+        "cNumeroRadicacion": "Número de radicación",
+        "cExpediente": "Expediente"
+    },
+    "options": {
+        "cTipoDeDocumento": {
+            "CC": "CC",
+            "CE": "CE",
+            "NIT": "NIT",
+            "Pasaporte": "Pasaporte",
+            "Otro": "Otro"
+        },
+        "cCanalDeReporte": {
+            "Correo": "Correo",
+            "Teléfono": "Teléfono",
+            "Presencial": "Presencial",
+            "WhatsApp": "WhatsApp",
+            "Página web": "Página web"
+        },
+        "cMunicipio": {
+            "Envigado": "Envigado"
+        },
+        "status": {
+            "Pendiente de radicacion": "Pendiente de radicación",
+            "Radicado": "Radicado"
+        }
+    }
+}

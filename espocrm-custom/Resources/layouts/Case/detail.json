@@ -1,0 +1,85 @@
+[
+    {
+        "rows": [
+            [
+                {
+                    "name": "assignedUser"
+                },
+                {
+                    "name": "cExpediente"
+                }
+            ],
+            [
+                {
+                    "name": "status"
+                },
+                {
+                    "name": "cNumeroRadicacion"
+                }
+            ],
+            [
+                {
+                    "name": "cNombreDelPeticionario"
+                },
+                {
+                    "name": "cApellido"
+                }
+            ],
+            [
+                {
+                    "name": "cTipoDeDocumento"
+                },
+                {
+                    "name": "cNumeroDeDocumento"
+                }
+            ],
+            [
+                {
+                    "name": "cCanalDeReporte"
+                },
+                {
+                    "name": "cTelefono"
+                }
+            ],
+            [
+                {
+                    "name": "cCorreo"
+                },
+                {
+                    "name": "cMunicipio"
+                }
+            ],
+            [
+                {
+                    "name": "cBarrioResidencia"
+                },
+                {
+                    "name": "cDireccion"
+                }
+            ],
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "type"
+                }
+            ],
+            [
+                {
+                    "name": "priority"
+                },
+                {
+                    "name": "description"
+                }
+            ],
+            [
+                {
+                    "name": "attachments"
+                }
+            ]
+        ],
+        "style": "default",
+        "label": ""
+    }
+]

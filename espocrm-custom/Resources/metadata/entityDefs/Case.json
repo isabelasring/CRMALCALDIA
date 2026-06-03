@@ -1,0 +1,94 @@
+{
+    "fields": {
+        "assignedUser": {
+            "view": "custom:views/case/fields/assigned-user",
+            "selectPrimaryFilterName": "patrulleros"
+        },
+        "status": {
+            "options": [
+                "New",
+                "Assigned",
+                "Pending",
+                "Closed",
+                "Rejected",
+                "Duplicate",
+                "Pendiente de radicacion",
+                "Radicado"
+            ],
+            "notActualOptions": [
+                "Closed",
+                "Rejected",
+                "Duplicate"
+            ]
+        },
+        "cNombreDelPeticionario": {
+            "type": "varchar",
+            "maxLength": 100,
+            "isCustom": true
+        },
+        "cApellido": {
+            "type": "varchar",
+            "maxLength": 150,
+            "isCustom": true
+        },
+        "cTipoDeDocumento": {
+            "type": "enum",
+            "options": ["CC", "CE", "NIT", "Pasaporte", "Otro"],
+            "default": "CC",
+            "maxLength": 100,
+            "isCustom": true
+        },
+        "cNumeroDeDocumento": {
+            "type": "varchar",
+            "maxLength": 50,
+            "isCustom": true
+        },
+        "cCanalDeReporte": {
+            "type": "enum",
+            "options": ["Correo", "Teléfono", "Presencial", "WhatsApp", "Página web"],
+            "default": "Teléfono",
+            "maxLength": 100,
+            "isCustom": true
+        },
+        "cTelefono": {
+            "type": "phone",
+            "maxLength": 50,
+            "isCustom": true
+        },
+        "cCorreo": {
+            "type": "email",
+            "maxLength": 100,
+            "isCustom": true
+        },
+        "cMunicipio": {
+            "type": "enum",
+            "options": ["Envigado"],
+            "default": "Envigado",
+            "maxLength": 100,
+            "isCustom": true
+        },
+        "cBarrioResidencia": {
+            "type": "varchar",
+            "maxLength": 150,
+            "isCustom": true
+        },
+        "cDireccion": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cNumeroRadicacion": {
+            "type": "varchar",
+            "maxLength": 100,
+            "isCustom": true,
+            "tooltip": true,
+            "required": false
+        },
+        "cExpediente": {
+            "type": "varchar",
+            "maxLength": 50,
+            "isCustom": true,
+            "readOnly": true,
+            "tooltip": true
+        }
+    }
+}

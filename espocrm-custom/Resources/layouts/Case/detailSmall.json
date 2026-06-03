@@ -1,0 +1,19 @@
+[
+    {
+        "rows": [
+            [
+                {
+                    "name": "status"
+                },
+                {
+                    "name": "cNumeroRadicacion"
+                }
+            ],
+            [
+                {
+                    "name": "name"
+                }
+            ]
+        ]
+    }
+]
