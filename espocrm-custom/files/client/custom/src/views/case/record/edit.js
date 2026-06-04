@@ -2,14 +2,27 @@ define('custom:views/case/record/edit', [
     'views/record/edit',
     'custom:helpers/patrullero-acta',
     'custom:helpers/inspeccion-acta',
-], function (Dep, PatrulleroActa, InspeccionActa) {
+    'custom:helpers/radicacion-fields',
+    'custom:helpers/post-radicacion-fields',
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields) {
 
     return Dep.extend({
+
+        setup: function () {
+            Dep.prototype.setup.call(this);
+
+            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente', function () {
+                this.toggleRadicacionFields();
+                this.togglePostRadicacionFields();
+            });
+        },
 
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
 
             this.applyFieldModes();
+            this.toggleRadicacionFields();
+            this.togglePostRadicacionFields();
         },
 
         applyFieldModes: function () {
@@ -55,6 +68,64 @@ define('custom:views/case/record/edit', [
                     'cCierreObservaciones',
                 ]);
             }
+        },
+
+        toggleRadicacionFields: function () {
+            const user = this.getUser();
+            const model = this.model;
+            const show = RadicacionFields.shouldShowRadicacionFields(user, model);
+            const readOnly = !RadicacionFields.isRadicacionUser(user);
+
+            RadicacionFields.RADICADO_FIELDS.forEach((field) => {
+                const $cell = this.$el.find('[data-name="' + field + '"]').closest('.cell');
+
+                if ($cell.length) {
+                    $cell.toggle(show);
+                }
+
+                if (!show) {
+                    return;
+                }
+
+                const view = this.getFieldView(field);
+
+                if (view && readOnly && typeof view.setReadOnly === 'function') {
+                    view.setReadOnly();
+                }
+            });
+        },
+
+        togglePostRadicacionFields: function () {
+            const user = this.getUser();
+            const model = this.model;
+            const show = PostRadicacionFields.shouldShowAsignacion(user, model);
+            const canEdit = PostRadicacionFields.canEditAsignacion(user, model);
+
+            this.findPanel('gestionPosteriorRadicacion').toggle(show);
+
+            const $cell = this.$el.find('[data-name="assignedUser"]').closest('.cell');
+
+            if ($cell.length) {
+                $cell.toggle(show);
+            }
+
+            if (!show) {
+                return;
+            }
+
+            const view = this.getFieldView('assignedUser');
+
+            if (view && !canEdit && typeof view.setReadOnly === 'function') {
+                view.setReadOnly();
+            }
+        },
+
+        findPanel: function (name) {
+            return this.$el.find(
+                '.panel[data-name="' + name + '"], ' +
+                '.record-panel[data-name="' + name + '"], ' +
+                '[data-name="' + name + '"].panel'
+            );
         },
 
         setReadOnlyExcept: function (editableFields) {

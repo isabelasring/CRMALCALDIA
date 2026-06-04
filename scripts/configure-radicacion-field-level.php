@@ -1,62 +1,82 @@
 <?php
 
 /**
- * Solo el rol Radicación puede ver/editar cNumeroRadicacion.
- * Ejecutar una vez después del rebuild.
+ * Radicación (Edwin) edita radicado/expediente; el resto de roles los lee
+ * cuando el caso ya fue radicado (visibilidad vacía en UI vía client custom).
+ * Usa SQL directo (evita hooks rotos en custom/Hooks/_disabled).
+ *
+ * docker cp scripts/configure-radicacion-field-level.php espocrm:/tmp/
+ * docker exec espocrm php /tmp/configure-radicacion-field-level.php
+ * docker exec espocrm php command.php clear-cache
  */
 
 require_once '/var/www/html/bootstrap.php';
 
 use Espo\Core\Application;
+use Espo\Core\DataManager;
 use Espo\ORM\EntityManager;
 
 $app = new Application();
 $app->setupSystemUser();
 
-/** @var EntityManager $entityManager */
-$entityManager = $app->getContainer()->getByClass(EntityManager::class);
+/** @var EntityManager $em */
+$em = $app->getContainer()->getByClass(EntityManager::class);
+$pdo = $em->getPDO();
 
-$field = 'cNumeroRadicacion';
+$exclusiveFields = ['cNumeroRadicado', 'cExpediente'];
 $scope = 'Case';
 $roleRadicacion = 'Radicación';
+$legacyFields = ['cNumeroRadicacion'];
 
-foreach ($entityManager->getRDBRepository('Role')->find() as $role) {
-    try {
-        $fieldData = $role->get('fieldData');
+$stmt = $pdo->query('SELECT id, name, field_data FROM role WHERE deleted = false');
 
-        if ($fieldData instanceof stdClass) {
-            $fieldData = json_decode(json_encode($fieldData), true);
-        }
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $roleName = $row['name'];
+    $fieldData = json_decode($row['field_data'] ?? '{}', true);
 
-        if (!is_array($fieldData)) {
-            $fieldData = [];
-        }
+    if (!is_array($fieldData)) {
+        $fieldData = [];
+    }
 
-        if (!isset($fieldData[$scope])) {
-            $fieldData[$scope] = [];
-        }
+    if (!isset($fieldData[$scope]) || !is_array($fieldData[$scope])) {
+        $fieldData[$scope] = [];
+    }
 
-        if ($fieldData[$scope] instanceof stdClass) {
-            $fieldData[$scope] = json_decode(json_encode($fieldData[$scope]), true);
-        }
-
-        if (!is_array($fieldData[$scope])) {
-            $fieldData[$scope] = [];
-        }
-
-        if ($role->get('name') === $roleRadicacion) {
+    foreach ($exclusiveFields as $field) {
+        if ($roleName === $roleRadicacion) {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
-            echo 'OK lectura/edición: ' . $role->get('name') . PHP_EOL;
         } else {
-            $fieldData[$scope][$field] = ['read' => 'no', 'edit' => 'no'];
-            echo 'Oculto para rol: ' . $role->get('name') . PHP_EOL;
+            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
         }
+    }
 
-        $role->set('fieldData', $fieldData);
-        $entityManager->saveEntity($role);
-    } catch (Throwable $e) {
-        echo 'Error en rol ' . $role->get('name') . ': ' . $e->getMessage() . PHP_EOL;
+    if ($roleName === 'Inspección' || $roleName === 'Inspeccion') {
+        $fieldData[$scope]['cTipo'] = ['read' => 'yes', 'edit' => 'yes'];
+        $fieldData[$scope]['cCategoria'] = ['read' => 'yes', 'edit' => 'yes'];
+    } else {
+        $fieldData[$scope]['cTipo'] = ['read' => 'yes', 'edit' => 'no'];
+        $fieldData[$scope]['cCategoria'] = ['read' => 'yes', 'edit' => 'no'];
+    }
+
+    foreach ($legacyFields as $legacyField) {
+        unset($fieldData[$scope][$legacyField]);
+    }
+
+    $update = $pdo->prepare(
+        'UPDATE role SET field_data = :fieldData, modified_at = :now WHERE id = :id'
+    );
+    $update->execute([
+        'fieldData' => json_encode($fieldData, JSON_UNESCAPED_UNICODE),
+        'now' => date('Y-m-d H:i:s'),
+        'id' => $row['id'],
+    ]);
+
+    if ($roleName === $roleRadicacion) {
+        echo "OK lectura/edición (radicado + expediente): {$roleName}\n";
+    } else {
+        echo "OK lectura, sin edición (radicado + expediente): {$roleName}\n";
     }
 }
 
-echo "Listo. Campo {$field} solo editable por rol {$roleRadicacion}.\n";
+$app->getContainer()->getByClass(DataManager::class)->rebuild();
+echo 'Listo. Todos leen radicado/expediente; solo Radicación edita.' . PHP_EOL;

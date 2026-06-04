@@ -1,204 +1,207 @@
 {
     "fields": {
-        "assignedUser": {
-            "view": "custom:views/case/fields/assigned-user",
-            "selectPrimaryFilterName": "patrulleros"
+        "name": {
+            "required": false
         },
-        "status": {
-            "view": "custom:views/case/fields/status",
-            "options": [
-                "New",
-                "Assigned",
-                "Pending",
-                "Closed",
-                "Rejected",
-                "Duplicate",
-                "Pendiente de radicacion",
-                "Radicado",
-                "En proceso",
-                "Visita realizada",
-                "Visita aprobada",
-                "Finalizado",
-                "Proceso cerrado"
-            ],
-            "notActualOptions": [
-                "Closed",
-                "Rejected",
-                "Duplicate"
-            ]
+        "cFechaVencimiento": {
+            "notNull": false,
+            "type": "date",
+            "isCustom": true
         },
-        "cNombreDelPeticionario": {
+        "cFechaCaso": {
+            "notNull": false,
+            "type": "datetime",
+            "required": true,
+            "default": "javascript: return this.dateTime.getNow(1);",
+            "minuteStep": 30,
+            "isCustom": true
+        },
+        "cNumeroRadicado": {
             "type": "varchar",
             "maxLength": 100,
+            "options": [],
             "isCustom": true
         },
-        "cApellido": {
+        "cExpediente": {
             "type": "varchar",
-            "maxLength": 150,
+            "maxLength": 100,
+            "options": [],
             "isCustom": true
         },
-        "cTipoDeDocumento": {
+        "cPeticionario": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100,
+            "options": [],
+            "isCustom": true
+        },
+        "cCedula": {
+            "type": "varchar",
+            "required": true,
+            "maxLength": 100,
+            "options": [],
+            "isCustom": true
+        },
+        "cDireccion": {
+            "type": "varchar",
+            "maxLength": 100,
+            "options": [],
+            "isCustom": true
+        },
+        "cTelefono": {
+            "type": "varchar",
+            "maxLength": 100,
+            "options": [],
+            "isCustom": true
+        },
+        "cBarrio": {
             "type": "enum",
-            "options": ["CC", "CE", "NIT", "Pasaporte", "Otro"],
-            "default": "CC",
+            "options": [
+                "barrio 1",
+                "barrio 2"
+            ],
+            "style": {
+                "barrio 1": null,
+                "barrio 2": null
+            },
+            "default": "barrio 1",
             "maxLength": 100,
             "isCustom": true
         },
-        "cNumeroDeDocumento": {
+        "cCorreo": {
             "type": "varchar",
-            "maxLength": 50,
+            "maxLength": 200,
+            "options": [],
             "isCustom": true
         },
         "cCanalDeReporte": {
             "type": "enum",
-            "options": ["Correo", "Teléfono", "Presencial", "WhatsApp", "Página web"],
-            "default": "Teléfono",
+            "options": [
+                "Telefono",
+                "Correo",
+                "Personal"
+            ],
+            "style": {
+                "Telefono": null,
+                "Correo": null,
+                "Personal": null
+            },
+            "default": "Telefono",
             "maxLength": 100,
             "isCustom": true
         },
-        "cTelefono": {
-            "type": "phone",
-            "maxLength": 50,
+        "cPerjudicante": {
+            "type": "varchar",
+            "maxLength": 200,
+            "options": [],
             "isCustom": true
         },
-        "cCorreo": {
-            "type": "email",
+        "cTelefonoPerjudicante": {
+            "type": "varchar",
             "maxLength": 100,
+            "options": [],
             "isCustom": true
         },
-        "cMunicipio": {
+        "cDireccionPerjudicante": {
+            "type": "varchar",
+            "maxLength": 100,
+            "options": [],
+            "isCustom": true
+        },
+        "cBarrioPerjudicante": {
             "type": "enum",
-            "options": ["Envigado"],
-            "default": "Envigado",
+            "options": [
+                "barrio 1",
+                "barrio 2"
+            ],
+            "style": {
+                "barrio 1": null,
+                "barrio 2": null
+            },
+            "default": "barrio 1",
             "maxLength": 100,
             "isCustom": true
         },
-        "cBarrioResidencia": {
+        "cRespuestaInmediata": {
             "type": "varchar",
-            "maxLength": 150,
+            "maxLength": 1000,
+            "options": [],
             "isCustom": true
         },
-        "cDireccion": {
-            "type": "text",
+        "cRecibidaPor": {
+            "type": "link",
             "isCustom": true
         },
-        "cNumeroRadicacion": {
-            "type": "varchar",
-            "maxLength": 100,
-            "isCustom": true,
-            "tooltip": true,
-            "required": false
-        },
-        "cExpediente": {
-            "type": "varchar",
-            "maxLength": 50,
-            "isCustom": true,
-            "readOnly": true,
-            "tooltip": true
-        },
-        "cActaFechaVisita": {
-            "type": "date",
+        "cRemitidoA": {
+            "type": "link",
             "isCustom": true
         },
-        "cActaHoraVisita": {
-            "type": "varchar",
-            "maxLength": 10,
-            "isCustom": true,
-            "tooltip": true
-        },
-        "cActaDireccionVisita": {
-            "type": "varchar",
-            "maxLength": 255,
-            "isCustom": true
-        },
-        "cActaNombreVisitado": {
-            "type": "varchar",
-            "maxLength": 150,
-            "isCustom": true
-        },
-        "cActaDocumentoVisitado": {
-            "type": "varchar",
-            "maxLength": 50,
-            "isCustom": true
-        },
-        "cActaHallazgos": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cActaMedidasTomadas": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cActaObservaciones": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cActaEstado": {
+        "cTipo": {
             "type": "enum",
-            "options": ["Pendiente", "Diligenciada", "Aprobada"],
-            "default": "Pendiente",
-            "maxLength": 50,
-            "isCustom": true,
-            "readOnly": true
-        },
-        "cActaVistoBueno": {
-            "type": "bool",
-            "default": false,
+            "options": [
+                "",
+                "Queja / reporte ambiental",
+                "PQRSD",
+                "Derecho de petición",
+                "Reclamo",
+                "Sugerencia",
+                "Denuncia",
+                "Otro"
+            ],
+            "style": {
+                "Queja / reporte ambiental": null,
+                "PQRSD": null,
+                "Derecho de petición": null,
+                "Reclamo": null,
+                "Sugerencia": null,
+                "Denuncia": null,
+                "Otro": null
+            },
+            "required": true,
             "isCustom": true
         },
-        "cActaObservacionesRevision": {
-            "type": "text",
+        "cCategoria": {
+            "type": "multiEnum",
+            "options": [
+                "Hídrico",
+                "Suelo de protección",
+                "Suelo",
+                "Aire",
+                "Fauna silvestre",
+                "Flora",
+                "Gestión socioambiental de obra",
+                "Servicios públicos",
+                "Fauna doméstica",
+                "Paisaje",
+                "Minero",
+                "Residuos sólidos"
+            ],
+            "style": {
+                "Hídrico": null,
+                "Suelo de protección": null,
+                "Suelo": null,
+                "Aire": null,
+                "Fauna silvestre": null,
+                "Flora": null,
+                "Gestión socioambiental de obra": null,
+                "Servicios públicos": null,
+                "Fauna doméstica": null,
+                "Paisaje": null,
+                "Minero": null,
+                "Residuos sólidos": null
+            },
+            "required": true,
             "isCustom": true
+        }
+    },
+    "links": {
+        "cRecibidaPor": {
+            "type": "belongsTo",
+            "entity": "User"
         },
-        "cActaFechaAprobacion": {
-            "type": "date",
-            "isCustom": true,
-            "readOnly": true
-        },
-        "cActaRegistroOficial": {
-            "type": "bool",
-            "default": false,
-            "isCustom": true,
-            "readOnly": true
-        },
-        "cCierreFecha": {
-            "type": "date",
-            "isCustom": true
-        },
-        "cCierreResumen": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cCierreConclusiones": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cCierreMedidasAdoptadas": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cCierreObservaciones": {
-            "type": "text",
-            "isCustom": true
-        },
-        "cCierreEstado": {
-            "type": "enum",
-            "options": ["Pendiente", "Diligenciado"],
-            "default": "Pendiente",
-            "maxLength": 50,
-            "isCustom": true,
-            "readOnly": true
-        },
-        "cCierreProcesoCompleto": {
-            "type": "bool",
-            "default": false,
-            "isCustom": true,
-            "readOnly": true
-        },
-        "cCierreFechaRegistro": {
-            "type": "date",
-            "isCustom": true,
-            "readOnly": true
+        "cRemitidoA": {
+            "type": "belongsTo",
+            "entity": "User"
         }
     }
 }

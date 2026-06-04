@@ -2,7 +2,9 @@ define('custom:views/case/record/detail', [
     'views/record/detail',
     'custom:helpers/patrullero-acta',
     'custom:helpers/inspeccion-acta',
-], function (Dep, PatrulleroActa, InspeccionActa) {
+    'custom:helpers/radicacion-fields',
+    'custom:helpers/post-radicacion-fields',
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields) {
 
     return Dep.extend({
 
@@ -11,6 +13,13 @@ define('custom:views/case/record/detail', [
 
             this.listenTo(this.model, 'change', function () {
                 this.toggleActaPanels();
+                this.toggleRadicacionFields();
+                this.togglePostRadicacionFields();
+            });
+
+            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente', function () {
+                this.toggleRadicacionFields();
+                this.togglePostRadicacionFields();
             });
         },
 
@@ -19,6 +28,8 @@ define('custom:views/case/record/detail', [
 
             this.toggleActaPanels();
             this.setActaFieldsReadOnlyForReview();
+            this.toggleRadicacionFields();
+            this.togglePostRadicacionFields();
         },
 
         findPanel: function (name) {
@@ -77,6 +88,35 @@ define('custom:views/case/record/detail', [
                     view.setReadOnly();
                 }
             });
+        },
+
+        toggleRadicacionFields: function () {
+            const show = RadicacionFields.shouldShowRadicacionFields(
+                this.getUser(),
+                this.model
+            );
+
+            RadicacionFields.RADICADO_FIELDS.forEach((field) => {
+                const $cell = this.$el.find('[data-name="' + field + '"]').closest('.cell');
+
+                if ($cell.length) {
+                    $cell.toggle(show);
+                }
+            });
+        },
+
+        togglePostRadicacionFields: function () {
+            const user = this.getUser();
+            const model = this.model;
+            const show = PostRadicacionFields.shouldShowAsignacion(user, model);
+
+            this.findPanel('gestionPosteriorRadicacion').toggle(show);
+
+            const $cell = this.$el.find('[data-name="assignedUser"]').closest('.cell');
+
+            if ($cell.length) {
+                $cell.toggle(show);
+            }
         },
     });
 });

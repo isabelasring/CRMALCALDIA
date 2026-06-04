@@ -1,9 +1,12 @@
-define('custom:views/case/fields/assigned-user', ['views/fields/assigned-user'], function (Dep) {
+define('custom:views/case/fields/assigned-user', [
+    'views/fields/assigned-user',
+    'custom:helpers/post-radicacion-fields',
+], function (Dep, PostRadicacionFields) {
 
     return Dep.extend({
 
         getSelectPrimaryFilterName: function () {
-            if (this.model.get('status') === 'Radicado') {
+            if (PostRadicacionFields.isCasePostRadicado(this.model)) {
                 return 'patrulleros';
             }
 

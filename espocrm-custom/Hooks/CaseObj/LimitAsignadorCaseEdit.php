@@ -10,16 +10,15 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Rol Asignador: al guardar solo puede cambiar assignedUserId.
+ * Rol Asignador (Julian): con radicado y expediente, solo puede cambiar Asignado a.
  */
 class LimitAsignadorCaseEdit implements BeforeSave
 {
+    public static int $order = 8;
+
     private const ROLE_ASIGNADOR = 'Asignador';
 
-    private const ALLOWED = ['assignedUserId', 'assignedUserName', 'status'];
-
-    private const STATUS_RADICADO = 'Radicado';
-    private const STATUS_EN_PROCESO = 'En proceso';
+    private const ALLOWED = ['assignedUserId', 'assignedUserName'];
 
     public function __construct(
         private User $user,
@@ -32,20 +31,12 @@ class LimitAsignadorCaseEdit implements BeforeSave
             return;
         }
 
-        $statusForEdit = $entity->hasFetched('status')
-            ? $entity->getFetched('status')
-            : $entity->get('status');
-
-        if ($statusForEdit !== self::STATUS_RADICADO) {
+        if (!$this->isPostRadicado($entity)) {
             return;
         }
 
         foreach ($entity->getAttributeList() as $attribute) {
             if (!$entity->isAttributeChanged($attribute)) {
-                continue;
-            }
-
-            if ($attribute === 'status' && $this->isAllowedStatusTransition($entity)) {
                 continue;
             }
 
@@ -59,18 +50,12 @@ class LimitAsignadorCaseEdit implements BeforeSave
         }
     }
 
-    private function isAllowedStatusTransition(Entity $entity): bool
+    private function isPostRadicado(Entity $entity): bool
     {
-        if (!$entity->isAttributeChanged('assignedUserId')) {
-            return false;
-        }
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
 
-        $previousStatus = $entity->hasFetched('status')
-            ? $entity->getFetched('status')
-            : null;
-
-        return $previousStatus === self::STATUS_RADICADO
-            && $entity->get('status') === self::STATUS_EN_PROCESO;
+        return $numero !== '' && $expediente !== '';
     }
 
     private function hasAsignadorRole(): bool

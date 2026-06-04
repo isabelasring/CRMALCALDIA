@@ -3,42 +3,38 @@
         "rows": [
             [
                 {
-                    "name": "assignedUser"
+                    "name": "cFechaCaso"
                 },
+                {
+                    "name": "cNumeroRadicado"
+                }
+            ],
+            [
                 {
                     "name": "cExpediente"
+                },
+                false
+            ],
+            [
+                {
+                    "name": "cPeticionario"
+                },
+                {
+                    "name": "cCedula"
                 }
             ],
             [
                 {
-                    "name": "status"
-                },
-                {
-                    "name": "cNumeroRadicacion"
+                    "name": "cDireccion",
+                    "fullWidth": true
                 }
             ],
             [
-                {
-                    "name": "cNombreDelPeticionario"
-                },
-                {
-                    "name": "cApellido"
-                }
-            ],
-            [
-                {
-                    "name": "cTipoDeDocumento"
-                },
-                {
-                    "name": "cNumeroDeDocumento"
-                }
-            ],
-            [
-                {
-                    "name": "cCanalDeReporte"
-                },
                 {
                     "name": "cTelefono"
+                },
+                {
+                    "name": "cBarrio"
                 }
             ],
             [
@@ -46,141 +42,84 @@
                     "name": "cCorreo"
                 },
                 {
-                    "name": "cMunicipio"
+                    "name": "cCanalDeReporte"
                 }
             ],
             [
                 {
-                    "name": "cBarrioResidencia"
+                    "name": "cTipo"
                 },
                 {
-                    "name": "cDireccion"
-                }
-            ],
-            [
-                {
-                    "name": "name"
-                },
-                {
-                    "name": "type"
-                }
-            ],
-            [
-                {
-                    "name": "priority"
-                },
-                {
-                    "name": "description"
-                }
-            ],
-            [
-                {
-                    "name": "attachments"
-                }
-            ],
-            [
-                {
-                    "name": "cActaEstado"
-                },
-                {
-                    "name": "cActaRegistroOficial"
-                }
-            ],
-            [
-                {
-                    "name": "cActaFechaVisita"
-                },
-                {
-                    "name": "cActaHoraVisita"
-                }
-            ],
-            [
-                {
-                    "name": "cActaDireccionVisita"
-                },
-                {
-                    "name": "cActaNombreVisitado"
-                }
-            ],
-            [
-                {
-                    "name": "cActaDocumentoVisitado"
-                }
-            ],
-            [
-                {
-                    "name": "cActaHallazgos",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cActaMedidasTomadas",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cActaObservaciones",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cActaVistoBueno"
-                },
-                {
-                    "name": "cActaFechaAprobacion"
-                }
-            ],
-            [
-                {
-                    "name": "cActaObservacionesRevision",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cCierreEstado"
-                },
-                {
-                    "name": "cCierreProcesoCompleto"
-                }
-            ],
-            [
-                {
-                    "name": "cCierreFecha"
-                },
-                {
-                    "name": "cCierreFechaRegistro"
-                }
-            ],
-            [
-                {
-                    "name": "cCierreResumen",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cCierreConclusiones",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cCierreMedidasAdoptadas",
-                    "fullWidth": true
-                }
-            ],
-            [
-                {
-                    "name": "cCierreObservaciones",
-                    "fullWidth": true
+                    "name": "cCategoria"
                 }
             ]
         ],
         "style": "default",
-        "label": ""
+        "label": "Solicitud de queja"
+    },
+    {
+        "rows": [
+            [
+                {
+                    "name": "cPerjudicante"
+                },
+                {
+                    "name": "cTelefonoPerjudicante"
+                }
+            ],
+            [
+                {
+                    "name": "cDireccionPerjudicante",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cBarrioPerjudicante"
+                },
+                false
+            ]
+        ],
+        "style": "default",
+        "label": "Perjudicante"
+    },
+    {
+        "rows": [
+            [
+                {
+                    "name": "description",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cRespuestaInmediata",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cRecibidaPor"
+                },
+                {
+                    "name": "cRemitidoA"
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Queja y gestión"
+    },
+    {
+        "name": "gestionPosteriorRadicacion",
+        "rows": [
+            [
+                {
+                    "name": "assignedUser"
+                },
+                false
+            ]
+        ],
+        "style": "default",
+        "label": "Asignación"
     }
 ]

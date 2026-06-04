@@ -72,6 +72,12 @@ $scopes = [
         'edit' => 'no',
         'delete' => 'no',
     ],
+    'User' => [
+        'create' => 'no',
+        'read' => 'all',
+        'edit' => 'no',
+        'delete' => 'no',
+    ],
 ];
 
 foreach ($scopes as $scope => $permissions) {
@@ -79,6 +85,7 @@ foreach ($scopes as $scope => $permissions) {
 }
 
 $role->set('data', $roleData);
+$role->set('userPermission', 'all');
 
 $fieldData = $role->get('fieldData');
 if ($fieldData instanceof stdClass) {
@@ -90,14 +97,20 @@ if (!is_array($fieldData)) {
 if (!isset($fieldData['Case']) || !is_array($fieldData['Case'])) {
     $fieldData['Case'] = [];
 }
-$fieldData['Case']['cNumeroRadicacion'] = ['read' => 'no', 'edit' => 'no'];
+$fieldData['Case']['cNumeroRadicado'] = ['read' => 'yes', 'edit' => 'no'];
+$fieldData['Case']['cExpediente'] = ['read' => 'yes', 'edit' => 'no'];
+$fieldData['Case']['cTipo'] = ['read' => 'yes', 'edit' => 'yes'];
+$fieldData['Case']['cCategoria'] = ['read' => 'yes', 'edit' => 'yes'];
+$fieldData['Case']['assignedUser'] = ['read' => 'yes', 'edit' => 'no'];
+$fieldData['Case']['assignedUserId'] = ['read' => 'yes', 'edit' => 'no'];
+unset($fieldData['Case']['cNumeroRadicacion']);
 $fieldData['Case']['status'] = ['read' => 'yes', 'edit' => 'yes'];
 
 $role->set('fieldData', $fieldData);
 $entityManager->saveEntity($role);
 
 echo "Rol {$roleName} configurado: Case crear/leer/editar = all\n";
-echo "Campos ocultos para Inspección: cNumeroRadicacion, status (estado se asigna solo al crear).\n";
+echo "Inspección: lectura de cNumeroRadicado/cExpediente (sin edición).\n";
 
 $users = $entityManager
     ->getRDBRepository('User')

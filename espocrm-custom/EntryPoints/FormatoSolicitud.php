@@ -1,0 +1,47 @@
+<?php
+
+namespace Espo\Custom\EntryPoints;
+
+use Espo\Core\Api\Request;
+use Espo\Core\Api\Response;
+use Espo\Core\Api\ResponseComposer;
+use Espo\Core\EntryPoint\EntryPoint;
+use Espo\Core\Exceptions\BadRequest;
+use Espo\Custom\Tools\CaseObj\FormatoSolicitudGenerator;
+
+class FormatoSolicitud implements EntryPoint
+{
+    public function __construct(
+        private FormatoSolicitudGenerator $generator
+    ) {}
+
+    public function run(Request $request, Response $response): void
+    {
+        $id = $request->getQueryParam('id');
+        $format = $request->getQueryParam('format') ?? 'doc';
+
+        if (!$id) {
+            throw new BadRequest("No id.");
+        }
+
+        $file = $this->generator->generate($id, $format);
+
+        $response
+            ->setHeader('Content-Disposition', 'attachment; filename="' . $file['name'] . '"')
+            ->setHeader('Content-Type', $file['type'])
+            ->setHeader('Content-Length', (string) filesize($file['path']))
+            ->setBody(fopen($file['path'], 'rb'));
+
+        register_shutdown_function(static function () use ($file): void {
+            $dir = dirname($file['path']);
+
+            if (is_file($file['path'])) {
+                @unlink($file['path']);
+            }
+
+            if (is_dir($dir)) {
+                @rmdir($dir);
+            }
+        });
+    }
+}

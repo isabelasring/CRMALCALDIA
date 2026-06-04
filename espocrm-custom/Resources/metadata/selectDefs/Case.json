@@ -1,5 +1,3 @@
 {
-    "accessControlFilterClassNameMap": {
-        "mandatory": "Espo\\Custom\\Classes\\Select\\Case\\AccessControlFilters\\Mandatory"
-    }
+    "accessControlFilterClassNameMap": {}
 }
