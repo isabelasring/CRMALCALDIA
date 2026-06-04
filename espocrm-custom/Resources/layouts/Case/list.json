@@ -1,0 +1,30 @@
+[
+    {
+        "name": "name",
+        "link": true
+    },
+    {
+        "name": "status",
+        "width": 12
+    },
+    {
+        "name": "cExpediente",
+        "width": 12
+    },
+    {
+        "name": "cNumeroRadicacion",
+        "width": 14
+    },
+    {
+        "name": "assignedUser",
+        "width": 14
+    },
+    {
+        "name": "priority",
+        "width": 10
+    },
+    {
+        "name": "createdAt",
+        "width": 12
+    }
+]

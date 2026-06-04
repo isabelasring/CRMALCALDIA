@@ -81,5 +81,54 @@
         ],
         "style": "default",
         "label": ""
+    },
+    {
+        "rows": [
+            [
+                {
+                    "name": "cActaEstado"
+                },
+                {
+                    "name": "cActaFechaVisita"
+                }
+            ],
+            [
+                {
+                    "name": "cActaHoraVisita"
+                },
+                {
+                    "name": "cActaDireccionVisita"
+                }
+            ],
+            [
+                {
+                    "name": "cActaNombreVisitado"
+                },
+                {
+                    "name": "cActaDocumentoVisitado"
+                }
+            ],
+            [
+                {
+                    "name": "cActaHallazgos",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cActaMedidasTomadas",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cActaObservaciones",
+                    "fullWidth": true
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Acta de visita",
+        "name": "actaVisita"
     }
 ]

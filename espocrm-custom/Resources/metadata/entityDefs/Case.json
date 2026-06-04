@@ -89,6 +89,51 @@
             "isCustom": true,
             "readOnly": true,
             "tooltip": true
+        },
+        "cActaFechaVisita": {
+            "type": "date",
+            "isCustom": true
+        },
+        "cActaHoraVisita": {
+            "type": "varchar",
+            "maxLength": 10,
+            "isCustom": true,
+            "tooltip": true
+        },
+        "cActaDireccionVisita": {
+            "type": "varchar",
+            "maxLength": 255,
+            "isCustom": true
+        },
+        "cActaNombreVisitado": {
+            "type": "varchar",
+            "maxLength": 150,
+            "isCustom": true
+        },
+        "cActaDocumentoVisitado": {
+            "type": "varchar",
+            "maxLength": 50,
+            "isCustom": true
+        },
+        "cActaHallazgos": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cActaMedidasTomadas": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cActaObservaciones": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cActaEstado": {
+            "type": "enum",
+            "options": ["Pendiente", "Diligenciada"],
+            "default": "Pendiente",
+            "maxLength": 50,
+            "isCustom": true,
+            "readOnly": true
         }
     }
 }

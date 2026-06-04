@@ -11,7 +11,19 @@
         "cBarrioResidencia": "Barrio residencia",
         "cDireccion": "Dirección",
         "cNumeroRadicacion": "Número de radicación",
-        "cExpediente": "Expediente"
+        "cExpediente": "Expediente",
+        "cActaFechaVisita": "Fecha de visita",
+        "cActaHoraVisita": "Hora de visita",
+        "cActaDireccionVisita": "Dirección de la visita",
+        "cActaNombreVisitado": "Nombre de la persona visitada",
+        "cActaDocumentoVisitado": "Documento de la persona visitada",
+        "cActaHallazgos": "Hallazgos en sitio",
+        "cActaMedidasTomadas": "Medidas tomadas",
+        "cActaObservaciones": "Observaciones",
+        "cActaEstado": "Estado del acta"
+    },
+    "labels": {
+        "Acta de visita": "Acta de visita"
     },
     "options": {
         "cTipoDeDocumento": {
@@ -34,6 +46,10 @@
         "status": {
             "Pendiente de radicacion": "Pendiente de radicación",
             "Radicado": "Radicado"
+        },
+        "cActaEstado": {
+            "Pendiente": "Pendiente",
+            "Diligenciada": "Diligenciada"
         }
     }
 }

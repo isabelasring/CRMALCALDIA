@@ -1,4 +1,8 @@
 {
+    "recordViews": {
+        "detail": "custom:views/case/record/detail",
+        "edit": "custom:views/case/record/edit"
+    },
     "relationshipPanels": {
         "assignedUser": {
             "selectPrimaryFilterName": "patrulleros"
