@@ -5,6 +5,7 @@
             "selectPrimaryFilterName": "patrulleros"
         },
         "status": {
+            "view": "custom:views/case/fields/status",
             "options": [
                 "New",
                 "Assigned",
@@ -13,7 +14,12 @@
                 "Rejected",
                 "Duplicate",
                 "Pendiente de radicacion",
-                "Radicado"
+                "Radicado",
+                "En proceso",
+                "Visita realizada",
+                "Visita aprobada",
+                "Finalizado",
+                "Proceso cerrado"
             ],
             "notActualOptions": [
                 "Closed",
@@ -129,9 +135,68 @@
         },
         "cActaEstado": {
             "type": "enum",
-            "options": ["Pendiente", "Diligenciada"],
+            "options": ["Pendiente", "Diligenciada", "Aprobada"],
             "default": "Pendiente",
             "maxLength": 50,
+            "isCustom": true,
+            "readOnly": true
+        },
+        "cActaVistoBueno": {
+            "type": "bool",
+            "default": false,
+            "isCustom": true
+        },
+        "cActaObservacionesRevision": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cActaFechaAprobacion": {
+            "type": "date",
+            "isCustom": true,
+            "readOnly": true
+        },
+        "cActaRegistroOficial": {
+            "type": "bool",
+            "default": false,
+            "isCustom": true,
+            "readOnly": true
+        },
+        "cCierreFecha": {
+            "type": "date",
+            "isCustom": true
+        },
+        "cCierreResumen": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cCierreConclusiones": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cCierreMedidasAdoptadas": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cCierreObservaciones": {
+            "type": "text",
+            "isCustom": true
+        },
+        "cCierreEstado": {
+            "type": "enum",
+            "options": ["Pendiente", "Diligenciado"],
+            "default": "Pendiente",
+            "maxLength": 50,
+            "isCustom": true,
+            "readOnly": true
+        },
+        "cCierreProcesoCompleto": {
+            "type": "bool",
+            "default": false,
+            "isCustom": true,
+            "readOnly": true
+        },
+        "cCierreFechaRegistro": {
+            "type": "date",
             "isCustom": true,
             "readOnly": true
         }

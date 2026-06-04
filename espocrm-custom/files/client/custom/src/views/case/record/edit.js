@@ -1,54 +1,65 @@
 define('custom:views/case/record/edit', [
     'views/record/edit',
     'custom:helpers/patrullero-acta',
-], function (Dep, PatrulleroActa) {
+    'custom:helpers/inspeccion-acta',
+], function (Dep, PatrulleroActa, InspeccionActa) {
 
     return Dep.extend({
-
-        setup: function () {
-            Dep.prototype.setup.call(this);
-
-            this.listenTo(this.model, 'change:assignedUserId change:status', function () {
-                this.toggleActaVisitaPanel();
-            });
-        },
 
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
 
-            this.toggleActaVisitaPanel();
-            this.applyPatrulleroFieldMode();
+            this.applyFieldModes();
         },
 
-        toggleActaVisitaPanel: function () {
-            const show = PatrulleroActa.shouldShowActaVisita(this.getUser(), this.model);
-            const $panel = this.$el.find('.panel[data-name="actaVisita"]');
+        applyFieldModes: function () {
+            const user = this.getUser();
+            const model = this.model;
 
-            if (!$panel.length) {
+            if (PatrulleroActa.shouldShowActaVisita(user, model)) {
+                this.setReadOnlyExcept([
+                    'cActaFechaVisita',
+                    'cActaHoraVisita',
+                    'cActaDireccionVisita',
+                    'cActaNombreVisitado',
+                    'cActaDocumentoVisitado',
+                    'cActaHallazgos',
+                    'cActaMedidasTomadas',
+                    'cActaObservaciones',
+                ]);
+
                 return;
             }
 
-            $panel.toggle(show);
-        },
+            if (InspeccionActa.shouldShowActaRevision(user, model)) {
+                this.setReadOnlyExcept([
+                    'cActaVistoBueno',
+                    'cActaObservacionesRevision',
+                ]);
 
-        applyPatrulleroFieldMode: function () {
-            if (!PatrulleroActa.shouldShowActaVisita(this.getUser(), this.model)) {
                 return;
             }
 
-            const actaFields = [
-                'cActaFechaVisita',
-                'cActaHoraVisita',
-                'cActaDireccionVisita',
-                'cActaNombreVisitado',
-                'cActaDocumentoVisitado',
-                'cActaHallazgos',
-                'cActaMedidasTomadas',
-                'cActaObservaciones',
-            ];
+            if (InspeccionActa.shouldFinalizeCaseStatus(user, model)) {
+                this.setReadOnlyExcept(['status']);
 
+                return;
+            }
+
+            if (InspeccionActa.shouldShowActoCierre(user, model)) {
+                this.setReadOnlyExcept([
+                    'cCierreFecha',
+                    'cCierreResumen',
+                    'cCierreConclusiones',
+                    'cCierreMedidasAdoptadas',
+                    'cCierreObservaciones',
+                ]);
+            }
+        },
+
+        setReadOnlyExcept: function (editableFields) {
             Object.keys(this.getFieldList()).forEach((field) => {
-                if (actaFields.includes(field)) {
+                if (editableFields.includes(field)) {
                     return;
                 }
 

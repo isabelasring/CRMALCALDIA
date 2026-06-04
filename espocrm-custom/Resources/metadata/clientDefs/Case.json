@@ -1,6 +1,5 @@
 {
     "recordViews": {
-        "detail": "custom:views/case/record/detail",
         "edit": "custom:views/case/record/edit"
     },
     "relationshipPanels": {
@@ -39,9 +38,650 @@
                 "visible": {
                     "conditionGroup": [
                         {
-                            "type": "equals",
-                            "attribute": "status",
-                            "value": "Radicado"
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Radicado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaFechaVisita": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaHoraVisita": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaDireccionVisita": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaNombreVisitado": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaDocumentoVisitado": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaHallazgos": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaMedidasTomadas": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaObservaciones": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaEstado": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "En proceso"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaVistoBueno": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "and",
+                                    "value": [
+                                        {
+                                            "type": "equals",
+                                            "attribute": "status",
+                                            "value": "Visita realizada"
+                                        },
+                                        {
+                                            "type": "equals",
+                                            "attribute": "cActaEstado",
+                                            "value": "Diligenciada"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaObservacionesRevision": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "and",
+                                    "value": [
+                                        {
+                                            "type": "equals",
+                                            "attribute": "status",
+                                            "value": "Visita realizada"
+                                        },
+                                        {
+                                            "type": "equals",
+                                            "attribute": "cActaEstado",
+                                            "value": "Diligenciada"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaFechaAprobacion": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cActaRegistroOficial": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita realizada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Visita aprobada"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreFecha": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreResumen": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreConclusiones": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreMedidasAdoptadas": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreObservaciones": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreEstado": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreProcesoCompleto": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            "cCierreFechaRegistro": {
+                "visible": {
+                    "conditionGroup": [
+                        {
+                            "type": "or",
+                            "value": [
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Finalizado"
+                                },
+                                {
+                                    "type": "equals",
+                                    "attribute": "status",
+                                    "value": "Proceso cerrado"
+                                }
+                            ]
                         }
                     ]
                 }

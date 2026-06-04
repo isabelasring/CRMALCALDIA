@@ -19,7 +19,7 @@ class PatrulleroCaseAccess implements BeforeSave
 {
     public static int $order = 8;
 
-    private const STATUS_RADICADO = 'Radicado';
+    private const STATUS_EN_PROCESO = 'En proceso';
     private const TEAM_PATRULLEROS = 'Patrulleros';
 
     private const ACTA_FIELDS = [
@@ -31,6 +31,17 @@ class PatrulleroCaseAccess implements BeforeSave
         'cActaHallazgos',
         'cActaMedidasTomadas',
         'cActaObservaciones',
+    ];
+
+    private const CIERRE_FIELDS = [
+        'cCierreFecha',
+        'cCierreResumen',
+        'cCierreConclusiones',
+        'cCierreMedidasAdoptadas',
+        'cCierreObservaciones',
+        'cCierreEstado',
+        'cCierreProcesoCompleto',
+        'cCierreFechaRegistro',
     ];
 
     private const BLOCKED_ROLES = [
@@ -49,6 +60,7 @@ class PatrulleroCaseAccess implements BeforeSave
     {
         if ($this->user->isAdmin() || $this->user->isPortal()) {
             $this->stripActaChangesForNonPatrullero($entity);
+            $this->stripCierreChangesForNonInspeccion($entity);
 
             return;
         }
@@ -62,6 +74,7 @@ class PatrulleroCaseAccess implements BeforeSave
         }
 
         $this->stripActaChangesForNonPatrullero($entity);
+        $this->stripCierreChangesForNonInspeccion($entity);
     }
 
     private function guardPatrulleroSave(Entity $entity): void
@@ -70,8 +83,16 @@ class PatrulleroCaseAccess implements BeforeSave
             throw Forbidden::create('Los patrulleros no pueden crear casos.');
         }
 
-        if ($entity->get('status') !== self::STATUS_RADICADO) {
-            throw Forbidden::create('Solo puede diligenciar el acta en casos Radicado.');
+        $actaEstado = $entity->hasFetched('cActaEstado')
+            ? $entity->getFetched('cActaEstado')
+            : $entity->get('cActaEstado');
+
+        if (in_array($actaEstado, ['Diligenciada', 'Aprobada'], true)) {
+            throw Forbidden::create('El acta ya fue enviada a revisión y no puede modificarse.');
+        }
+
+        if ($entity->get('status') !== self::STATUS_EN_PROCESO) {
+            throw Forbidden::create('Solo puede diligenciar el acta en casos En proceso.');
         }
 
         if ($entity->get('assignedUserId') !== $this->user->getId()) {
@@ -107,6 +128,34 @@ class PatrulleroCaseAccess implements BeforeSave
                 $entity->set($field, $entity->getFetched($field));
             }
         }
+    }
+
+    private function stripCierreChangesForNonInspeccion(Entity $entity): void
+    {
+        if ($this->hasInspeccionRole()) {
+            return;
+        }
+
+        foreach (self::CIERRE_FIELDS as $field) {
+            if (!$entity->isAttributeChanged($field)) {
+                continue;
+            }
+
+            if ($entity->hasFetched($field)) {
+                $entity->set($field, $entity->getFetched($field));
+            }
+        }
+    }
+
+    private function hasInspeccionRole(): bool
+    {
+        foreach (['Inspección', 'Inspeccion'] as $roleName) {
+            if ($this->hasRole($roleName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function updateActaEstado(Entity $entity): void

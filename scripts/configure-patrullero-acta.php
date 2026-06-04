@@ -17,6 +17,17 @@ $app->setupSystemUser();
 $em = $app->getContainer()->getByClass(EntityManager::class);
 $metadata = $app->getContainer()->getByClass(Espo\Core\Utils\Metadata::class);
 
+$cierreFields = [
+    'cCierreFecha',
+    'cCierreResumen',
+    'cCierreConclusiones',
+    'cCierreMedidasAdoptadas',
+    'cCierreObservaciones',
+    'cCierreEstado',
+    'cCierreProcesoCompleto',
+    'cCierreFechaRegistro',
+];
+
 $actaFields = [
     'cActaFechaVisita',
     'cActaHoraVisita',
@@ -27,6 +38,10 @@ $actaFields = [
     'cActaMedidasTomadas',
     'cActaObservaciones',
     'cActaEstado',
+    'cActaVistoBueno',
+    'cActaObservacionesRevision',
+    'cActaFechaAprobacion',
+    'cActaRegistroOficial',
 ];
 
 $rolePatrulleroName = 'Patrullero';
@@ -55,6 +70,8 @@ $caseFields = array_keys($metadata->get(['entityDefs', 'Case', 'fields']) ?? [])
 foreach ($caseFields as $field) {
     if (in_array($field, $actaFields, true)) {
         $fieldDataPatrullero['Case'][$field] = ['read' => 'yes', 'edit' => 'yes'];
+    } elseif (in_array($field, $cierreFields, true)) {
+        $fieldDataPatrullero['Case'][$field] = ['read' => 'no', 'edit' => 'no'];
     } else {
         $fieldDataPatrullero['Case'][$field] = ['read' => 'yes', 'edit' => 'no'];
     }
@@ -65,7 +82,7 @@ $em->saveEntity($rolePatrullero);
 
 echo "Rol {$rolePatrulleroName}: leer casos, editar solo acta.\n";
 
-$rolesHideActa = ['Asignador', 'Radicación', 'Inspección', 'Inspeccion'];
+$rolesHideActa = ['Asignador', 'Radicación'];
 
 foreach ($rolesHideActa as $roleName) {
     $role = $em->getRDBRepository('Role')->where(['name' => $roleName])->findOne();
@@ -89,7 +106,7 @@ foreach ($rolesHideActa as $roleName) {
         $fieldData['Case'] = [];
     }
 
-    foreach ($actaFields as $field) {
+    foreach (array_merge($actaFields, $cierreFields) as $field) {
         $fieldData['Case'][$field] = ['read' => 'no', 'edit' => 'no'];
     }
 

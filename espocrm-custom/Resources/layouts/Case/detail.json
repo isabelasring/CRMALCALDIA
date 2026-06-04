@@ -77,33 +77,32 @@
                 {
                     "name": "attachments"
                 }
-            ]
-        ],
-        "style": "default",
-        "label": ""
-    },
-    {
-        "rows": [
+            ],
             [
                 {
                     "name": "cActaEstado"
                 },
                 {
-                    "name": "cActaFechaVisita"
+                    "name": "cActaRegistroOficial"
                 }
             ],
             [
+                {
+                    "name": "cActaFechaVisita"
+                },
                 {
                     "name": "cActaHoraVisita"
-                },
-                {
-                    "name": "cActaDireccionVisita"
                 }
             ],
             [
                 {
-                    "name": "cActaNombreVisitado"
+                    "name": "cActaDireccionVisita"
                 },
+                {
+                    "name": "cActaNombreVisitado"
+                }
+            ],
+            [
                 {
                     "name": "cActaDocumentoVisitado"
                 }
@@ -125,10 +124,63 @@
                     "name": "cActaObservaciones",
                     "fullWidth": true
                 }
+            ],
+            [
+                {
+                    "name": "cActaVistoBueno"
+                },
+                {
+                    "name": "cActaFechaAprobacion"
+                }
+            ],
+            [
+                {
+                    "name": "cActaObservacionesRevision",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cCierreEstado"
+                },
+                {
+                    "name": "cCierreProcesoCompleto"
+                }
+            ],
+            [
+                {
+                    "name": "cCierreFecha"
+                },
+                {
+                    "name": "cCierreFechaRegistro"
+                }
+            ],
+            [
+                {
+                    "name": "cCierreResumen",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cCierreConclusiones",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cCierreMedidasAdoptadas",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cCierreObservaciones",
+                    "fullWidth": true
+                }
             ]
         ],
         "style": "default",
-        "label": "Acta de visita",
-        "name": "actaVisita"
+        "label": ""
     }
 ]

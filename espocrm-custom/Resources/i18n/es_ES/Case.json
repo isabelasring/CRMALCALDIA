@@ -20,10 +20,24 @@
         "cActaHallazgos": "Hallazgos en sitio",
         "cActaMedidasTomadas": "Medidas tomadas",
         "cActaObservaciones": "Observaciones",
-        "cActaEstado": "Estado del acta"
+        "cActaEstado": "Estado del acta",
+        "cActaVistoBueno": "Visto bueno (inspección)",
+        "cActaObservacionesRevision": "Observaciones de la revisión",
+        "cActaFechaAprobacion": "Fecha de aprobación del acta",
+        "cActaRegistroOficial": "Acta registrada oficialmente",
+        "cCierreFecha": "Fecha del acto de cierre",
+        "cCierreResumen": "Resumen del acto de cierre",
+        "cCierreConclusiones": "Conclusiones del cierre",
+        "cCierreMedidasAdoptadas": "Medidas adoptadas en el cierre",
+        "cCierreObservaciones": "Observaciones del acto de cierre",
+        "cCierreEstado": "Estado del acto de cierre",
+        "cCierreProcesoCompleto": "Proceso finalizado",
+        "cCierreFechaRegistro": "Fecha de registro del cierre"
     },
     "labels": {
-        "Acta de visita": "Acta de visita"
+        "Acta de visita": "Acta de visita",
+        "Revisión del acta": "Revisión del acta",
+        "Acto de cierre": "Acto de cierre"
     },
     "options": {
         "cTipoDeDocumento": {
@@ -45,11 +59,21 @@
         },
         "status": {
             "Pendiente de radicacion": "Pendiente de radicación",
-            "Radicado": "Radicado"
+            "Radicado": "Radicado",
+            "En proceso": "En proceso",
+            "Visita realizada": "Visita realizada",
+            "Visita aprobada": "Visita aprobada",
+            "Finalizado": "Finalizado",
+            "Proceso cerrado": "Proceso cerrado"
+        },
+        "cCierreEstado": {
+            "Pendiente": "Pendiente",
+            "Diligenciado": "Diligenciado"
         },
         "cActaEstado": {
             "Pendiente": "Pendiente",
-            "Diligenciada": "Diligenciada"
+            "Diligenciada": "Diligenciada",
+            "Aprobada": "Aprobada"
         }
     }
 }

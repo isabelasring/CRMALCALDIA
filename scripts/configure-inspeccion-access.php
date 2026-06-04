@@ -91,7 +91,7 @@ if (!isset($fieldData['Case']) || !is_array($fieldData['Case'])) {
     $fieldData['Case'] = [];
 }
 $fieldData['Case']['cNumeroRadicacion'] = ['read' => 'no', 'edit' => 'no'];
-$fieldData['Case']['status'] = ['read' => 'no', 'edit' => 'no'];
+$fieldData['Case']['status'] = ['read' => 'yes', 'edit' => 'yes'];
 
 $role->set('fieldData', $fieldData);
 $entityManager->saveEntity($role);

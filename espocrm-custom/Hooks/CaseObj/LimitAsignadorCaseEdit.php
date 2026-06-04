@@ -16,7 +16,10 @@ class LimitAsignadorCaseEdit implements BeforeSave
 {
     private const ROLE_ASIGNADOR = 'Asignador';
 
-    private const ALLOWED = ['assignedUserId', 'assignedUserName'];
+    private const ALLOWED = ['assignedUserId', 'assignedUserName', 'status'];
+
+    private const STATUS_RADICADO = 'Radicado';
+    private const STATUS_EN_PROCESO = 'En proceso';
 
     public function __construct(
         private User $user,
@@ -29,12 +32,20 @@ class LimitAsignadorCaseEdit implements BeforeSave
             return;
         }
 
-        if ($entity->get('status') !== 'Radicado') {
+        $statusForEdit = $entity->hasFetched('status')
+            ? $entity->getFetched('status')
+            : $entity->get('status');
+
+        if ($statusForEdit !== self::STATUS_RADICADO) {
             return;
         }
 
         foreach ($entity->getAttributeList() as $attribute) {
             if (!$entity->isAttributeChanged($attribute)) {
+                continue;
+            }
+
+            if ($attribute === 'status' && $this->isAllowedStatusTransition($entity)) {
                 continue;
             }
 
@@ -46,6 +57,20 @@ class LimitAsignadorCaseEdit implements BeforeSave
                 $entity->set($attribute, $entity->getFetched($attribute));
             }
         }
+    }
+
+    private function isAllowedStatusTransition(Entity $entity): bool
+    {
+        if (!$entity->isAttributeChanged('assignedUserId')) {
+            return false;
+        }
+
+        $previousStatus = $entity->hasFetched('status')
+            ? $entity->getFetched('status')
+            : null;
+
+        return $previousStatus === self::STATUS_RADICADO
+            && $entity->get('status') === self::STATUS_EN_PROCESO;
     }
 
     private function hasAsignadorRole(): bool

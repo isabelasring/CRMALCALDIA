@@ -30,11 +30,15 @@ class NotifyPatrulleroAssignment implements AfterSave
 
     public function afterSave(Entity $entity, SaveOptions $options): void
     {
-        if ($entity->get('status') !== self::STATUS_RADICADO) {
+        if (!$entity->isAttributeChanged('assignedUserId')) {
             return;
         }
 
-        if (!$entity->isAttributeChanged('assignedUserId')) {
+        $previousStatus = $entity->hasFetched('status')
+            ? $entity->getFetched('status')
+            : null;
+
+        if ($previousStatus !== self::STATUS_RADICADO && $entity->get('status') !== self::STATUS_RADICADO) {
             return;
         }
 

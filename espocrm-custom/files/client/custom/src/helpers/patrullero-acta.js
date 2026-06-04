@@ -21,7 +21,13 @@ define('custom:helpers/patrullero-acta', [], function () {
             return false;
         }
 
-        if (model.get('status') !== 'Radicado') {
+        if (model.get('status') !== 'En proceso') {
+            return false;
+        }
+
+        const actaEstado = model.get('cActaEstado');
+
+        if (actaEstado === 'Diligenciada' || actaEstado === 'Aprobada') {
             return false;
         }
 

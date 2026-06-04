@@ -31,7 +31,8 @@ if (!isset($fieldData['Case']) || !is_array($fieldData['Case'])) {
     $fieldData['Case'] = [];
 }
 
-$fieldData['Case']['status'] = ['read' => 'no', 'edit' => 'no'];
+// Edición restringida por hook InspeccionActaReviewAccess (solo Finalizado tras aprobación).
+$fieldData['Case']['status'] = ['read' => 'yes', 'edit' => 'yes'];
 $fieldData['Case']['cNumeroRadicacion'] = ['read' => 'no', 'edit' => 'no'];
 
 $role->set('fieldData', $fieldData);

@@ -17,6 +17,7 @@ class Mandatory implements Filter
     private const ROLE_ASIGNADOR = 'Asignador';
     private const TEAM_PATRULLEROS = 'Patrulleros';
     private const STATUS_RADICADO = 'Radicado';
+    private const STATUS_EN_PROCESO = 'En proceso';
 
     private const BLOCKED_PATRULLERO_ROLES = [
         'Asignador',
@@ -42,8 +43,8 @@ class Mandatory implements Filter
 
         if ($this->isPatrulleroUser()) {
             $queryBuilder->where([
-                'status' => self::STATUS_RADICADO,
                 'assignedUserId' => $this->user->getId(),
+                'status' => self::STATUS_EN_PROCESO,
             ]);
 
             return;
@@ -105,17 +106,6 @@ class Mandatory implements Filter
 
     private function hasAsignadorRole(): bool
     {
-        $role = $this->entityManager
-            ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => self::ROLE_ASIGNADOR])
-            ->findOne();
-
-        if (!$role) {
-            return false;
-        }
-
-        $roles = $this->user->getLinkMultipleIdList('roles') ?? [];
-
-        return in_array($role->getId(), $roles, true);
+        return $this->hasRoleByName(self::ROLE_ASIGNADOR);
     }
 }

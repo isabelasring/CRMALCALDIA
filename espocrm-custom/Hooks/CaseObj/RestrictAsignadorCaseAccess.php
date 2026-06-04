@@ -33,7 +33,11 @@ class RestrictAsignadorCaseAccess implements BeforeSave
             throw Forbidden::create('Los asignadores no pueden crear casos.');
         }
 
-        if ($entity->get('status') !== self::STATUS_RADICADO) {
+        $statusForEdit = $entity->hasFetched('status')
+            ? $entity->getFetched('status')
+            : $entity->get('status');
+
+        if ($statusForEdit !== self::STATUS_RADICADO) {
             throw Forbidden::create('Solo puede gestionar casos en estado Radicado.');
         }
     }
