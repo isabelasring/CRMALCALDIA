@@ -1,16 +1,16 @@
-define('custom:views/case/record/panels/formato-solicitud', [
+define('custom:views/case/record/panels/formato-acta-visita', [
     'views/record/panels/side',
-    'custom:helpers/formato-solicitud-access',
-], function (Dep, FormatoSolicitudAccess) {
+    'custom:helpers/formato-acta-visita-case-access',
+], function (Dep, FormatoActaVisitaCaseAccess) {
 
     return Dep.extend({
 
-        template: 'custom:case/record/panels/formato-solicitud',
+        template: 'custom:case/record/panels/formato-acta-visita',
 
         setup: function () {
             Dep.prototype.setup.call(this);
 
-            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:cFormatoSolicitudPdfId', function () {
+            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:assignedUserId', function () {
                 this.reRender();
                 this.togglePanel();
             });
@@ -23,15 +23,15 @@ define('custom:views/case/record/panels/formato-solicitud', [
         },
 
         bindDownloadButtons: function () {
-            this.$el.find('[data-action="downloadFormato"]').off('click.formato');
+            this.$el.find('[data-action="downloadFormatoActaCaso"]').off('click.formatoActaCaso');
 
-            this.$el.find('[data-action="downloadFormato"]').on('click.formato', (e) => {
+            this.$el.find('[data-action="downloadFormatoActaCaso"]').on('click.formatoActaCaso', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
                 const format = $(e.currentTarget).data('format') || 'pdf';
 
-                this.actionDownloadFormato({format: format});
+                this.actionDownloadFormatoActaCaso({format: format});
             });
         },
 
@@ -50,37 +50,33 @@ define('custom:views/case/record/panels/formato-solicitud', [
         },
 
         data: function () {
-            const pdfId = this.model.get('cFormatoSolicitudPdfId');
-            const pdfName = this.model.get('cFormatoSolicitudPdfName');
-
             const canDownload = this.canDownload();
 
             return {
                 visible: canDownload,
-                hasAutoPdf: canDownload && !!pdfId,
-                autoPdfName: pdfName || this.translate('downloadFormatoPdf', 'Case'),
-                autoPdfUrl: this.canDownload()
-                    ? this.getBasePath()
-                        + '?entryPoint=FormatoSolicitud'
-                        + '&id=' + encodeURIComponent(this.model.id)
-                        + '&format=pdf'
-                    : '',
+                helpText: this.translate('formatoActaVisitaCaseHelp', 'Case'),
+                unavailableText: this.translate('formatoActaVisitaCaseUnavailable', 'Case'),
+                wordLabel: this.translate('downloadFormatoActaWord', 'Case'),
+                pdfLabel: this.translate('downloadFormatoActaPdf', 'Case'),
             };
         },
 
         canDownload: function () {
-            return FormatoSolicitudAccess.canDownloadFormatoSolicitud(this.getUser(), this.model);
+            return FormatoActaVisitaCaseAccess.canDownloadFormatoActaVisitaFromCase(
+                this.getUser(),
+                this.model
+            );
         },
 
         isVisible: function () {
             return this.canDownload();
         },
 
-        actionDownloadFormato: function (data) {
+        actionDownloadFormatoActaCaso: function (data) {
             const format = (data && data.format) || 'pdf';
 
             if (!this.canDownload()) {
-                Espo.Ui.warning(this.translate('formatoSolicitudUnavailable', 'Case'));
+                Espo.Ui.warning(this.translate('formatoActaVisitaCaseUnavailable', 'Case'));
 
                 return;
             }
@@ -92,7 +88,7 @@ define('custom:views/case/record/panels/formato-solicitud', [
             }
 
             const url = this.getBasePath()
-                + '?entryPoint=FormatoSolicitud'
+                + '?entryPoint=FormatoActaVisitaCaso'
                 + '&id=' + encodeURIComponent(this.model.id)
                 + '&format=' + encodeURIComponent(format);
 

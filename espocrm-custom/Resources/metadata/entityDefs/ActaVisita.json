@@ -161,6 +161,11 @@
             "accept": ["image/*", "application/pdf", ".doc", ".docx"],
             "isCustom": true
         },
+        "cFormatoActaVisitaPdf": {
+            "type": "file",
+            "readOnly": true,
+            "isCustom": true
+        },
         "assignedUser": {
             "type": "link",
             "readOnlyAfterCreate": true,

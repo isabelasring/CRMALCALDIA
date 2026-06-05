@@ -198,6 +198,19 @@
         "label": "Formato diligenciado a mano"
     },
     {
+        "name": "formatoGenerado",
+        "rows": [
+            [
+                {
+                    "name": "cFormatoActaVisitaPdf",
+                    "fullWidth": true
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Formato generado"
+    },
+    {
         "rows": [
             [
                 {

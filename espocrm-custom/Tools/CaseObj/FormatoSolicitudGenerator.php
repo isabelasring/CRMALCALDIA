@@ -17,6 +17,7 @@ class FormatoSolicitudGenerator
 {
     private const ROLE_INSPECCION = 'Inspección';
     private const ROLE_RADICACION = 'Radicación';
+    private const ROLE_ASIGNADOR = 'Asignador';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -149,12 +150,21 @@ class FormatoSolicitudGenerator
             return true;
         }
 
-        if (trim((string) $case->get('cPeticionario')) === '') {
+        if (!$this->isPostRadicado($case)) {
             return false;
         }
 
         return $this->userHasRole(self::ROLE_INSPECCION)
-            || $this->userHasRole(self::ROLE_RADICACION);
+            || $this->userHasRole(self::ROLE_RADICACION)
+            || $this->userHasRole(self::ROLE_ASIGNADOR);
+    }
+
+    private function isPostRadicado(Entity $case): bool
+    {
+        $numero = trim((string) $case->get('cNumeroRadicado'));
+        $expediente = trim((string) $case->get('cExpediente'));
+
+        return $numero !== '' && $expediente !== '';
     }
 
     private function userHasRole(string $roleName): bool

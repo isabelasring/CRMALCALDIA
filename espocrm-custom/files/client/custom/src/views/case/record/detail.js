@@ -5,7 +5,10 @@ define('custom:views/case/record/detail', [
     'custom:helpers/radicacion-fields',
     'custom:helpers/post-radicacion-fields',
     'custom:helpers/acta-visita-modal',
-], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal) {
+    'custom:helpers/acta-visita-case-status',
+    'custom:helpers/formato-solicitud-access',
+    'custom:helpers/formato-acta-visita-case-access',
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus, FormatoSolicitudAccess, FormatoActaVisitaCaseAccess) {
 
     return Dep.extend({
 
@@ -20,9 +23,11 @@ define('custom:views/case/record/detail', [
                 this.togglePostRadicacionFields();
             });
 
-            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente', function () {
+            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:assignedUserId', function () {
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
+                this.toggleFormatoGeneradoPanel();
+                this.toggleFormatoActaVisitaPanel();
             });
 
             this.listenTo(this.model, 'change:status change:assignedUserId change:cNumeroRadicado change:cExpediente', function () {
@@ -35,24 +40,44 @@ define('custom:views/case/record/detail', [
         updateActaVisitaButton: function () {
             const show = PatrulleroActa.shouldShowLlenarActaButton(this.getUser(), this.model);
 
-            if (show) {
-                if (!this._actaVisitaButtonAdded) {
-                    this.addMenuItem('buttons', {
-                        label: 'Llenar acta de visita',
-                        name: 'llenarActaVisita',
-                        action: 'llenarActaVisita',
-                        style: 'primary',
-                    });
-                    this._actaVisitaButtonAdded = true;
+            if (!show) {
+                if (this._actaVisitaButtonAdded) {
+                    this.removeMenuItem('llenarActaVisita');
+                    this._actaVisitaButtonAdded = false;
                 }
-            } else if (this._actaVisitaButtonAdded) {
-                this.removeMenuItem('llenarActaVisita');
-                this._actaVisitaButtonAdded = false;
+
+                return;
             }
+
+            if (!this.model.id) {
+                return;
+            }
+
+            ActaVisitaCaseStatus.fetchActaForCase(this.model.id).then((acta) => {
+                const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                const label = isEdit
+                    ? this.translate('editarActaVisita', 'Case')
+                    : this.translate('llenarActaVisita', 'Case');
+
+                if (this._actaVisitaButtonAdded) {
+                    this.removeMenuItem('llenarActaVisita');
+                    this._actaVisitaButtonAdded = false;
+                }
+
+                this.addMenuItem('buttons', {
+                    label: label,
+                    name: 'llenarActaVisita',
+                    action: 'llenarActaVisita',
+                    style: 'primary',
+                });
+                this._actaVisitaButtonAdded = true;
+            });
         },
 
         actionLlenarActaVisita: function () {
-            ActaVisitaModal.open(this, this.model, this.getUser());
+            ActaVisitaModal.open(this, this.model, this.getUser(), {
+                onAfterSave: () => this.updateActaVisitaButton(),
+            });
         },
 
         afterRender: function () {
@@ -63,6 +88,8 @@ define('custom:views/case/record/detail', [
             this.setActaFieldsReadOnlyForReview();
             this.toggleRadicacionFields();
             this.togglePostRadicacionFields();
+            this.toggleFormatoGeneradoPanel();
+            this.toggleFormatoActaVisitaPanel();
         },
 
         findPanel: function (name) {
@@ -141,6 +168,24 @@ define('custom:views/case/record/detail', [
                     $cell.hide();
                 }
             });
+        },
+
+        toggleFormatoGeneradoPanel: function () {
+            const show = FormatoSolicitudAccess.canDownloadFormatoSolicitud(
+                this.getUser(),
+                this.model
+            );
+
+            this.findPanel('formatoGenerado').toggle(show);
+        },
+
+        toggleFormatoActaVisitaPanel: function () {
+            const show = FormatoActaVisitaCaseAccess.canDownloadFormatoActaVisitaFromCase(
+                this.getUser(),
+                this.model
+            );
+
+            this.findPanel('formatoActaVisita').toggle(show);
         },
 
         togglePostRadicacionFields: function () {

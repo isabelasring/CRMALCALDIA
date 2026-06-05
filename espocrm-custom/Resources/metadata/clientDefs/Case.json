@@ -27,6 +27,12 @@
                 "notRefreshable": true
             },
             {
+                "name": "formatoActaVisita",
+                "label": "Formato acta de visita",
+                "view": "custom:views/case/record/panels/formato-acta-visita",
+                "notRefreshable": true
+            },
+            {
                 "name": "activities",
                 "reference": "activities",
                 "view": "crm:views/case/record/panels/activities"

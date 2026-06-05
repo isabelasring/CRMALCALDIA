@@ -1,8 +1,9 @@
 define('custom:helpers/acta-visita-modal', [
     'helpers/record-modal',
     'custom:helpers/acta-visita-from-case',
+    'custom:helpers/acta-visita-case-status',
     'custom:helpers/patrullero-acta',
-], function (RecordModal, ActaFromCase, PatrulleroActa) {
+], function (RecordModal, ActaFromCase, ActaVisitaCaseStatus, PatrulleroActa) {
 
     const RecordModalHelper = RecordModal.default || RecordModal;
 
@@ -32,7 +33,9 @@ define('custom:helpers/acta-visita-modal', [
         return null;
     };
 
-    const open = function (hostView, caseModel, user) {
+    const open = function (hostView, caseModel, user, options) {
+        options = options || {};
+
         if (!hostView || !caseModel || !user) {
             Espo.Ui.error('No se pudo abrir el formulario del acta.');
 
@@ -53,25 +56,55 @@ define('custom:helpers/acta-visita-modal', [
             return;
         }
 
-        const attributes = ActaFromCase.buildDefaultsFromCase(caseModel, user);
         const helper = new RecordModalHelper();
+        const afterSave = function () {
+            caseModel.fetch();
 
-        helper.showCreate(host, {
-            entityType: 'ActaVisita',
-            attributes: attributes,
-            layoutName: 'edit',
-            fullFormDisabled: true,
-            relate: {
-                model: caseModel,
-                link: 'case',
-            },
-            afterSave: function () {
-                caseModel.fetch();
-            },
+            if (typeof options.onAfterSave === 'function') {
+                options.onAfterSave();
+            }
+        };
+
+        ActaVisitaCaseStatus.fetchActaForCase(caseModel.id).then(function (acta) {
+            if (acta && acta.id) {
+                helper.showEdit(host, {
+                    entityType: 'ActaVisita',
+                    id: acta.id,
+                    layoutName: 'edit',
+                    fullFormDisabled: true,
+                    afterSave: afterSave,
+                }).catch(function (error) {
+                    if (error && error.message) {
+                        console.error(error);
+                    }
+                });
+
+                return;
+            }
+
+            const attributes = ActaFromCase.buildDefaultsFromCase(caseModel, user);
+
+            helper.showCreate(host, {
+                entityType: 'ActaVisita',
+                attributes: attributes,
+                layoutName: 'edit',
+                fullFormDisabled: true,
+                relate: {
+                    model: caseModel,
+                    link: 'case',
+                },
+                afterSave: afterSave,
+            }).catch(function (error) {
+                if (error && error.message) {
+                    console.error(error);
+                }
+            });
         }).catch(function (error) {
             if (error && error.message) {
                 console.error(error);
             }
+
+            Espo.Ui.error('No se pudo cargar el acta de visita.');
         });
     };
 

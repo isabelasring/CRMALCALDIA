@@ -58,12 +58,12 @@ class GenerateFormatoSolicitudOnSave implements AfterSave
 
     private function shouldGenerate(Entity $entity): bool
     {
-        if (trim((string) $entity->get('cPeticionario')) === '') {
+        if (!$this->isPostRadicado($entity)) {
             return false;
         }
 
-        if ($this->isJustCreated($entity)) {
-            return true;
+        if (trim((string) $entity->get('cPeticionario')) === '') {
+            return false;
         }
 
         foreach (self::FORMATO_FIELDS as $field) {
@@ -75,11 +75,11 @@ class GenerateFormatoSolicitudOnSave implements AfterSave
         return false;
     }
 
-    private function isJustCreated(Entity $entity): bool
+    private function isPostRadicado(Entity $entity): bool
     {
-        $createdAt = $entity->get('createdAt');
-        $modifiedAt = $entity->get('modifiedAt');
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
 
-        return $createdAt && $modifiedAt && $createdAt === $modifiedAt;
+        return $numero !== '' && $expediente !== '';
     }
 }
