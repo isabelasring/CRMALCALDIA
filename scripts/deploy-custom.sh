@@ -6,6 +6,18 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 echo 'Copiando backend custom...'
 docker cp "$ROOT/espocrm-custom/." espocrm:/var/www/html/custom/Espo/Custom/
 
+if [ -d "$ROOT/formatos" ]; then
+  echo 'Copiando plantillas desde formatos/...'
+  docker exec espocrm mkdir -p /var/www/html/custom/Espo/Custom/files/templates
+  for f in "$ROOT/formatos"/*.doc "$ROOT/formatos"/*.docx; do
+    [ -f "$f" ] || continue
+    base="$(basename "$f")"
+    if [ "$base" = "FormatoSolicitud.doc" ] || [ "$base" = "FormatoSolicitud.docx" ]; then
+      docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/FormatoSolicitud.doc"
+    fi
+  done
+fi
+
 echo 'Copiando frontend client/custom...'
 docker cp "$ROOT/espocrm-custom/files/client/custom/." espocrm:/var/www/html/client/custom/
 

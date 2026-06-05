@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Rellena FormatoSolicitud.doc con datos JSON (stdin). Imprime ruta del archivo generado."""
+"""Rellena FormatoSolicitud.doc conservando todo el diseño de la plantilla."""
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -70,22 +71,79 @@ def get_tables(doc):
     return tables
 
 
-def cell_text(table, col, row, label, value):
-    table.getCellByPosition(col, row).setString(f"{label}{value or ''}")
-
-
-def replace_all(doc, search, replace):
+def replace_regex(doc, pattern, replacement):
     sd = doc.createSearchDescriptor()
-    sd.SearchString = search
-    sd.ReplaceString = replace
+    sd.SearchRegularExpression = True
+    sd.SearchString = pattern
+    sd.ReplaceString = replacement
     doc.replaceAll(sd)
 
 
-def pad_after_label(value, width):
+def replace_label_underscores(doc, label, value):
     text = (value or "").strip()
-    if len(text) > width:
-        return text[:width]
-    return text + (" " * (width - len(text)))
+    if not text:
+        return
+    pattern = re.escape(label) + r"  _+"
+    replace_regex(doc, pattern, label + "  " + text)
+
+
+def replace_label_underscores_single(doc, label, value):
+    text = (value or "").strip()
+    if not text:
+        return
+    pattern = re.escape(label) + r" _+"
+    replace_regex(doc, pattern, label + " " + text)
+
+
+def mark_checkbox_option(doc, option_label):
+    """Marca X en la opción sin borrar las demás del formato."""
+    sd = doc.createSearchDescriptor()
+    sd.SearchString = option_label + "  X"
+    if doc.findFirst(sd):
+        return
+
+    sd = doc.createSearchDescriptor()
+    sd.SearchString = option_label
+    sd.ReplaceString = option_label + "  X"
+    doc.replaceAll(sd)
+
+
+def separator_after_label(prefix):
+    """Conserva ': ' o espacio que trae la plantilla; si no hay, agrega ': '."""
+    if prefix.endswith(": "):
+        return ""
+    if prefix.endswith(" "):
+        return ""
+    if prefix.rstrip().endswith(":"):
+        return " "
+    return ": "
+
+
+def fill_cell_after_label(cell, label, value):
+    """Escribe el valor después de la etiqueta sin borrar el resto de la celda."""
+    text = (value or "").strip()
+    if not text:
+        return
+
+    current = cell.getString()
+    if not current.strip():
+        cell.setString(label.rstrip() + separator_after_label(label.rstrip()) + text)
+        return
+
+    for candidate in (label, label.strip()):
+        if candidate and candidate in current:
+            idx = current.index(candidate)
+            prefix = current[: idx + len(candidate)]
+            suffix = current[idx + len(candidate) :]
+            suffix = re.sub(r"^[\s_:]+", "", suffix)
+            joiner = separator_after_label(prefix)
+            new_text = prefix + joiner + text
+            if suffix.strip():
+                new_text += " " + suffix.strip()
+            cell.setString(new_text)
+            return
+
+    cell.setString(current.rstrip() + " " + text)
 
 
 def fill_doc(template_path, output_path, data):
@@ -104,64 +162,58 @@ def fill_doc(template_path, output_path, data):
         if len(tables) < 5:
             raise RuntimeError("Plantilla FormatoSolicitud.doc: estructura de tablas inesperada")
 
-        cell_text(tables[0], 0, 0, "FECHA: ", data.get("fecha", ""))
-        cell_text(tables[0], 1, 0, "RADICADO Nº   ", data.get("radicado", ""))
-
-        cell_text(tables[1], 0, 0, "PETICIONARIO: ", data.get("peticionario", ""))
-        cell_text(tables[1], 1, 0, "CEDULA ", data.get("cedula", ""))
-        cell_text(tables[1], 0, 1, "DIRECCIÓN: ", data.get("direccion", ""))
-        cell_text(tables[1], 0, 2, "TELEFONO ", data.get("telefono", ""))
-        cell_text(tables[1], 1, 2, "BARRIO ", data.get("barrio", ""))
-        cell_text(tables[1], 0, 3, "CORREO ELECTRÓNICO ", data.get("correo", ""))
-
-        acepta = (
-            "Aceptó me sea enviado la respuesta al correo electrónico antes citado"
+        fill_cell_after_label(tables[0].getCellByPosition(0, 0), "FECHA: ", data.get("fecha", ""))
+        fill_cell_after_label(
+            tables[0].getCellByPosition(1, 0), "RADICADO Nº   ", data.get("radicado", "")
         )
-        if data.get("aceptaCorreo"):
-            acepta += "  X"
-        tables[1].getCellByPosition(0, 4).setString(acepta)
 
-        cell_text(tables[2], 0, 0, "PERJUDICANTE: ", data.get("perjudicante", ""))
-        cell_text(tables[2], 1, 0, "TEL: ", data.get("telPerjudicante", ""))
-        cell_text(tables[2], 0, 1, "DIRECCIÓN: ", data.get("direccionPerjudicante", ""))
-        cell_text(tables[2], 1, 1, "BARRIO: ", data.get("barrioPerjudicante", ""))
+        fill_cell_after_label(
+            tables[1].getCellByPosition(0, 0), "PETICIONARIO: ", data.get("peticionario", "")
+        )
+        fill_cell_after_label(tables[1].getCellByPosition(1, 0), "CEDULA ", data.get("cedula", ""))
+        fill_cell_after_label(
+            tables[1].getCellByPosition(0, 1), "DIRECCIÓN: ", data.get("direccion", "")
+        )
+        fill_cell_after_label(
+            tables[1].getCellByPosition(0, 2), "TELEFONO", data.get("telefono", "")
+        )
+        fill_cell_after_label(tables[1].getCellByPosition(1, 2), "BARRIO", data.get("barrio", ""))
+        fill_cell_after_label(
+            tables[1].getCellByPosition(0, 3), "CORREO ELECTRÓNICO", data.get("correo", "")
+        )
+
+        if data.get("aceptaCorreo"):
+            correo_cell = tables[1].getCellByPosition(0, 4)
+            current = correo_cell.getString()
+            if current and " X" not in current and not current.rstrip().endswith("X"):
+                correo_cell.setString(current.rstrip() + "  X")
+
+        fill_cell_after_label(
+            tables[2].getCellByPosition(0, 0), "PERJUDICANTE: ", data.get("perjudicante", "")
+        )
+        fill_cell_after_label(tables[2].getCellByPosition(1, 0), "TEL: ", data.get("telPerjudicante", ""))
+        fill_cell_after_label(
+            tables[2].getCellByPosition(0, 1), "DIRECCIÓN: ", data.get("direccionPerjudicante", "")
+        )
+        fill_cell_after_label(
+            tables[2].getCellByPosition(1, 1), "BARRIO: ", data.get("barrioPerjudicante", "")
+        )
 
         canal = (data.get("canalDeReporte") or "").strip()
         if canal == "Telefono":
-            tables[3].getCellByPosition(1, 0).setString("\nATENCIÓN TELEFONICA  X")
+            mark_checkbox_option(doc, "ATENCIÓN TELEFONICA")
         elif canal == "Personal":
-            tables[3].getCellByPosition(0, 0).setString("\nATENCIÓN PERSONAL  X")
-        elif canal == "Correo":
-            correo_cell = tables[1].getCellByPosition(0, 3).getString()
-            if " X" not in correo_cell:
-                tables[1].getCellByPosition(0, 3).setString(correo_cell.rstrip() + "  X")
+            mark_checkbox_option(doc, "ATENCIÓN PERSONAL")
+        elif canal == "Correo" and data.get("correo"):
+            correo_cell = tables[1].getCellByPosition(0, 3)
+            current = correo_cell.getString()
+            if current and " X" not in current and not current.rstrip().endswith("X"):
+                correo_cell.setString(current.rstrip() + "  X")
 
-        descripcion = (data.get("descripcion") or "").strip()
-        if descripcion:
-            replace_all(
-                doc,
-                "DESCRIPCION QUEJA:  " + ("_" * 305),
-                "DESCRIPCION QUEJA:  " + descripcion,
-            )
-
-        respuesta = (data.get("respuestaInmediata") or "").strip()
-        if respuesta:
-            replace_all(
-                doc,
-                "RESPUESTA INMEDIATA:  " + ("_" * 305),
-                "RESPUESTA INMEDIATA:  " + respuesta,
-            )
-
-        replace_all(
-            doc,
-            "RECIBIDA POR: ________________________________________________",
-            "RECIBIDA POR: " + pad_after_label(data.get("recibidaPor", ""), 46),
-        )
-        replace_all(
-            doc,
-            "REMITIDO A: __________________________________________________",
-            "REMITIDO A: " + pad_after_label(data.get("remitidoA", ""), 62),
-        )
+        replace_label_underscores(doc, "DESCRIPCION QUEJA:", data.get("descripcion", ""))
+        replace_label_underscores(doc, "RESPUESTA INMEDIATA:", data.get("respuestaInmediata", ""))
+        replace_label_underscores_single(doc, "RECIBIDA POR:", data.get("recibidaPor", ""))
+        replace_label_underscores_single(doc, "REMITIDO A:", data.get("remitidoA", ""))
 
         props = (uno.createUnoStruct("com.sun.star.beans.PropertyValue"),)
         props[0].Name = "FilterName"
@@ -185,7 +237,7 @@ def convert_to_pdf(doc_path, pdf_path):
             "--nofirststartwizard",
             f"-env:UserInstallation={profile_url}",
             "--convert-to",
-            "pdf",
+            "pdf:writer_pdf_Export",
             "--outdir",
             os.path.dirname(pdf_path) or ".",
             doc_path,

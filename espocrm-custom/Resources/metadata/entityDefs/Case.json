@@ -160,6 +160,11 @@
             "required": true,
             "isCustom": true
         },
+        "cFormatoSolicitudPdf": {
+            "type": "file",
+            "readOnly": true,
+            "isCustom": true
+        },
         "cCategoria": {
             "type": "multiEnum",
             "options": [

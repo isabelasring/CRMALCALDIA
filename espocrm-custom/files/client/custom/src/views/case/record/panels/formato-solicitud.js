@@ -10,7 +10,7 @@ define('custom:views/case/record/panels/formato-solicitud', [
         setup: function () {
             Dep.prototype.setup.call(this);
 
-            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente', function () {
+            this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:cFormatoSolicitudPdfId', function () {
                 this.reRender();
                 this.togglePanel();
             });
@@ -50,17 +50,34 @@ define('custom:views/case/record/panels/formato-solicitud', [
         },
 
         data: function () {
+            const pdfId = this.model.get('cFormatoSolicitudPdfId');
+            const pdfName = this.model.get('cFormatoSolicitudPdfName');
+
             return {
                 visible: this.isVisible(),
+                hasAutoPdf: !!pdfId,
+                autoPdfName: pdfName || this.translate('downloadFormatoPdf', 'Case'),
+                autoPdfUrl: pdfId
+                    ? this.getBasePath() + '?entryPoint=download&id=' + encodeURIComponent(pdfId)
+                    : '',
             };
         },
 
         isVisible: function () {
-            if (!RadicacionFields.isCasePostRadicado(this.model)) {
-                return false;
+            if (this.model.get('cFormatoSolicitudPdfId')) {
+                return true;
             }
 
-            return RadicacionFields.isInspeccionUser(this.getUser());
+            if (RadicacionFields.isInspeccionUser(this.getUser())) {
+                return true;
+            }
+
+            if (RadicacionFields.isRadicacionUser(this.getUser())
+                && RadicacionFields.isCaseRadicado(this.model)) {
+                return true;
+            }
+
+            return false;
         },
 
         actionDownloadFormato: function (data) {

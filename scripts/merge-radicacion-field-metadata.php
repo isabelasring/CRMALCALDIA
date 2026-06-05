@@ -29,10 +29,8 @@ $data['fields']['cNumeroRadicacion'] = [
 
 $data['fields']['cExpediente'] = [
     'type' => 'varchar',
-    'maxLength' => 50,
+    'maxLength' => 100,
     'isCustom' => true,
-    'readOnly' => true,
-    'tooltip' => true,
 ];
 
 file_put_contents(

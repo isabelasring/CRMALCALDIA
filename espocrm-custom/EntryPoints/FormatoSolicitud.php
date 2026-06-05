@@ -4,10 +4,10 @@ namespace Espo\Custom\EntryPoints;
 
 use Espo\Core\Api\Request;
 use Espo\Core\Api\Response;
-use Espo\Core\Api\ResponseComposer;
 use Espo\Core\EntryPoint\EntryPoint;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Custom\Tools\CaseObj\FormatoSolicitudGenerator;
+use GuzzleHttp\Psr7\Utils;
 
 class FormatoSolicitud implements EntryPoint
 {
@@ -25,12 +25,13 @@ class FormatoSolicitud implements EntryPoint
         }
 
         $file = $this->generator->generate($id, $format);
+        $stream = Utils::streamFor(fopen($file['path'], 'rb'));
 
         $response
             ->setHeader('Content-Disposition', 'attachment; filename="' . $file['name'] . '"')
             ->setHeader('Content-Type', $file['type'])
             ->setHeader('Content-Length', (string) filesize($file['path']))
-            ->setBody(fopen($file['path'], 'rb'));
+            ->setBody($stream);
 
         register_shutdown_function(static function () use ($file): void {
             $dir = dirname($file['path']);

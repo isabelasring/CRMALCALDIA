@@ -18,8 +18,12 @@ if [[ ! -f "$DUMP" ]]; then
   exit 1
 fi
 
-echo "==> Levantando base de datos..."
-docker compose up -d espocrm-db
+if docker ps --format '{{.Names}}' | grep -qx 'espocrm-db'; then
+  echo "==> Contenedores ya en marcha, se reutilizan."
+else
+  echo "==> Levantando base de datos..."
+  docker compose up -d espocrm-db
+fi
 
 echo "==> Esperando PostgreSQL..."
 for i in {1..40}; do
@@ -36,8 +40,12 @@ else
   docker exec -i espocrm-db psql -U espocrm -d espocrm <"$DUMP"
 fi
 
-echo "==> Levantando EspoCRM (app, daemon, websocket)..."
-docker compose up -d
+if docker ps --format '{{.Names}}' | grep -qx 'espocrm'; then
+  echo "==> EspoCRM ya está arriba."
+else
+  echo "==> Levantando EspoCRM (app, daemon, websocket)..."
+  docker compose up -d
+fi
 
 echo "==> Esperando contenedor espocrm..."
 sleep 15

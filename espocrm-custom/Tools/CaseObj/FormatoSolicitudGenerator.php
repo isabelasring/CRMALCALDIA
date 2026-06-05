@@ -16,6 +16,7 @@ use Espo\ORM\EntityManager;
 class FormatoSolicitudGenerator
 {
     private const ROLE_INSPECCION = 'Inspección';
+    private const ROLE_RADICACION = 'Radicación';
 
     public function __construct(
         private EntityManager $entityManager,
@@ -27,7 +28,7 @@ class FormatoSolicitudGenerator
     /**
      * @return array{path: string, name: string, type: string}
      */
-    public function generate(string $caseId, string $format): array
+    public function generate(string $caseId, string $format, bool $internal = false): array
     {
         $format = strtolower($format);
 
@@ -35,22 +36,19 @@ class FormatoSolicitudGenerator
             throw new BadRequest("Formato no válido. Use doc o pdf.");
         }
 
-        if (!$this->userHasInspeccionRole()) {
-            throw new Forbidden();
-        }
-
         /** @var ?Entity $case */
         $case = $this->entityManager->getEntityById('Case', $caseId);
 
-        if (!$case || !$this->acl->checkEntityRead($case)) {
+        if (!$case) {
             throw new Forbidden();
         }
 
-        $radicado = trim((string) $case->get('cNumeroRadicado'));
-        $expediente = trim((string) $case->get('cExpediente'));
+        if (!$internal && !$this->acl->checkEntityRead($case)) {
+            throw new Forbidden();
+        }
 
-        if ($radicado === '' || $expediente === '') {
-            throw new BadRequest('El caso debe tener número de radicado y expediente.');
+        if (!$internal && !$this->canDownloadFormato($case)) {
+            throw new Forbidden();
         }
 
         $templatePath = $this->getTemplatePath();
@@ -77,7 +75,10 @@ class FormatoSolicitudGenerator
             throw new Error('No se pudo crear el perfil de LibreOffice.');
         }
 
-        $safeRadicado = preg_replace('/[^\w\-]+/', '_', $radicado) ?: 'caso';
+        $radicado = trim((string) $case->get('cNumeroRadicado'));
+        $peticionario = trim((string) $case->get('cPeticionario'));
+        $slugSource = $radicado !== '' ? $radicado : $peticionario;
+        $safeRadicado = preg_replace('/[^\w\-]+/u', '_', $slugSource) ?: 'caso';
         $outputPath = $workDir . '/FormatoSolicitud-' . $safeRadicado . '.' . $format;
         $jsonPath = $workDir . '/payload.json';
 
@@ -142,11 +143,25 @@ class FormatoSolicitudGenerator
         ];
     }
 
-    private function userHasInspeccionRole(): bool
+    private function canDownloadFormato(Entity $case): bool
+    {
+        if ($this->user->isAdmin()) {
+            return true;
+        }
+
+        if (trim((string) $case->get('cPeticionario')) === '') {
+            return false;
+        }
+
+        return $this->userHasRole(self::ROLE_INSPECCION)
+            || $this->userHasRole(self::ROLE_RADICACION);
+    }
+
+    private function userHasRole(string $roleName): bool
     {
         $role = $this->entityManager
             ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => self::ROLE_INSPECCION])
+            ->where(['name' => $roleName])
             ->findOne();
 
         if (!$role) {
@@ -160,12 +175,12 @@ class FormatoSolicitudGenerator
 
     private function getTemplatePath(): string
     {
-        return realpath(__DIR__ . '/../files/templates/FormatoSolicitud.doc') ?: '';
+        return realpath(__DIR__ . '/../../files/templates/FormatoSolicitud.doc') ?: '';
     }
 
     private function getScriptPath(): string
     {
-        return realpath(__DIR__ . '/../files/scripts/fill-formato-solicitud.py') ?: '';
+        return realpath(__DIR__ . '/../../files/scripts/fill-formato-solicitud.py') ?: '';
     }
 
     /**
@@ -196,7 +211,26 @@ class FormatoSolicitudGenerator
             'respuestaInmediata' => trim((string) $case->get('cRespuestaInmediata')),
             'recibidaPor' => $recibidaPor,
             'remitidoA' => $remitidoA,
+            'tipo' => trim((string) $case->get('cTipo')),
+            'categoria' => $this->formatCategoria($case->get('cCategoria')),
         ];
+    }
+
+    private function formatCategoria(mixed $value): string
+    {
+        if (is_array($value)) {
+            return implode(', ', array_filter(array_map('trim', $value)));
+        }
+
+        if (is_string($value) && str_starts_with($value, '[')) {
+            $decoded = json_decode($value, true);
+
+            if (is_array($decoded)) {
+                return implode(', ', array_filter(array_map('trim', $decoded)));
+            }
+        }
+
+        return trim((string) $value);
     }
 
     private function resolveUserName(?string $userId): string

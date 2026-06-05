@@ -121,5 +121,18 @@
         ],
         "style": "default",
         "label": "Asignación"
+    },
+    {
+        "name": "formatoGenerado",
+        "rows": [
+            [
+                {
+                    "name": "cFormatoSolicitudPdf",
+                    "fullWidth": true
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Formato generado"
     }
 ]
