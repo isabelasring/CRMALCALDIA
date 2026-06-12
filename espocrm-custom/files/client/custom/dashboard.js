@@ -628,6 +628,40 @@
         };
     }
 
+    function ajustarAlturaIframe() {
+        if (window.parent === window) {
+            return;
+        }
+
+        var root = document.querySelector('.dashboard');
+        var height = root ? Math.ceil(root.getBoundingClientRect().height) + 16 : 0;
+
+        if (!height || height < 200) {
+            height = Math.ceil(document.documentElement.scrollHeight);
+        }
+
+        window.parent.postMessage({
+            type: 'crm-dashboard-height',
+            height: height,
+        }, window.location.origin);
+    }
+
+    window.addEventListener('load', ajustarAlturaIframe);
+
+    if (typeof ResizeObserver !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', function () {
+            var dash = document.querySelector('.dashboard');
+
+            if (!dash) {
+                return;
+            }
+
+            new ResizeObserver(function () {
+                ajustarAlturaIframe();
+            }).observe(dash);
+        });
+    }
+
     var params = new URLSearchParams(window.location.search);
     var assignedUserId = params.get('assignedUserId') || '';
 
@@ -653,6 +687,7 @@
 
             if (!casos.length) {
                 estado.textContent = 'Aún no hay casos registrados.';
+                ajustarAlturaIframe();
                 return;
             }
 
@@ -819,10 +854,15 @@
                     ['rgba(42, 89, 52, 0.72)', 'rgba(148, 163, 184, 0.78)']
                 );
             }
+
+            ajustarAlturaIframe();
+            setTimeout(ajustarAlturaIframe, 250);
+            setTimeout(ajustarAlturaIframe, 1200);
         })
         .catch(function (err) {
             console.error('Dashboard error:', err);
             estado.textContent = 'Error al leer casos: ' + (err.message || err);
             estado.classList.add('error');
+            ajustarAlturaIframe();
         });
 })();

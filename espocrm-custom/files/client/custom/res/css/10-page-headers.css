@@ -351,6 +351,6 @@
 }
 
 /* ── Contenido principal ── */
-#content #main {
+#content #main:not(:has(.custom-home)) {
   padding: 16px 20px 24px !important;
 }

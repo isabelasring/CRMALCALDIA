@@ -72,7 +72,45 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
             this.renderCustomPanels();
+            this.bindDashboardIframeResize();
             this.removeUnwantedDashlets();
+        },
+
+        bindDashboardIframeResize: function () {
+            var self = this;
+
+            if (this._dashboardHeightHandler) {
+                window.removeEventListener('message', this._dashboardHeightHandler);
+            }
+
+            this._dashboardHeightHandler = function (event) {
+                if (!event.data || event.data.type !== 'crm-dashboard-height') {
+                    return;
+                }
+
+                if (event.origin !== window.location.origin) {
+                    return;
+                }
+
+                var height = parseInt(event.data.height, 10);
+
+                if (!height || height < 200) {
+                    return;
+                }
+
+                self.$el.find('.custom-home-iframe').css('height', height + 'px');
+            };
+
+            window.addEventListener('message', this._dashboardHeightHandler);
+        },
+
+        remove: function () {
+            if (this._dashboardHeightHandler) {
+                window.removeEventListener('message', this._dashboardHeightHandler);
+                this._dashboardHeightHandler = null;
+            }
+
+            Dep.prototype.remove.call(this);
         },
 
         sanitizeDashboardPreferences: function () {
@@ -177,7 +215,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                 html += '<div class="panel panel-default custom-home-tablero">' +
                     '<div class="panel-heading"><h4 class="panel-title">Tablero de control</h4></div>' +
                     '<div class="panel-body custom-home-tablero-body">' +
-                    '<iframe src="' + _.escape(cfg.iframeUrl) + '" title="Tablero de control" class="custom-home-iframe"></iframe>' +
+                    '<iframe src="' + _.escape(cfg.iframeUrl) + '" title="Tablero de control" class="custom-home-iframe" scrolling="no"></iframe>' +
                     '</div></div>';
             }
 

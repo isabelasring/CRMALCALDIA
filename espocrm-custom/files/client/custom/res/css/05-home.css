@@ -11,7 +11,19 @@ body:has(.custom-home) #content #main {
 }
 
 #content #main:has(.custom-home) {
-  padding: 6px 4px 20px !important;
+  padding: 0 0 16px !important;
+}
+
+body:has(.custom-home) #content,
+body:has(.custom-home) #content > .content,
+body:has(.custom-home) #content #main,
+body:has(.custom-home) .dashlets,
+body:has(.custom-home) .page,
+body:has(.custom-home) .row {
+  max-width: none !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 .custom-home {
@@ -21,42 +33,40 @@ body:has(.custom-home) #content #main {
 }
 
 .custom-home + .dashlets {
-  margin-top: 20px;
+  margin-top: 16px;
+  padding: 0 8px;
 }
 
 .custom-home-tablero {
-  border: 1px solid var(--crm-border-light) !important;
-  box-shadow: var(--crm-shadow-sm) !important;
-  border-radius: var(--crm-radius-md) !important;
-  overflow: hidden;
+  border: none !important;
+  border-top: 1px solid var(--crm-border-light) !important;
+  border-bottom: 1px solid var(--crm-border-light) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible;
   width: 100%;
   margin: 0;
 }
 
-/* Sin barra verde — header neutro del panel */
+/* Ocultar título duplicado — el iframe ya tiene su header */
 .custom-home-tablero > .panel-heading {
-  background: var(--crm-surface) !important;
-  border-bottom: 1px solid var(--crm-border-light) !important;
-  padding: 12px 16px !important;
-}
-
-.custom-home-tablero > .panel-heading .panel-title {
-  color: var(--crm-text) !important;
-  font-size: var(--crm-font-size-base) !important;
-  font-weight: 700 !important;
+  display: none !important;
 }
 
 .custom-home-tablero-body {
   padding: 0 !important;
   background: var(--crm-bg) !important;
+  overflow: visible !important;
 }
 
 .custom-home-iframe {
   width: 100%;
-  height: 1420px;
+  height: 720px;
+  min-height: 400px;
   border: 0;
   display: block;
   background: var(--crm-bg);
+  overflow: hidden;
 }
 
 .custom-home-lista {

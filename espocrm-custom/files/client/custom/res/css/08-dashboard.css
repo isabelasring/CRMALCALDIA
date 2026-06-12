@@ -10,11 +10,13 @@ html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  width: 100%;
+  min-height: 0;
   font-family: var(--crm-font);
   background: var(--crm-bg);
   color: var(--crm-text);
-  overflow-y: auto;
+  overflow-x: hidden;
+  overflow-y: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -22,10 +24,10 @@ body {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 10px 4px 16px;
+  padding: 8px 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
 }
 
 /* ── Header ── */
@@ -34,9 +36,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--crm-space-md);
-  padding: var(--crm-space-md) var(--crm-space-lg);
+  padding: 14px 16px;
   background: var(--crm-surface);
-  border-radius: var(--crm-radius-xl);
+  border-radius: var(--crm-radius-md);
   box-shadow: var(--crm-shadow-card);
   border: 1px solid var(--crm-border-light);
 }
@@ -105,14 +107,14 @@ body {
 /* ── KPIs ── */
 .kpis {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .kpi {
   background: var(--crm-surface);
-  border-radius: var(--crm-radius-lg);
-  padding: 18px 20px;
+  border-radius: var(--crm-radius-md);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -252,16 +254,25 @@ body {
   padding: 12px;
 }
 
-/* ── Grid de gráficas ── */
+/* ── Grid de gráficas — 3 columnas desde pantallas medianas ── */
 .graficas-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
-@media (min-width: 1280px) {
+.grafica-card--embudo {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.grafica-card--wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
   .graficas-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .grafica-card--embudo {
@@ -276,8 +287,8 @@ body {
 
 .grafica-card {
   background: var(--crm-surface);
-  border-radius: var(--crm-radius-lg);
-  padding: 20px 22px;
+  border-radius: var(--crm-radius-md);
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--crm-border-light);
@@ -287,14 +298,6 @@ body {
 
 .grafica-card:hover {
   box-shadow: var(--crm-shadow-md);
-}
-
-.grafica-card--wide {
-  grid-column: span 2;
-}
-
-.grafica-card--embudo {
-  grid-row: span 2;
 }
 
 .grafica-header {
@@ -354,7 +357,7 @@ body {
 .grafica-cuerpo--embudo {
   height: 100%;
   min-height: 440px;
-  overflow-y: auto;
+  overflow: visible;
 }
 
 .grafica-cuerpo--alta {
@@ -366,18 +369,18 @@ body {
   height: 100%;
   display: flex;
   align-items: stretch;
-  justify-content: center;
-  padding: 4px 0;
+  justify-content: stretch;
+  padding: 0;
 }
 
 .funnel {
   width: 100%;
-  max-width: 100%;
+  max-width: none;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .funnel-nivel {
