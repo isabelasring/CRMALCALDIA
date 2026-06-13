@@ -230,7 +230,13 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
             html += '</div>';
 
-            this.$el.find('> .dashlets').before(html);
+            var $dashlets = this.$el.find('.dashlets').first();
+
+            if ($dashlets.length) {
+                $dashlets.before(html);
+            } else {
+                this.$el.prepend(html);
+            }
 
             cfg.lists.forEach(function (listCfg, index) {
                 this.loadList(index, listCfg);

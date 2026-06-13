@@ -74,6 +74,10 @@ echo 'Placeholder en desplegables Case...'
 docker cp "$ROOT/scripts/configure-case-enum-placeholders.php" espocrm:/tmp/configure-case-enum-placeholders.php
 docker exec espocrm php /tmp/configure-case-enum-placeholders.php
 
+echo 'Menú lateral (tabList global)...'
+docker cp "$ROOT/scripts/configure-global-tablist.php" espocrm:/tmp/configure-global-tablist.php
+docker exec espocrm php /tmp/configure-global-tablist.php
+
 echo 'Home: tablero custom + dashlets editables...'
 docker cp "$ROOT/scripts/configure-user-dashboards.php" espocrm:/tmp/configure-user-dashboards.php
 docker exec espocrm php /tmp/configure-user-dashboards.php

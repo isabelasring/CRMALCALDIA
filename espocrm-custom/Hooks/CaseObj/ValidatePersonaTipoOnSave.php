@@ -56,7 +56,11 @@ class ValidatePersonaTipoOnSave implements BeforeSave
         $tipo = trim((string) $entity->get('cTipoPersonaPerjudicante'));
 
         if ($nombre === '' && $documento === '') {
-            return;
+            if (!$this->needsFullSolicitud($entity)) {
+                return;
+            }
+
+            throw new BadRequest('Indique los datos del infractor.');
         }
 
         if ($tipo === '' || $tipo === self::PLACEHOLDER) {
@@ -76,5 +80,13 @@ class ValidatePersonaTipoOnSave implements BeforeSave
 
             throw new BadRequest('Indique la ' . $label . ' del infractor.');
         }
+    }
+
+    private function needsFullSolicitud(Entity $entity): bool
+    {
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
+
+        return $numero === '' || $expediente === '';
     }
 }

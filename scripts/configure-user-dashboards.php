@@ -255,32 +255,18 @@ foreach ($users as $user) {
         continue;
     }
 
-    $layout = json_decode(json_encode($prefs->get('dashboardLayout') ?: []), true);
-
-    if (!is_array($layout) || $layout === []) {
-        $layout = [
-            [
-                'name' => 'My Espo',
-                'layout' => [],
-            ],
-        ];
-    }
-
-    $options = json_decode(json_encode($prefs->get('dashletsOptions') ?: new stdClass()), true);
-
-    if (!is_array($options)) {
-        $options = [];
-    }
-
-    $layout = $sanitizeDashboard($layout);
-    $options = $sanitizeDashletsOptions($layout, $options);
-
-    $prefs->set('dashboardLayout', $layout);
-    $prefs->set('dashletsOptions', $options);
+    // Vacío a propósito: tablero + listas los inyecta custom:views/home (evita crash de dashlets Cases).
+    $prefs->set('dashboardLayout', [
+        [
+            'name' => 'My Espo',
+            'layout' => [],
+        ],
+    ]);
+    $prefs->set('dashletsOptions', new stdClass());
     $prefs->set('dashboardLocked', false);
     $em->saveEntity($prefs);
 
-    echo "{$userName} → perfil {$profile} (sin Memo/Record List)\n";
+    echo "{$userName} → perfil {$profile} (home custom)\n";
 }
 
 $statePath = '/var/www/html/data/state.php';

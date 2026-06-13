@@ -56,6 +56,14 @@ if [ -f "$DATA" ]; then
   echo "    OK"
 fi
 
+echo "==> Esperando contenedor EspoCRM..."
+for i in $(seq 1 60); do
+  if docker exec espocrm test -f /var/www/html/bootstrap.php 2>/dev/null; then
+    break
+  fi
+  sleep 3
+done
+
 echo "==> Desplegando custom + permisos..."
 bash "$ROOT/scripts/deploy-custom.sh"
 

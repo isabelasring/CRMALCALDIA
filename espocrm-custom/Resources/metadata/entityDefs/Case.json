@@ -3,6 +3,9 @@
         "name": {
             "required": false
         },
+        "description": {
+            "required": true
+        },
         "cFechaVencimiento": {
             "notNull": false,
             "type": "date",
@@ -91,17 +94,20 @@
         "cDireccion": {
             "type": "varchar",
             "maxLength": 100,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cTelefono": {
             "type": "varchar",
             "maxLength": 100,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cBarrio": {
             "type": "enum",
+            "required": true,
             "options": [
                 "Alcalá",
                 "Alto de Misael",
@@ -197,11 +203,13 @@
                 "Zuñiga": null
             },
             "maxLength": 100,
+            "required": true,
             "isCustom": true
         },
         "cCorreo": {
             "type": "varchar",
             "maxLength": 200,
+            "required": true,
             "options": [],
             "isCustom": true
         },
@@ -220,6 +228,7 @@
                 "Personal": null
             },
             "default": "Seleccione una opción",
+            "required": true,
             "maxLength": 100,
             "isCustom": true
         },
@@ -242,12 +251,14 @@
         "cPerjudicante": {
             "type": "varchar",
             "maxLength": 200,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cDocumentoPerjudicante": {
             "type": "varchar",
             "maxLength": 100,
+            "required": true,
             "options": [],
             "isCustom": true
         },
@@ -274,17 +285,20 @@
         "cTelefonoPerjudicante": {
             "type": "varchar",
             "maxLength": 100,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cDireccionPerjudicante": {
             "type": "varchar",
             "maxLength": 100,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cBarrioPerjudicante": {
             "type": "enum",
+            "required": true,
             "options": [
                 "Alcalá",
                 "Alto de Misael",
@@ -380,20 +394,24 @@
                 "Zuñiga": null
             },
             "maxLength": 100,
+            "required": true,
             "isCustom": true
         },
         "cRespuestaInmediata": {
             "type": "varchar",
             "maxLength": 1000,
+            "required": true,
             "options": [],
             "isCustom": true
         },
         "cRecibidaPor": {
             "type": "link",
+            "required": true,
             "isCustom": true
         },
         "cRemitidoA": {
             "type": "link",
+            "required": true,
             "isCustom": true
         },
         "cFormatoSolicitudPdf": {
@@ -429,6 +447,7 @@
         },
         "cRecursoTema": {
             "type": "enum",
+            "required": true,
             "options": [
                 "AIRE",
                 "ESPACIO PUBLICOS VERDES",
@@ -455,6 +474,7 @@
         },
         "cAsunto": {
             "type": "enum",
+            "required": true,
             "options": [
                 "Acumulación de escombros en el espacio publico",
                 "Afectación a individuos arboreos",
@@ -507,6 +527,7 @@
         },
         "cZonaAlcaldia": {
             "type": "enum",
+            "required": true,
             "options": [
                 "1",
                 "2",
@@ -541,6 +562,7 @@
         },
         "cUltimaActuacion": {
             "type": "enum",
+            "required": true,
             "options": [
                 "Archivado",
                 "Audiencia",
@@ -581,6 +603,7 @@
         },
         "cProximaActuacion": {
             "type": "enum",
+            "required": true,
             "options": [
                 "Archivado",
                 "Audiencia",

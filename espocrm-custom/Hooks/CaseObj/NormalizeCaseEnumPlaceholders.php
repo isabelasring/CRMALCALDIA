@@ -31,6 +31,13 @@ class NormalizeCaseEnumPlaceholders implements BeforeSave
         'cTipoPersonaPeticionario' => 'Seleccione el tipo de peticionario.',
         'cTipoPersonaPerjudicante' => 'Seleccione el tipo de infractor.',
         'cCanalDeReporte' => 'Seleccione el canal de reporte.',
+        'cBarrio' => 'Seleccione el barrio del peticionario.',
+        'cZonaAlcaldia' => 'Seleccione la zona del peticionario.',
+        'cBarrioPerjudicante' => 'Seleccione el barrio del infractor.',
+        'cRecursoTema' => 'Seleccione el recurso / tema.',
+        'cAsunto' => 'Seleccione el asunto.',
+        'cUltimaActuacion' => 'Seleccione la última actuación.',
+        'cProximaActuacion' => 'Seleccione la próxima actuación.',
     ];
 
     public static int $order = 1;
@@ -49,9 +56,17 @@ class NormalizeCaseEnumPlaceholders implements BeforeSave
                 $value = '';
             }
 
-            if ($value === '' && isset(self::REQUIRED_MESSAGES[$field]) && $entity->isNew()) {
+            if ($value === '' && isset(self::REQUIRED_MESSAGES[$field]) && $this->needsFullSolicitud($entity)) {
                 throw BadRequest::create(self::REQUIRED_MESSAGES[$field]);
             }
         }
+    }
+
+    private function needsFullSolicitud(Entity $entity): bool
+    {
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
+
+        return $numero === '' || $expediente === '';
     }
 }

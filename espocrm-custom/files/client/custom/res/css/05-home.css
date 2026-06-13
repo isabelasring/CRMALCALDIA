@@ -22,8 +22,6 @@ body:has(.custom-home) .page,
 body:has(.custom-home) .row {
   max-width: none !important;
   width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
 }
 
 .custom-home {
