@@ -31,6 +31,7 @@ body[data-navbar=side] > .content {
 body[data-navbar=side] #main > .page,
 body[data-navbar=side] #main > .list,
 body[data-navbar=side] #main > .record,
+body[data-navbar=side] #main > .detail,
 body[data-navbar=side] #main > .edit,
 body[data-navbar=side] #main > .list-container,
 body[data-navbar=side] #main > .dashlets {
@@ -41,6 +42,7 @@ body[data-navbar=side] #main > .dashlets {
 .list,
 .list-container,
 .record,
+.detail,
 .edit,
 .record-container,
 .dashlets,
@@ -52,6 +54,8 @@ body[data-navbar=side] #main > .dashlets {
 
 .record .record-grid,
 .record .record-grid.record-grid-wide,
+.detail .record-grid,
+.detail .record-grid.record-grid-wide,
 .edit .record-grid,
 .edit .record-grid.record-grid-wide {
   max-width: none !important;
@@ -60,6 +64,8 @@ body[data-navbar=side] #main > .dashlets {
 
 .record > .middle,
 .record > .bottom,
+.detail > .middle,
+.detail > .bottom,
 .edit > .middle,
 .edit > .bottom {
   max-width: none !important;

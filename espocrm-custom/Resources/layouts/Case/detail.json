@@ -6,14 +6,17 @@
                     "name": "cFechaCaso"
                 },
                 {
-                    "name": "cNumeroRadicado"
+                    "name": "status",
+                    "readOnly": true
                 }
             ],
             [
                 {
-                    "name": "cExpediente"
+                    "name": "cNumeroRadicado"
                 },
-                false
+                {
+                    "name": "cExpediente"
+                }
             ],
             [
                 {
@@ -164,11 +167,28 @@
         "label": "Asignación"
     },
     {
+        "name": "actaVisita",
+        "rows": [
+            [
+                {
+                    "name": "cPanelActaVisita",
+                    "view": "custom:views/case/fields/acta-visita-action",
+                    "noLabel": true,
+                    "fullWidth": true
+                }
+            ]
+        ],
+        "style": "default",
+        "label": "Acta de visita"
+    },
+    {
         "name": "formatoGenerado",
         "rows": [
             [
                 {
                     "name": "cFormatoSolicitudPdf",
+                    "view": "custom:views/case/fields/formato-generado-docs",
+                    "noLabel": true,
                     "fullWidth": true
                 }
             ]

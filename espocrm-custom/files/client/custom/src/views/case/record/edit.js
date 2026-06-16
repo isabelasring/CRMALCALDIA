@@ -18,6 +18,7 @@ define('custom:views/case/record/edit', [
             Dep.prototype.setup.call(this);
 
             if (this.model.isNew()) {
+                this.isWide = true;
                 CaseCreateDefaults.apply(this.model);
                 this.clearAssignedUserOnCreate();
             }

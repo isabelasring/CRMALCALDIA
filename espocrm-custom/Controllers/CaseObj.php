@@ -5,6 +5,9 @@ namespace Espo\Custom\Controllers;
 use Espo\Core\Api\Request;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
+use Espo\Core\Exceptions\NotFound;
+use Espo\Custom\Tools\CaseObj\CaseCronogramaService;
+use Espo\Custom\Tools\CaseObj\CaseTimelineService;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
 use Espo\Custom\Tools\Party\PartyRegistryService;
@@ -116,6 +119,58 @@ class CaseObj extends BaseCaseObj
                 : 'Ya existe una persona natural (infractor) con esta cédula. Se cargaron los datos registrados; el caso se vinculará a ese registro.',
             'data' => $data,
         ];
+    }
+
+    /**
+     * GET Case/action/timeline?id=...
+     *
+     * @return array<string, mixed>
+     */
+    public function getActionTimeline(Request $request): array
+    {
+        $id = trim((string) $request->getQueryParam('id'));
+
+        if ($id === '') {
+            throw new BadRequest('ID requerido.');
+        }
+
+        $case = $this->entityManager->getEntityById('Case', $id);
+
+        if (!$case) {
+            throw new NotFound();
+        }
+
+        if (!$this->acl->checkEntityRead($case)) {
+            throw new Forbidden();
+        }
+
+        return (new CaseTimelineService($this->entityManager))->build($case);
+    }
+
+    /**
+     * GET Case/action/cronograma?id=...
+     *
+     * @return array<string, mixed>
+     */
+    public function getActionCronograma(Request $request): array
+    {
+        $id = trim((string) $request->getQueryParam('id'));
+
+        if ($id === '') {
+            throw new BadRequest('ID requerido.');
+        }
+
+        $case = $this->entityManager->getEntityById('Case', $id);
+
+        if (!$case) {
+            throw new NotFound();
+        }
+
+        if (!$this->acl->checkEntityRead($case)) {
+            throw new Forbidden();
+        }
+
+        return (new CaseCronogramaService($this->entityManager))->build($case);
     }
 
     private function canUseRadicadoAssistant(User $user): bool

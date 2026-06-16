@@ -1,17 +1,14 @@
 [
     {
-        "name": "actaVisitaPanel"
+        "name": "caseTimeline"
     },
     {
-        "name": "formatoSolicitud"
+        "name": "caseCronograma"
     },
     {
-        "name": "formatoActaVisita"
+        "name": "caseStream"
     },
     {
         "name": "actuoArchivoPanel"
-    },
-    {
-        "name": "formatoActuoArchivo"
     }
 ]

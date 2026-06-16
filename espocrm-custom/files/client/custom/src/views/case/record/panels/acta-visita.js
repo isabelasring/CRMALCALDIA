@@ -1,10 +1,9 @@
 define('custom:views/case/record/panels/acta-visita', [
     'views/record/panels/side',
     'custom:helpers/patrullero-acta',
-    'custom:helpers/radicacion-fields',
     'custom:helpers/acta-visita-modal',
     'custom:helpers/acta-visita-case-status',
-], function (Dep, PatrulleroActa, RadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus) {
+], function (Dep, PatrulleroActa, ActaVisitaModal, ActaVisitaCaseStatus) {
 
     return Dep.extend({
 
@@ -14,7 +13,6 @@ define('custom:views/case/record/panels/acta-visita', [
             Dep.prototype.setup.call(this);
 
             this.isEditMode = false;
-            this.isInspeccionReview = false;
 
             this.listenTo(this.model, 'change:status change:assignedUserId change:cNumeroRadicado change:cExpediente', function () {
                 this.loadActaState();
@@ -36,11 +34,9 @@ define('custom:views/case/record/panels/acta-visita', [
         loadActaState: function () {
             const user = this.getUser();
             const isPatrullero = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
-            const isInspeccion = RadicacionFields.isInspeccionUser(user);
 
-            if (!isPatrullero && !isInspeccion) {
+            if (!isPatrullero) {
                 this.isEditMode = false;
-                this.isInspeccionReview = false;
 
                 if (this.isRendered()) {
                     this.reRender();
@@ -53,7 +49,6 @@ define('custom:views/case/record/panels/acta-visita', [
 
             if (!this.model.id) {
                 this.isEditMode = false;
-                this.isInspeccionReview = false;
 
                 if (this.isRendered()) {
                     this.reRender();
@@ -65,10 +60,7 @@ define('custom:views/case/record/panels/acta-visita', [
             }
 
             ActaVisitaCaseStatus.fetchActaForCase(this.model.id, this.getUser(), this.model).then((acta) => {
-                const diligenciada = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-
-                this.isEditMode = isPatrullero && diligenciada;
-                this.isInspeccionReview = isInspeccion && diligenciada;
+                this.isEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
 
                 if (this.isRendered()) {
                     this.reRender();
@@ -99,16 +91,14 @@ define('custom:views/case/record/panels/acta-visita', [
             }
 
             const user = this.getUser();
-            const show = PatrulleroActa.shouldShowLlenarActaButton(user, this.model)
-                || this.isInspeccionReview;
+            const show = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
 
             $panel.toggle(show);
         },
 
         data: function () {
             const user = this.getUser();
-            const showPatrulleroButton = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
-            const showButton = showPatrulleroButton || this.isInspeccionReview;
+            const showButton = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
             let unavailableReason = PatrulleroActa.getUnavailableReason(user, this.model);
 
             if (!unavailableReason) {
@@ -118,10 +108,7 @@ define('custom:views/case/record/panels/acta-visita', [
             let helpText = this.translate('actaVisitaPanelHelp', 'Case');
             let buttonLabel = this.translate('llenarActaVisita', 'Case');
 
-            if (this.isInspeccionReview) {
-                helpText = this.translate('actaVisitaInspeccionHelp', 'Case');
-                buttonLabel = this.translate('revisarActaVisita', 'Case');
-            } else if (this.isEditMode) {
+            if (this.isEditMode) {
                 helpText = this.translate('actaVisitaEditHelp', 'Case');
                 buttonLabel = this.translate('editarActaVisita', 'Case');
             }

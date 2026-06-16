@@ -638,6 +638,13 @@
                 "Visitas técnicos": null
             },
             "isCustom": true
+        },
+        "cPanelActaVisita": {
+            "type": "varchar",
+            "notStorable": true,
+            "readOnly": true,
+            "utility": true,
+            "isCustom": true
         }
     },
     "links": {

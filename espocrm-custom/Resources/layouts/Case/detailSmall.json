@@ -6,14 +6,17 @@
                     "name": "cFechaCaso"
                 },
                 {
-                    "name": "cNumeroRadicado"
+                    "name": "status",
+                    "readOnly": true
                 }
             ],
             [
                 {
-                    "name": "cExpediente"
+                    "name": "cNumeroRadicado"
                 },
-                false
+                {
+                    "name": "cExpediente"
+                }
             ],
             [
                 {

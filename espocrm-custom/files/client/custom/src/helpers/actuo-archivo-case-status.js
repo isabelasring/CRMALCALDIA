@@ -75,6 +75,7 @@ define('custom:helpers/actuo-archivo-case-status', [
         'referencia',
         'motivoArchivo',
         'cFormatoActuoArchivoPdfId',
+        'cFormatoActuoArchivoPdfName',
         'modifiedAt',
     ].join(',');
 

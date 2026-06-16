@@ -85,6 +85,7 @@ define('custom:helpers/acta-visita-case-status', [
         'conclusion',
         'requerimientos',
         'cFormatoActaVisitaPdfId',
+        'cFormatoActaVisitaPdfName',
         'modifiedAt',
     ].join(',');
 

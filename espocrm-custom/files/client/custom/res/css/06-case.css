@@ -20,11 +20,13 @@
 }
 
 /* Side panels de formatos */
-.record[data-scope="Case"] .side .panel {
+.detail[data-scope="Case"] .side .panel,
+.edit[data-scope="Case"] .side .panel {
   border-left: 3px solid var(--crm-primary) !important;
 }
 
-.record[data-scope="Case"] .side .panel-heading {
+.detail[data-scope="Case"] .side .panel-heading,
+.edit[data-scope="Case"] .side .panel-heading {
   background: var(--crm-bg-elevated) !important;
 }
 
@@ -41,6 +43,41 @@
 /* Kanban Case */
 .kanban[data-scope="Case"] .kanban-row {
   gap: 12px;
+}
+
+/* Detalle: columna derecha (timeline) más amplia que la izquierda */
+.detail[data-scope="Case"] .record-grid,
+.detail[data-scope="Case"] .record-grid.record-grid-wide {
+  grid-template-columns: minmax(0, 36%) minmax(0, 64%) !important;
+  column-gap: 24px !important;
+}
+
+/* Crear / editar caso: ancho completo */
+.edit[data-scope="Case"] .record-grid,
+.edit[data-scope="Case"] .record-grid.record-grid-wide {
+  grid-template-columns: 100% !important;
+  column-gap: 0 !important;
+}
+
+.detail[data-scope="Case"] .record-grid .side,
+.detail[data-scope="Case"] .record-grid .left,
+.edit[data-scope="Case"] .record-grid .side,
+.edit[data-scope="Case"] .record-grid .left {
+  min-width: 0;
+}
+
+/* Estatus dentro de Solicitud de queja */
+.detail[data-scope="Case"] .field[data-name="status"] .label .label-text {
+  font-weight: 600 !important;
+}
+
+@media (max-width: 991px) {
+  .detail[data-scope="Case"] .record-grid,
+  .detail[data-scope="Case"] .record-grid.record-grid-wide,
+  .edit[data-scope="Case"] .record-grid,
+  .edit[data-scope="Case"] .record-grid.record-grid-wide {
+    grid-template-columns: 100% !important;
+  }
 }
 
 /* ── Selects / enums: lista desplegable visible fuera del panel ── */
@@ -60,14 +97,14 @@
 .modal .edit[data-scope="Case"] .panel-body,
 .modal-body .edit[data-scope="Case"] .panel,
 .modal-body .edit[data-scope="Case"] .panel-body,
-.record[data-scope="Case"] .panel,
-.record[data-scope="Case"] .panel-body {
+.detail[data-scope="Case"] .panel,
+.detail[data-scope="Case"] .panel-body {
   overflow: visible !important;
   max-height: none !important;
 }
 
 .edit[data-scope="Case"] .panel-body,
-.record[data-scope="Case"] .panel-body {
+.detail[data-scope="Case"] .panel-body {
   overflow-y: visible !important;
   overflow-x: visible !important;
 }

@@ -1,0 +1,193 @@
+/**
+ * Casos — cronograma (debajo del timeline, panel lateral derecho)
+ */
+
+.detail[data-scope="Case"] .panel-caseCronograma {
+  border-left: none !important;
+  box-shadow: var(--crm-shadow-md) !important;
+  border: 1px solid var(--crm-border) !important;
+  border-radius: var(--crm-radius-lg) !important;
+  overflow: hidden !important;
+  margin-top: 14px !important;
+}
+
+.detail[data-scope="Case"] .panel-caseCronograma .panel-heading {
+  background: var(--crm-surface) !important;
+  border-bottom: 2px solid var(--crm-primary) !important;
+  padding: 12px 16px 10px !important;
+}
+
+.detail[data-scope="Case"] .panel-caseCronograma .panel-title {
+  color: var(--crm-text) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  text-transform: none !important;
+}
+
+.detail[data-scope="Case"] .panel-caseCronograma .panel-body {
+  padding: 0 !important;
+  background: var(--crm-surface) !important;
+}
+
+.case-cronograma.is-loading {
+  opacity: 0.5;
+}
+
+.case-cronograma-meta {
+  padding: 14px 16px 12px;
+  background: var(--crm-bg-elevated);
+  border-bottom: 1px solid var(--crm-border-light);
+}
+
+.case-cronograma-meta-row {
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 58%);
+  gap: 10px;
+  padding: 4px 0;
+  align-items: baseline;
+}
+
+.case-cronograma-meta-label {
+  text-align: right;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--crm-text-secondary);
+}
+
+.case-cronograma-meta-value {
+  font-size: 11px;
+  color: var(--crm-text);
+  line-height: 1.35;
+}
+
+.case-cronograma-meta-value.is-status {
+  font-weight: 700;
+  color: var(--crm-primary-dark);
+}
+
+.case-cronograma-table {
+  width: 100%;
+}
+
+.case-cronograma-head {
+  display: none;
+}
+
+.case-cronograma-row {
+  display: grid;
+  grid-template-columns: minmax(0, 44%) minmax(0, 56%);
+  gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--crm-border-light);
+  align-items: start;
+  transition: background 0.15s ease;
+}
+
+.case-cronograma-row:last-child {
+  border-bottom: none;
+}
+
+.case-cronograma-row:hover {
+  background: var(--crm-primary-light);
+}
+
+.case-cronograma-row.is-pending {
+  opacity: 0.72;
+}
+
+.case-cronograma-row.is-overdue,
+.case-cronograma-row.is-alert {
+  background: var(--crm-danger-soft);
+}
+
+.case-cronograma-row.is-overdue:hover,
+.case-cronograma-row.is-alert:hover {
+  background: #fde8e8;
+}
+
+.case-cronograma-row.is-remaining .case-cronograma-status,
+.case-cronograma-row.is-today .case-cronograma-status {
+  color: var(--crm-warning);
+  font-weight: 700;
+}
+
+.case-cronograma-row.is-elapsed .case-cronograma-status {
+  color: var(--crm-primary-dark);
+  font-weight: 700;
+}
+
+.case-cronograma-row.is-elapsed .case-cronograma-timestamp {
+  color: var(--crm-text-muted);
+  font-weight: 400;
+  font-style: normal;
+}
+
+.case-cronograma-col-label {
+  text-align: right;
+  min-width: 0;
+}
+
+.case-cronograma-milestone {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--crm-text);
+  line-height: 1.35;
+}
+
+.case-cronograma-detail {
+  margin-top: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--crm-text-muted);
+  line-height: 1.3;
+}
+
+.case-cronograma-col-value {
+  min-width: 0;
+}
+
+.case-cronograma-status {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--crm-text-secondary);
+}
+
+.case-cronograma-timestamp {
+  margin-top: 3px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--crm-text-muted);
+  word-break: break-word;
+}
+
+.case-cronograma-row.is-pending .case-cronograma-status {
+  font-style: normal;
+  color: var(--crm-text-secondary);
+  font-weight: 600;
+}
+
+.case-cronograma-row.is-pending .case-cronograma-timestamp {
+  color: var(--crm-text-muted);
+  font-style: italic;
+}
+
+@media (max-width: 1400px) {
+  .case-cronograma-milestone,
+  .case-cronograma-status {
+    font-size: 11px;
+  }
+
+  .case-cronograma-timestamp,
+  .case-cronograma-detail,
+  .case-cronograma-meta-label,
+  .case-cronograma-meta-value {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 991px) {
+  .detail[data-scope="Case"] .panel-caseCronograma {
+    margin-top: 12px !important;
+  }
+}
