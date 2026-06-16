@@ -110,24 +110,12 @@ class FormatoActuoArchivoGenerator
 
     public function canDownloadFormatoFromCase(Entity $case): bool
     {
-        if ($this->user->isAdmin()) {
-            return true;
-        }
-
-        if ($case->get('status') !== 'Finalizado') {
-            return false;
-        }
-
-        return $this->userHasRole(self::ROLE_INSPECCION);
+        return $case->get('status') === 'Finalizado';
     }
 
     public function canDownloadFormato(Entity $actuo): bool
     {
-        if ($this->user->isAdmin()) {
-            return true;
-        }
-
-        return $this->userHasRole(self::ROLE_INSPECCION);
+        return true;
     }
 
     /**

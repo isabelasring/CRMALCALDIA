@@ -41,40 +41,33 @@ define('custom:helpers/case-documentos', [
             + '&format=' + encodeURIComponent(format || 'pdf');
     };
 
-    const canShowSolicitudDocument = function (user, model, acta) {
-        const pdfId = model.get('cFormatoSolicitudPdfId');
-
-        if (!pdfId
-            || !FormatoSolicitudAccess.canDownloadFormatoSolicitud(user, model)
-            || !FormatoSolicitudAccess.isFormatoSolicitudHabilitado(model)) {
-            return false;
-        }
-
-        if (!FormatoSolicitudAccess.requiresActaDiligenciada(user)) {
-            return true;
-        }
-
-        return ActaVisitaCaseStatus.isActaDiligenciada(acta);
+    const canShowSolicitudDocument = function (user, model) {
+        return !!user
+            && !!model
+            && FormatoSolicitudAccess.isFormatoSolicitudHabilitado(model);
     };
 
     const pushSolicitudDocument = function (docs, user, model, basePath, acta) {
-        if (!canShowSolicitudDocument(user, model, acta)) {
+        if (!canShowSolicitudDocument(user, model)) {
             return;
         }
+
+        const pdfId = model.get('cFormatoSolicitudPdfId');
 
         docs.push({
             key: 'solicitud',
             labelKey: 'formatoGeneradoSolicitud',
             name: model.get('cFormatoSolicitudPdfName') || 'FormatoSolicitud.pdf',
-            url: buildAttachmentUrl(basePath, model.get('cFormatoSolicitudPdfId')),
+            url: hasText(pdfId)
+                ? buildAttachmentUrl(basePath, pdfId)
+                : buildEntryPointUrl(basePath, 'FormatoSolicitud', model.id, 'pdf'),
             icon: 'fas fa-file-pdf text-danger',
         });
     };
 
     const pushActaDocument = function (docs, user, model, basePath, acta) {
-        if (!acta
-            || !FormatoActaVisitaCaseAccess.canDownloadFormatoActaVisitaFromCase(user, model)
-            || !ActaVisitaCaseStatus.isFormatoActaHabilitado(acta)) {
+        if (!FormatoActaVisitaCaseAccess.canDownloadFormatoActaVisitaFromCase(user, model)
+            || !ActaVisitaCaseStatus.isVisitaRealizadaForFormatos(model, acta)) {
             return;
         }
 

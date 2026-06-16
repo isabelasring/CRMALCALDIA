@@ -37,7 +37,7 @@ echo 'Verificando Excel oficial (excelAlcaldia.xlsx)...'
 docker exec espocrm bash -c 'test -f /var/www/html/data/exports/excelAlcaldia.xlsx || echo "AVISO: coloque excelAlcaldia.xlsx en exports/ del proyecto"'
 
 docker exec espocrm mkdir -p /var/www/html/data
-docker exec espocrm chown -R www-data:www-data /var/www/html/data /var/www/html/custom/Espo/Custom/
+docker exec -u root espocrm chown -R www-data:www-data /var/www/html/data /var/www/html/custom/Espo/Custom/ /var/www/html/client/custom/
 
 echo 'Rebuild + clear cache...'
 docker exec espocrm php command.php rebuild

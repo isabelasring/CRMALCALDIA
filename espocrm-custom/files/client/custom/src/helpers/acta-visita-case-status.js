@@ -1,9 +1,15 @@
 define('custom:helpers/acta-visita-case-status', [
     'custom:helpers/silent-ajax',
     'custom:helpers/case-fetch-cache',
-    'custom:helpers/formato-acta-visita-case-access',
-    'custom:helpers/patrullero-acta',
-], function (SilentAjax, CaseFetchCache, FormatoActaVisitaCaseAccess, PatrulleroActa) {
+    'custom:helpers/inspeccion-acta',
+], function (SilentAjax, CaseFetchCache, InspeccionActa) {
+
+    const POST_VISITA_STATUSES = [
+        'Visita realizada',
+        'Visita aprobada',
+        'Finalizado',
+        'Proceso cerrado',
+    ];
 
     const CONTENT_FIELDS = [
         'objetoVisita',
@@ -61,20 +67,30 @@ define('custom:helpers/acta-visita-case-status', [
         return isActaDiligenciada(acta);
     };
 
-    const canFetchActaForCase = function (user, model) {
-        if (!user || !model || !model.id) {
+    const isPostVisitaStatus = function (model) {
+        if (!model) {
             return false;
         }
 
-        if (user.isAdmin()) {
+        const status = String(model.get('status') || '').trim();
+
+        return POST_VISITA_STATUSES.indexOf(status) !== -1;
+    };
+
+    const isVisitaRealizadaForFormatos = function (model, acta) {
+        if (acta && isActaDiligenciada(acta)) {
             return true;
         }
 
-        if (FormatoActaVisitaCaseAccess.canDownloadFormatoActaVisitaFromCase(user, model)) {
+        if (InspeccionActa.hasPatrulleroActaRedactada(model)) {
             return true;
         }
 
-        return PatrulleroActa.shouldShowLlenarActaButton(user, model);
+        return isPostVisitaStatus(model);
+    };
+
+    const canFetchActaForCase = function (user, model) {
+        return !!(user && model && model.id);
     };
 
     const ACTA_SELECT = [
@@ -128,6 +144,8 @@ define('custom:helpers/acta-visita-case-status', [
         CONTENT_FIELDS: CONTENT_FIELDS,
         isActaDiligenciada: isActaDiligenciada,
         isFormatoActaHabilitado: isFormatoActaHabilitado,
+        isPostVisitaStatus: isPostVisitaStatus,
+        isVisitaRealizadaForFormatos: isVisitaRealizadaForFormatos,
         canFetchActaForCase: canFetchActaForCase,
         fetchActaForCase: fetchActaForCase,
         invalidateCache: CaseFetchCache.invalidateActa,

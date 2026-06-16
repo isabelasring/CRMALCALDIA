@@ -155,17 +155,7 @@ class FormatoSolicitudGenerator
 
     private function canDownloadFormato(Entity $case): bool
     {
-        if ($this->user->isAdmin()) {
-            return true;
-        }
-
-        if (!$this->isPostRadicado($case)) {
-            return false;
-        }
-
-        return $this->userHasRole(self::ROLE_INSPECCION)
-            || $this->userHasRole(self::ROLE_RADICACION)
-            || $this->userHasRole(self::ROLE_ASIGNADOR);
+        return $this->isPostRadicado($case);
     }
 
     private function isPostRadicado(Entity $case): bool

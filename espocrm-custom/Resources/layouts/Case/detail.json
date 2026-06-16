@@ -26,10 +26,10 @@
             ],
             [
                 {
-                    "name": "cPeticionario"
+                    "name": "cCedula"
                 },
                 {
-                    "name": "cCedula"
+                    "name": "cPeticionario"
                 }
             ],
             [
@@ -70,17 +70,21 @@
                 {
                     "name": "cTipoPersonaPerjudicante"
                 },
+                false
+            ],
+            [
                 {
                     "name": "cDocumentoPerjudicante"
+                },
+                {
+                    "name": "cPerjudicante"
                 }
             ],
             [
                 {
-                    "name": "cPerjudicante"
-                },
-                {
                     "name": "cTelefonoPerjudicante"
-                }
+                },
+                false
             ],
             [
                 {

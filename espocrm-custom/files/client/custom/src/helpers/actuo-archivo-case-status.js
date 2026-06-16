@@ -1,9 +1,7 @@
 define('custom:helpers/actuo-archivo-case-status', [
     'custom:helpers/silent-ajax',
     'custom:helpers/case-fetch-cache',
-    'custom:helpers/formato-actuo-archivo-case-access',
-    'custom:helpers/inspeccion-actuo-archivo',
-], function (SilentAjax, CaseFetchCache, FormatoActuoArchivoCaseAccess, InspeccionActuoArchivo) {
+], function (SilentAjax, CaseFetchCache) {
 
     const CONTENT_FIELDS = [
         'referencia',
@@ -55,19 +53,7 @@ define('custom:helpers/actuo-archivo-case-status', [
     };
 
     const canFetchActuoForCase = function (user, model) {
-        if (!user || !model || !model.id) {
-            return false;
-        }
-
-        if (user.isAdmin()) {
-            return true;
-        }
-
-        if (FormatoActuoArchivoCaseAccess.canDownloadFormatoActuoArchivoFromCase(user, model)) {
-            return true;
-        }
-
-        return InspeccionActuoArchivo.shouldShowActuoArchivoButton(user, model);
+        return !!(user && model && model.id);
     };
 
     const ACTUO_SELECT = [

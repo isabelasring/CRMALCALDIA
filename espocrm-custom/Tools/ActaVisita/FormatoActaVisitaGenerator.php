@@ -15,6 +15,7 @@ use Espo\ORM\EntityManager;
 class FormatoActaVisitaGenerator
 {
     private const ROLE_INSPECCION = 'Inspección';
+    private const ROLE_RADICACION = 'Radicación';
     private const ROLE_ASIGNADOR = 'Asignador';
     private const ROLE_PATRULLERO = 'Patrullero';
 
@@ -82,7 +83,7 @@ class FormatoActaVisitaGenerator
 
         $acta = $this->resolveActaForCase($caseId);
 
-        if (!$internal && !$this->isFormatoActaHabilitado($acta)) {
+        if (!$internal && !$this->isFormatoActaHabilitadoForCase($case, $acta)) {
             throw new Forbidden('El formato de acta de visita aún no está habilitado.');
         }
 
@@ -112,19 +113,28 @@ class FormatoActaVisitaGenerator
 
     public function canDownloadFormatoFromCase(Entity $case): bool
     {
-        if ($this->user->isAdmin()) {
+        return $this->isCasePostRadicado($case);
+    }
+
+    private function isFormatoActaHabilitadoForCase(Entity $case, ?Entity $acta): bool
+    {
+        if ($acta && $this->isFormatoActaHabilitado($acta)) {
             return true;
         }
 
-        if (!$this->isCasePostRadicado($case)) {
-            return false;
-        }
+        return $this->isPostVisitaStatus($case);
+    }
 
-        if ($this->userHasRole(self::ROLE_INSPECCION) || $this->userHasRole(self::ROLE_ASIGNADOR)) {
-            return true;
-        }
+    private function isPostVisitaStatus(Entity $case): bool
+    {
+        $status = trim((string) $case->get('status'));
 
-        return $case->get('assignedUserId') === $this->user->getId();
+        return in_array($status, [
+            'Visita realizada',
+            'Visita aprobada',
+            'Finalizado',
+            'Proceso cerrado',
+        ], true);
     }
 
     /**
@@ -326,19 +336,7 @@ class FormatoActaVisitaGenerator
 
     public function canDownloadFormato(Entity $acta): bool
     {
-        if ($this->user->isAdmin()) {
-            return true;
-        }
-
-        if ($this->userHasRole(self::ROLE_INSPECCION) || $this->userHasRole(self::ROLE_ASIGNADOR)) {
-            return true;
-        }
-
-        if ($this->userHasRole(self::ROLE_PATRULLERO)) {
-            return $acta->get('assignedUserId') === $this->user->getId();
-        }
-
-        return $acta->get('assignedUserId') === $this->user->getId();
+        return true;
     }
 
     private function userHasRole(string $roleName): bool

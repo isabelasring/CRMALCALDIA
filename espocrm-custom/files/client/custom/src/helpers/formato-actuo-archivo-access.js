@@ -1,18 +1,9 @@
 define('custom:helpers/formato-actuo-archivo-access', [
-    'custom:helpers/radicacion-fields',
     'custom:helpers/actuo-archivo-case-status',
-], function (RadicacionFields, ActuoArchivoCaseStatus) {
+], function (ActuoArchivoCaseStatus) {
 
     const canDownloadFormatoActuoArchivo = function (user, model) {
-        if (!user || !model) {
-            return false;
-        }
-
-        if (user.isAdmin()) {
-            return true;
-        }
-
-        return RadicacionFields.isInspeccionUser(user);
+        return !!(user && model);
     };
 
     const isFormatoActuoHabilitado = function (model) {

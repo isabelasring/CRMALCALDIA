@@ -60,6 +60,33 @@
   box-shadow: none !important;
 }
 
+/* Botones Guardar / Cancelar / menú — separados (no pegados) */
+.edit .button-container.record-buttons .btn-group,
+.detail .button-container.record-buttons .btn-group,
+.edit .detail-button-container .btn-group,
+.detail .detail-button-container .btn-group {
+  display: inline-flex !important;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px !important;
+}
+
+.edit .button-container.record-buttons .btn-group > .btn,
+.detail .button-container.record-buttons .btn-group > .btn,
+.edit .detail-button-container .btn-group > .btn,
+.detail .detail-button-container .btn-group > .btn {
+  border-radius: var(--crm-radius-sm) !important;
+  margin-left: 0 !important;
+  float: none !important;
+}
+
+.edit .button-container.record-buttons,
+.detail .button-container.record-buttons,
+.edit .detail-button-container,
+.detail .detail-button-container {
+  margin-bottom: 12px !important;
+}
+
 /* ── Paneles / Cards ── */
 .panel {
   border: 1px solid var(--crm-border-light) !important;

@@ -26,10 +26,10 @@
             ],
             [
                 {
-                    "name": "cPeticionario"
+                    "name": "cCedula"
                 },
                 {
-                    "name": "cCedula"
+                    "name": "cPeticionario"
                 }
             ],
             [
