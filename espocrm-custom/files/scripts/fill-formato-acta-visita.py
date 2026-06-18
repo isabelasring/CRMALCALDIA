@@ -179,6 +179,9 @@ def fill_pdf(template_path, output_path, data):
 
         page = doc[index]
 
+        for label_def in page_layout.get("labels", {}).values():
+            overlay.put_static_label(page, label_def, layout)
+
         for key, field_def in page_layout.get("fields", {}).items():
             if key in layout.get("manualFields", []) and str(
                 data.get("modoDiligenciamiento") or data.get("modo") or ""

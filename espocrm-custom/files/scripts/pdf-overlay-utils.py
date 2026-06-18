@@ -272,6 +272,31 @@ def cover_rect(page, rect, field_def=None):
     page.draw_rect(box, color=(1, 1, 1), fill=(1, 1, 1), overlay=True)
 
 
+def put_static_label(page, field_def, layout):
+    covers = list(field_def.get("coverRects") or [])
+    cover = field_def.get("coverRect")
+    if cover:
+        covers.append(cover)
+
+    for rect in covers:
+        cover_rect(page, rect, field_def)
+
+    label = field_def.get("label")
+    label_rect = field_def.get("labelRect")
+    if not label or not label_rect:
+        return
+
+    label_def = {
+        "rect": label_rect,
+        "align": field_def.get("labelAlign", "left"),
+        "fontName": field_def.get("labelFontName", "hebo"),
+    }
+    label_layout = dict(layout)
+    label_layout["fontSize"] = float(field_def.get("labelFontSize", layout.get("fontSize", 9)))
+    label_layout["minFontSize"] = label_layout["fontSize"]
+    put_fitted_textbox(page, label_rect, label, label_layout, label_def)
+
+
 def put_fitted_field(page, field_def, text, layout):
     cover = field_def.get("coverRect")
     if cover:
@@ -290,7 +315,8 @@ def put_fitted_field(page, field_def, text, layout):
         label_layout["minFontSize"] = label_layout["fontSize"]
         put_fitted_textbox(page, label_rect, label, label_layout, label_def)
 
-    put_fitted_textbox(page, field_rect(field_def), text, layout, field_render_def(field_def, layout))
+    if "rect" in field_def or "x" in field_def:
+        put_fitted_textbox(page, field_rect(field_def), text, layout, field_render_def(field_def, layout))
 
 
 def border_style(layout, line_def=None):

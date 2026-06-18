@@ -3,6 +3,10 @@
   "fontSize": 9,
   "minFontSize": 6,
   "textColor": [0, 0, 0],
+  "fieldPadding": { "left": 1, "right": 2, "top": 0, "bottom": 3 },
+  "fieldSingleLine": true,
+  "truncateOverflow": true,
+  "ellipsis": "...",
   "autoFields": [
     "fecha",
     "radicado",
@@ -35,14 +39,14 @@
           "label": "FECHA:",
           "labelRect": [418, 199, 485, 216],
           "labelFontName": "hebo",
-          "labelFontSize": 9,
+          "labelFontSize": 11,
           "rect": [488, 199, 555, 216],
           "align": "left"
         },
         "posibleAfectante": { "rect": [172, 238, 555, 253] },
         "radicado": { "rect": [222, 263, 555, 278] },
         "direccionAfectacion": { "rect": [322, 289, 555, 304] },
-        "telefono": { "rect": [112, 314, 380, 329] },
+        "telefono": { "rect": [118, 314, 380, 329] },
         "barrio": { "rect": [102, 339, 430, 354] },
         "fechaVisita": { "rect": [182, 365, 394, 380] }
       },
@@ -69,6 +73,20 @@
       },
       "textBoxes": {
         "requerimientos": [57, 175, 555, 230]
+      },
+      "labels": {
+        "establecimientoHeader": {
+          "coverRects": [
+            [338, 236, 443, 252],
+            [54, 251, 175, 264]
+          ],
+          "coverMode": "redact",
+          "label": "POR PARTE DEL ESTABLECIMIENTO",
+          "labelRect": [340, 237, 555, 251],
+          "labelFontName": "hebo",
+          "labelFontSize": 11,
+          "labelAlign": "left"
+        }
       },
       "marks": {}
     }
