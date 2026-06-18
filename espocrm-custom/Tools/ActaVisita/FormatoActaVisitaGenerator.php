@@ -159,7 +159,7 @@ class FormatoActaVisitaGenerator
         $scriptPath = $this->getScriptPath();
 
         if (!is_readable($templatePath)) {
-            throw new Error('No se encontró la plantilla ActaVisita.xlsx.');
+            throw new Error('No se encontró la plantilla ActaVisita2 (PDF o DOCX).');
         }
 
         if (!is_readable($scriptPath)) {
@@ -231,7 +231,7 @@ class FormatoActaVisitaGenerator
             'name' => basename($outputPath),
             'type' => $format === 'pdf'
                 ? 'application/pdf'
-                : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ];
     }
 
@@ -384,7 +384,12 @@ class FormatoActaVisitaGenerator
 
     private function getTemplatePath(): string
     {
-        return realpath(__DIR__ . '/../../files/templates/ActaVisita.xlsx') ?: '';
+        $pdf = realpath(__DIR__ . '/../../files/templates/ActaVisita2-template.pdf');
+        if ($pdf) {
+            return $pdf;
+        }
+
+        return realpath(__DIR__ . '/../../files/templates/ActaVisita2.docx') ?: '';
     }
 
     private function resolveCaseForActa(Entity $acta): ?Entity

@@ -15,11 +15,11 @@ if [ -d "$ROOT/formatos" ]; then
     if [ "$base" = "FormatoSolicitud.doc" ] || [ "$base" = "FormatoSolicitud.docx" ]; then
       docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/FormatoSolicitud.doc"
     fi
-    if [ "$base" = "ActaVisita.xlsx" ]; then
-      docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/ActaVisita.xlsx"
-    fi
     if [ "$base" = "ActaVisita2.docx" ]; then
       docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/ActaVisita2.docx"
+    fi
+    if [ "$base" = "ActaVisita.xlsx" ]; then
+      docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/ActaVisita.xlsx"
     fi
     if [ "$base" = "ActuoArchivo.docx" ]; then
       docker cp "$f" "espocrm:/var/www/html/custom/Espo/Custom/files/templates/ActuoArchivo.docx"
@@ -42,9 +42,26 @@ docker exec espocrm bash -c '
   pdf="$tpl/FormatoSolicitud-template.pdf"
   doc="$tpl/FormatoSolicitud.doc"
   if [ ! -f "$pdf" ] && [ -f "$doc" ]; then
-    soffice --headless --invisible --nologo --convert-to pdf --outdir "$tpl" "$doc" 2>/dev/null || true
+    profile="/tmp/lo-tpl-sol-$$"
+    mkdir -p "$profile"
+    soffice --headless --invisible --nologo -env:UserInstallation=file://$profile --convert-to pdf --outdir "$tpl" "$doc" 2>/dev/null || true
     if [ -f "$tpl/FormatoSolicitud.pdf" ]; then
       mv "$tpl/FormatoSolicitud.pdf" "$pdf"
+    fi
+  fi
+'
+
+echo 'Generando PDF plantilla ActaVisita2 (si falta)...'
+docker exec espocrm bash -c '
+  tpl="/var/www/html/custom/Espo/Custom/files/templates"
+  pdf="$tpl/ActaVisita2-template.pdf"
+  doc="$tpl/ActaVisita2.docx"
+  if [ ! -f "$pdf" ] && [ -f "$doc" ]; then
+    profile="/tmp/lo-tpl-acta-$$"
+    mkdir -p "$profile"
+    soffice --headless --invisible --nologo -env:UserInstallation=file://$profile --convert-to pdf --outdir "$tpl" "$doc" 2>/dev/null || true
+    if [ -f "$tpl/ActaVisita2.pdf" ]; then
+      mv "$tpl/ActaVisita2.pdf" "$pdf"
     fi
   fi
 '

@@ -1,0 +1,43 @@
+{
+  "pageSize": [612.0, 792.0],
+  "fontSize": 10,
+  "textColor": [0, 0, 0.55],
+  "pages": [
+    {
+      "fields": {
+        "fecha": { "x": 455, "y": 212 },
+        "posibleAfectante": { "x": 172, "y": 250 },
+        "radicado": { "x": 222, "y": 275 },
+        "direccionAfectacion": { "x": 322, "y": 301 },
+        "telefono": { "x": 112, "y": 327 },
+        "barrio": { "x": 102, "y": 352 },
+        "fechaVisita": { "x": 182, "y": 378 }
+      },
+      "textBoxes": {
+        "objetoVisita": [57, 450, 555, 490],
+        "situacionEncontrada": [57, 510, 555, 560],
+        "analisisSituacion": [57, 580, 555, 620],
+        "registroFotografico": [57, 640, 555, 680],
+        "conclusion": [57, 700, 555, 732]
+      },
+      "marks": {
+        "zonaUrbano": { "x": 448, "y": 352 },
+        "zonaRural": { "x": 508, "y": 352 }
+      }
+    },
+    {
+      "fields": {
+        "funcionarioNombre": { "x": 112, "y": 358 },
+        "establecimientoNombre": { "x": 370, "y": 358 },
+        "funcionarioCedula": { "x": 112, "y": 382 },
+        "establecimientoCedula": { "x": 370, "y": 382 },
+        "funcionarioCargo": { "x": 112, "y": 406 },
+        "establecimientoCargo": { "x": 370, "y": 406 }
+      },
+      "textBoxes": {
+        "requerimientos": [57, 175, 555, 230]
+      },
+      "marks": {}
+    }
+  ]
+}
