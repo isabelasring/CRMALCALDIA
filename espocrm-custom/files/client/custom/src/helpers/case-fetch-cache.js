@@ -49,7 +49,9 @@ define('custom:helpers/case-fetch-cache', [], function () {
         }
 
         actaInflight[caseId] = loader(caseId).then(function (result) {
-            actaCache[caseId] = result;
+            if (result) {
+                actaCache[caseId] = result;
+            }
 
             return result;
         }).finally(function () {

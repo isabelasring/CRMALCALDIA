@@ -1,17 +1,9 @@
-define('custom:helpers/inspeccion-acta', [], function () {
+define('custom:helpers/inspeccion-acta', [
+    'custom:helpers/radicacion-fields',
+], function (RadicacionFields) {
 
     const isInspeccionUser = function (user) {
-        if (!user || user.isAdmin()) {
-            return false;
-        }
-
-        const roles = user.get('rolesNames') || {};
-
-        return Object.values(roles).some(function (name) {
-            return name === 'Inspección'
-                || name === 'Inspeccion'
-                || /inspecci[oó]n/i.test(String(name));
-        });
+        return RadicacionFields.isInspeccionUser(user);
     };
 
     const isPendingActaReview = function (model) {

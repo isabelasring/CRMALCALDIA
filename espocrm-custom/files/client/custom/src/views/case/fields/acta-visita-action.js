@@ -1,9 +1,10 @@
 define('custom:views/case/fields/acta-visita-action', [
     'views/fields/base',
     'custom:helpers/patrullero-acta',
+    'custom:helpers/radicacion-fields',
     'custom:helpers/acta-visita-modal',
     'custom:helpers/acta-visita-case-status',
-], function (Dep, PatrulleroActa, ActaVisitaModal, ActaVisitaCaseStatus) {
+], function (Dep, PatrulleroActa, RadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus) {
 
     return Dep.extend({
 
@@ -27,7 +28,9 @@ define('custom:views/case/fields/acta-visita-action', [
             let buttonLabel = this.translate('llenarActaVisita', 'Case');
 
             if (this.actaIsEditMode) {
-                helpText = this.translate('actaVisitaEditHelp', 'Case');
+                helpText = RadicacionFields.isInspeccionUser(this.getUser())
+                    ? this.translate('actaVisitaInspeccionHelp', 'Case')
+                    : this.translate('actaVisitaEditHelp', 'Case');
                 buttonLabel = this.translate('editarActaVisita', 'Case');
             }
 
@@ -45,9 +48,8 @@ define('custom:views/case/fields/acta-visita-action', [
 
         loadActaState: function () {
             const user = this.getUser();
-            const isPatrullero = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
 
-            if (!isPatrullero || !this.model.id) {
+            if (!this.model.id) {
                 this.actaIsEditMode = false;
                 this.showButton = false;
                 this.updatePanelVisibility(false);
@@ -56,10 +58,10 @@ define('custom:views/case/fields/acta-visita-action', [
                 return;
             }
 
-            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, user, this.model).then((acta) => {
+            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, user, this.model, { bypassCache: true }).then((acta) => {
                 this.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                this.showButton = true;
-                this.updatePanelVisibility(true);
+                this.showButton = PatrulleroActa.shouldShowActaVisitaButton(user, this.model, acta);
+                this.updatePanelVisibility(this.showButton);
                 this.reRenderIfNeeded();
             });
         },
@@ -72,7 +74,13 @@ define('custom:views/case/fields/acta-visita-action', [
         },
 
         updatePanelVisibility: function (show) {
-            this.$el.closest('.panel[data-name="actaVisita"]').toggle(show);
+            const $panel = this.$el.closest(
+                '.panel[data-name="actaVisita"], ' +
+                '.record-panel[data-name="actaVisita"], ' +
+                '[data-name="actaVisita"].panel'
+            );
+
+            $panel.toggle(show);
         },
 
         bindButton: function () {

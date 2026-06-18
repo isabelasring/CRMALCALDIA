@@ -67,9 +67,7 @@ define('custom:views/case/record/detail', [
         },
 
         updateActaVisitaButton: function () {
-            const show = PatrulleroActa.shouldShowLlenarActaButton(this.getUser(), this.model);
-
-            if (!show) {
+            if (!this.model.id) {
                 if (this._actaVisitaButtonAdded) {
                     this.removeMenuItem('llenarActaVisita');
                     this._actaVisitaButtonAdded = false;
@@ -78,11 +76,18 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            if (!this.model.id) {
-                return;
-            }
+            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, this.getUser(), this.model, { bypassCache: true }).then((acta) => {
+                const show = PatrulleroActa.shouldShowActaVisitaButton(this.getUser(), this.model, acta);
 
-            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, this.getUser(), this.model).then((acta) => {
+                if (!show) {
+                    if (this._actaVisitaButtonAdded) {
+                        this.removeMenuItem('llenarActaVisita');
+                        this._actaVisitaButtonAdded = false;
+                    }
+
+                    return;
+                }
+
                 const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
                 const label = isEdit
                     ? this.translate('editarActaVisita', 'Case')
@@ -252,16 +257,27 @@ define('custom:views/case/record/detail', [
             const $acta = this.findPanel('actaVisita');
             const $revision = this.findPanel('actaRevision');
 
-            const showPatrullero = PatrulleroActa.shouldShowLlenarActaButton(user, model);
             const showRevision = InspeccionActa.shouldShowActaRevision(user, model);
-
-            if ($acta.length) {
-                $acta.toggle(showPatrullero);
-            }
 
             if ($revision.length) {
                 $revision.toggle(showRevision);
             }
+
+            if (!$acta.length) {
+                return;
+            }
+
+            if (!model.id) {
+                $acta.toggle(false);
+
+                return;
+            }
+
+            ActaVisitaCaseStatus.fetchActaForCase(model.id, user, model, { bypassCache: true }).then((acta) => {
+                const showActa = PatrulleroActa.shouldShowActaVisitaButton(user, model, acta);
+
+                $acta.toggle(showActa);
+            });
         },
 
         setActaFieldsReadOnlyForReview: function () {

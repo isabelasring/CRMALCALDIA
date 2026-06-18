@@ -50,12 +50,6 @@ define('custom:helpers/acta-visita-modal', [
             return;
         }
 
-        if (!PatrulleroActa.shouldShowLlenarActaButton(user, caseModel)) {
-            Espo.Ui.warning('No puede diligenciar el acta en este caso.');
-
-            return;
-        }
-
         const helper = new RecordModalHelper();
         const afterSave = function () {
             caseModel.fetch();
@@ -66,6 +60,12 @@ define('custom:helpers/acta-visita-modal', [
         };
 
         ActaVisitaCaseStatus.fetchActaForCase(caseModel.id, user, caseModel).then(function (acta) {
+            if (!PatrulleroActa.canOpenActaVisitaModal(user, caseModel, acta)) {
+                Espo.Ui.warning('No puede diligenciar el acta en este caso.');
+
+                return;
+            }
+
             if (acta && acta.id) {
                 helper.showEdit(host, {
                     entityType: 'ActaVisita',

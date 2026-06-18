@@ -1,4 +1,6 @@
-define('custom:helpers/patrullero-acta', [], function () {
+define('custom:helpers/patrullero-acta', [
+    'custom:helpers/inspeccion-acta',
+], function (InspeccionActa) {
 
     const TEAM_PATRULLEROS = 'Patrulleros';
 
@@ -25,28 +27,64 @@ define('custom:helpers/patrullero-acta', [], function () {
         return radicado !== '' && expediente !== '';
     };
 
-    const shouldShowLlenarActaButton = function (user, model) {
-        if (!user || !model) {
-            return false;
+    const resolveActaId = function (acta) {
+        if (!acta) {
+            return null;
         }
 
-        if (!isPatrulleroUser(user)) {
-            return false;
+        if (typeof acta.get === 'function') {
+            return acta.get('id') || null;
         }
 
-        if (model.get('assignedUserId') !== user.id) {
-            return false;
-        }
-
-        return isCasePostRadicado(model);
+        return acta.id || null;
     };
 
-    const getUnavailableReason = function (user, model) {
-        if (!isPatrulleroUser(user)) {
-            return 'Solo patrulleros ven este panel.';
+    const shouldShowActaVisitaButton = function (user, model, acta) {
+        if (!user || !model || !isCasePostRadicado(model)) {
+            return false;
         }
 
-        if (model.get('assignedUserId') !== user.id) {
+        if (user.isAdmin()) {
+            return true;
+        }
+
+        if (isPatrulleroUser(user) && model.get('assignedUserId') === user.id) {
+            return true;
+        }
+
+        if (InspeccionActa.isInspeccionUser(user) && resolveActaId(acta)) {
+            return true;
+        }
+
+        return false;
+    };
+
+    const canOpenActaVisitaModal = function (user, model, acta) {
+        if (!shouldShowActaVisitaButton(user, model, acta)) {
+            return false;
+        }
+
+        if (InspeccionActa.isInspeccionUser(user) && !isPatrulleroUser(user)) {
+            return !!resolveActaId(acta);
+        }
+
+        return true;
+    };
+
+    const shouldShowLlenarActaButton = function (user, model, acta) {
+        return shouldShowActaVisitaButton(user, model, acta);
+    };
+
+    const getUnavailableReason = function (user, model, acta) {
+        if (InspeccionActa.isInspeccionUser(user) && !resolveActaId(acta)) {
+            return 'El acta aún no ha sido diligenciada por el patrullero.';
+        }
+
+        if (!isPatrulleroUser(user) && !InspeccionActa.isInspeccionUser(user)) {
+            return 'Solo patrulleros e inspección ven este panel.';
+        }
+
+        if (isPatrulleroUser(user) && model.get('assignedUserId') !== user.id) {
             return 'El caso no está asignado a usted.';
         }
 
@@ -54,12 +92,14 @@ define('custom:helpers/patrullero-acta', [], function () {
             return 'El caso debe tener radicado y expediente.';
         }
 
-        return 'Disponible cuando el caso tenga radicado, expediente y esté asignado a usted.';
+        return 'Disponible cuando el caso tenga radicado, expediente y acta de visita.';
     };
 
     return {
         isPatrulleroUser: isPatrulleroUser,
         isCasePostRadicado: isCasePostRadicado,
+        shouldShowActaVisitaButton: shouldShowActaVisitaButton,
+        canOpenActaVisitaModal: canOpenActaVisitaModal,
         shouldShowLlenarActaButton: shouldShowLlenarActaButton,
         getUnavailableReason: getUnavailableReason,
     };

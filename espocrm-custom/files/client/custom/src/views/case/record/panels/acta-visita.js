@@ -13,6 +13,7 @@ define('custom:views/case/record/panels/acta-visita', [
             Dep.prototype.setup.call(this);
 
             this.actaIsEditMode = false;
+            this.showButton = false;
 
             this.listenTo(this.model, 'change:status change:assignedUserId change:cNumeroRadicado change:cExpediente', function () {
                 this.loadActaState();
@@ -33,22 +34,10 @@ define('custom:views/case/record/panels/acta-visita', [
 
         loadActaState: function () {
             const user = this.getUser();
-            const isPatrullero = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
-
-            if (!isPatrullero) {
-                this.actaIsEditMode = false;
-
-                if (this.isRendered()) {
-                    this.reRender();
-                    this.togglePanel();
-                    this.bindButton();
-                }
-
-                return;
-            }
 
             if (!this.model.id) {
                 this.actaIsEditMode = false;
+                this.showButton = false;
 
                 if (this.isRendered()) {
                     this.reRender();
@@ -59,8 +48,9 @@ define('custom:views/case/record/panels/acta-visita', [
                 return;
             }
 
-            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, this.getUser(), this.model).then((acta) => {
+            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, user, this.model).then((acta) => {
                 this.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                this.showButton = PatrulleroActa.shouldShowActaVisitaButton(user, this.model, acta);
 
                 if (this.isRendered()) {
                     this.reRender();
@@ -90,16 +80,15 @@ define('custom:views/case/record/panels/acta-visita', [
                 return;
             }
 
-            const user = this.getUser();
-            const show = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
-
-            $panel.toggle(show);
+            $panel.toggle(!!this.showButton);
         },
 
         data: function () {
-            const user = this.getUser();
-            const showButton = PatrulleroActa.shouldShowLlenarActaButton(user, this.model);
-            let unavailableReason = PatrulleroActa.getUnavailableReason(user, this.model);
+            let unavailableReason = PatrulleroActa.getUnavailableReason(
+                this.getUser(),
+                this.model,
+                null
+            );
 
             if (!unavailableReason) {
                 unavailableReason = 'Disponible cuando el caso esté En proceso, asignado a usted, con radicado y expediente.';
@@ -114,7 +103,7 @@ define('custom:views/case/record/panels/acta-visita', [
             }
 
             return {
-                showButton: showButton,
+                showButton: !!this.showButton,
                 unavailableReason: unavailableReason,
                 helpText: helpText,
                 buttonLabel: buttonLabel,

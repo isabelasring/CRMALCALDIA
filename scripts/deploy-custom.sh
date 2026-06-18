@@ -114,6 +114,10 @@ echo 'Menú lateral (tabList global)...'
 docker cp "$ROOT/scripts/configure-global-tablist.php" espocrm:/tmp/configure-global-tablist.php
 docker exec espocrm php /tmp/configure-global-tablist.php
 
+echo 'Permisos ActaVisita por rol (Inspección edita acta)...'
+docker cp "$ROOT/scripts/configure-acta-visita-entity.php" espocrm:/tmp/configure-acta-visita-entity.php
+docker exec espocrm php /tmp/configure-acta-visita-entity.php
+
 echo 'Home: tablero custom + dashlets editables...'
 docker cp "$ROOT/scripts/configure-user-dashboards.php" espocrm:/tmp/configure-user-dashboards.php
 docker exec espocrm php /tmp/configure-user-dashboards.php

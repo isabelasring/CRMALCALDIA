@@ -18,6 +18,7 @@ $tabList = [
     ],
     'Case',
     'Contact',
+    'Account',
     [
         'type' => 'divider',
         'text' => 'Actividades',

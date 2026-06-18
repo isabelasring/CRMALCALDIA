@@ -37,7 +37,7 @@ $roleConfigs = [
     ],
     'Inspección' => [
         'scope' => ['create' => 'no', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no'],
-        'fieldEdit' => $revisionFields,
+        'fieldEdit' => $actaFields,
         'fieldRead' => $actaFields,
         'tabs' => null,
     ],
