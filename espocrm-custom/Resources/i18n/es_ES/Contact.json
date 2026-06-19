@@ -18,6 +18,7 @@
         "accounts": "Personas jurídicas",
         "cases": "Casos (peticionario)",
         "casesPrimary": "Casos (peticionario)",
-        "casesPerjudicante": "Casos (infractor)"
+        "casesPerjudicante": "Casos (infractor)",
+        "casosAsociados": "Casos"
     }
 }

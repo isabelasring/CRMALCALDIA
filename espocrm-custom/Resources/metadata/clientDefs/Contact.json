@@ -9,6 +9,9 @@
         "cases": {
             "disabled": true
         },
+        "casosAsociados": {
+            "disabled": true
+        },
         "opportunities": {
             "disabled": true
         },
@@ -25,14 +28,26 @@
             "disabled": true
         },
         "casesPrimary": {
+            "view": "custom:views/party/record/panels/casos-relacion",
+            "layout": "listForParty",
+            "recordListView": "views/record/list",
+            "label": "Casos (peticionario)",
             "create": false,
             "select": false,
-            "label": "Casos (peticionario)"
+            "view": false,
+            "rowActionsView": "views/record/row-actions/view-only",
+            "unlinkDisabled": true
         },
         "casesPerjudicante": {
+            "view": "custom:views/party/record/panels/casos-relacion",
+            "layout": "listForParty",
+            "recordListView": "views/record/list",
+            "label": "Casos (infractor)",
             "create": false,
             "select": false,
-            "label": "Casos (infractor)"
+            "view": false,
+            "rowActionsView": "views/record/row-actions/view-only",
+            "unlinkDisabled": true
         }
     }
 }

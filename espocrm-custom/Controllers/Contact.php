@@ -36,7 +36,24 @@ class Contact extends BaseContact
         }
 
         $service = new PartyCasosService($this->entityManager);
-        $list = $service->serializeCasosForContact($contactId);
+
+        return $this->buildCaseListResponse($service->findCasosForContact($contactId));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function buildCaseListResponse(iterable $cases): array
+    {
+        $list = [];
+
+        foreach ($cases as $case) {
+            if (!$this->acl->checkEntityRead($case)) {
+                continue;
+            }
+
+            $list[] = $case->getValueMap();
+        }
 
         return [
             'total' => count($list),

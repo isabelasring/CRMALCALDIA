@@ -13,7 +13,8 @@
         "contacts": "Personas naturales",
         "contactsPrimary": "Personas naturales (primario)",
         "cases": "Casos (peticionario)",
-        "casesPerjudicante": "Casos (infractor)"
+        "casesPerjudicante": "Casos (infractor)",
+        "casosAsociados": "Casos"
     },
     "tabs": {
         "Casos": "Casos"
