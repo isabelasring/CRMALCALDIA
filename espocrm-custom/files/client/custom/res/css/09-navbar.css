@@ -301,31 +301,69 @@ body[data-navbar=side] #navbar a.minimizer::before {
 }
 
 /* Iconos superiores (campana, +, etc.) — mismos estados */
-body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a {
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a,
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a.notifications-button {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  color: var(--crm-text-muted, #94a3b8) !important;
-  background: transparent !important;
-  border: 1px solid transparent !important;
-  border-radius: 12px !important;
-  margin: 2px 8px !important;
-  padding: 8px !important;
-  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  color: var(--crm-text-secondary, #64748b) !important;
+  background: var(--crm-surface, #fff) !important;
+  border: 1px solid var(--crm-border, #e2e8f0) !important;
+  border-radius: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: var(--crm-shadow-xs) !important;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a:hover,
 body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a:focus,
-body[data-navbar=side] #navbar .navbar-nav.navbar-right > li.open > a {
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li.open > a,
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a.notifications-button:hover,
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a.notifications-button:focus {
   background: var(--crm-bg-elevated, #f8fafc) !important;
   border-color: var(--nav-accent) !important;
   color: var(--nav-accent) !important;
+  box-shadow: var(--crm-shadow-sm) !important;
 }
 
-body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a:active {
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a:active,
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a.notifications-button:active {
   background: var(--nav-accent-soft) !important;
   border-color: var(--nav-accent) !important;
   color: var(--crm-primary-dark, #2a5934) !important;
+}
+
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a .icon,
+body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a.notifications-button .icon {
+  font-size: 15px !important;
+  line-height: 1 !important;
+}
+
+/* Badge de notificaciones no leídas */
+body[data-navbar=side] #navbar .navbar-nav.navbar-right .notifications-badge-container {
+  position: relative !important;
+}
+
+body[data-navbar=side] #navbar .navbar-nav.navbar-right .notifications-badge-container .number-badge {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  min-width: 16px !important;
+  height: 16px !important;
+  padding: 0 4px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 16px !important;
+  text-align: center !important;
+  color: #fff !important;
+  background: var(--crm-danger, #ef4444) !important;
+  border: 2px solid #fff !important;
+  border-radius: var(--crm-radius-full, 9999px) !important;
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.35) !important;
 }
 
 /* Evitar que overflow del sidebar recorte la barra superior */
@@ -345,25 +383,27 @@ body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-body > .navbar-rig
 
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right {
   position: fixed !important;
-  top: 0 !important;
+  top: 10px !important;
   right: 0 !important;
   left: auto !important;
   bottom: auto !important;
   width: auto !important;
   max-width: calc(100vw - var(--navbar-minimized-width, 76px) - 16px) !important;
-  height: var(--top-bar-height, 42px) !important;
+  height: auto !important;
+  min-height: var(--top-bar-height, 48px) !important;
   margin: 0 !important;
-  padding: 0 16px 0 12px !important;
+  padding: 0 18px 0 14px !important;
   display: flex !important;
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   align-items: center !important;
   justify-content: flex-end !important;
-  gap: 2px !important;
+  gap: 8px !important;
   z-index: 1060 !important;
   float: none !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  background: transparent !important;
+  border: none !important;
+  border-bottom: none !important;
   box-shadow: none !important;
   pointer-events: auto !important;
 }
@@ -378,22 +418,89 @@ body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right >
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right > li.global-search-container {
   display: flex !important;
   align-items: center !important;
+  margin-right: 2px !important;
 }
 
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container .input-group {
   display: flex !important;
   align-items: center !important;
-  width: 220px !important;
+  width: 240px !important;
   max-width: 36vw !important;
   margin: 0 !important;
+  padding: 0 4px 0 12px !important;
+  background: var(--crm-bg-elevated, #f8fafc) !important;
+  border: 1px solid var(--crm-border, #e2e8f0) !important;
+  border-radius: 10px !important;
+  box-shadow: var(--crm-shadow-xs) !important;
+  overflow: hidden !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container .input-group:focus-within {
+  background: var(--crm-surface, #fff) !important;
+  border-color: var(--nav-accent) !important;
+  box-shadow: 0 0 0 3px rgba(29, 138, 110, 0.12) !important;
 }
 
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right input.global-search-input {
   width: 100% !important;
-  min-width: 120px !important;
+  min-width: 0 !important;
   max-width: none !important;
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--crm-text, #0f172a) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right input.global-search-input::placeholder {
+  color: var(--crm-text-muted, #94a3b8) !important;
+  font-weight: 400 !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right input.global-search-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container .input-group-btn {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container a.global-search-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--crm-text-muted, #94a3b8) !important;
+  box-shadow: none !important;
+  transition: color 0.2s ease, background 0.2s ease !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container a.global-search-button:hover,
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container a.global-search-button:focus {
+  color: var(--nav-accent) !important;
+  background: rgba(29, 138, 110, 0.08) !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container a.global-search-button .icon {
+  font-size: 14px !important;
+  line-height: 1 !important;
 }
 
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .quick-create-container,
