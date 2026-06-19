@@ -209,7 +209,20 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }
 
             var cfg = this.config;
+            var activeTab = sessionStorage.getItem('crm-home-tab') || 'dashboard';
             var html = '<div class="custom-home">';
+
+            html += '<nav class="custom-home-tabs" role="tablist" aria-label="Secciones de inicio">';
+            html += this.buildHomeTabButton('dashboard', 'Dashboard', activeTab);
+            html += '<span class="custom-home-tab-sep" aria-hidden="true">/</span>';
+            html += this.buildHomeTabButton('gestion', 'Gestión de casos', activeTab);
+            html += '<span class="custom-home-tab-sep" aria-hidden="true">/</span>';
+            html += this.buildHomeTabButton('agenda', 'Agenda', activeTab);
+            html += '</nav>';
+
+            html += '<div class="custom-home-panels">';
+
+            html += '<div class="custom-home-panel' + (activeTab === 'dashboard' ? ' is-active' : '') + '" data-panel="dashboard" role="tabpanel">';
 
             if (cfg.showTablero) {
                 html += '<div class="panel panel-default custom-home-tablero">' +
@@ -218,6 +231,10 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                     '<iframe src="' + _.escape(cfg.iframeUrl) + '" title="Tablero de control" class="custom-home-iframe" scrolling="no"></iframe>' +
                     '</div></div>';
             }
+
+            html += '</div>';
+
+            html += '<div class="custom-home-panel' + (activeTab === 'gestion' ? ' is-active' : '') + '" data-panel="gestion" role="tabpanel">';
 
             cfg.lists.forEach(function (listCfg, index) {
                 html += '<div class="panel panel-default custom-home-lista">' +
@@ -230,6 +247,23 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
             html += '</div>';
 
+            html += '<div class="custom-home-panel custom-home-agenda-panel' + (activeTab === 'agenda' ? ' is-active' : '') + '" data-panel="agenda" role="tabpanel">' +
+                '<div class="panel panel-default custom-home-lista">' +
+                '<div class="panel-heading"><h4 class="panel-title">Reuniones</h4></div>' +
+                '<div class="panel-body">' +
+                '<div class="custom-home-lista-cuerpo" data-agenda-list="meetings">' +
+                '<p class="text-muted">Cargando reuniones…</p>' +
+                '</div></div></div>' +
+                '<div class="panel panel-default custom-home-lista">' +
+                '<div class="panel-heading"><h4 class="panel-title">Tareas</h4></div>' +
+                '<div class="panel-body">' +
+                '<div class="custom-home-lista-cuerpo" data-agenda-list="tasks">' +
+                '<p class="text-muted">Cargando tareas…</p>' +
+                '</div></div></div>' +
+                '</div>';
+
+            html += '</div></div>';
+
             var $dashlets = this.$el.find('.dashlets').first();
 
             if ($dashlets.length) {
@@ -238,9 +272,211 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                 this.$el.prepend(html);
             }
 
+            this.bindHomeTabs();
+            this._activeHomeTab = activeTab;
+
             cfg.lists.forEach(function (listCfg, index) {
                 this.loadList(index, listCfg);
             }, this);
+
+            if (activeTab === 'agenda') {
+                this.loadAgendaLists();
+            } else if (activeTab === 'dashboard') {
+                this.refreshDashboardIframeHeight();
+            }
+        },
+
+        buildHomeTabButton: function (tabId, label, activeTab) {
+            var isActive = tabId === activeTab;
+
+            return '<button type="button" class="custom-home-tab' + (isActive ? ' is-active' : '') + '" data-tab="' + tabId + '" role="tab"' +
+                (isActive ? ' aria-selected="true"' : ' aria-selected="false"') + '>' +
+                _.escape(label) +
+                '</button>';
+        },
+
+        bindHomeTabs: function () {
+            var self = this;
+
+            this.$el.find('.custom-home-tabs [data-tab]').on('click', function () {
+                self.switchHomeTab($(this).data('tab'));
+            });
+        },
+
+        switchHomeTab: function (tab) {
+            if (!tab || tab === this._activeHomeTab) {
+                return;
+            }
+
+            this._activeHomeTab = tab;
+            sessionStorage.setItem('crm-home-tab', tab);
+
+            this.$el.find('.custom-home-tabs [data-tab]')
+                .removeClass('is-active')
+                .attr('aria-selected', 'false');
+
+            this.$el.find('.custom-home-tabs [data-tab="' + tab + '"]')
+                .addClass('is-active')
+                .attr('aria-selected', 'true');
+
+            this.$el.find('.custom-home-panel')
+                .removeClass('is-active');
+
+            this.$el.find('.custom-home-panel[data-panel="' + tab + '"]')
+                .addClass('is-active');
+
+            if (tab === 'agenda') {
+                this.loadAgendaLists();
+            }
+
+            if (tab === 'dashboard') {
+                this.refreshDashboardIframeHeight();
+            }
+        },
+
+        refreshDashboardIframeHeight: function () {
+            var iframe = this.$el.find('.custom-home-iframe')[0];
+
+            if (!iframe || !iframe.contentWindow) {
+                return;
+            }
+
+            try {
+                iframe.contentWindow.postMessage({
+                    type: 'crm-dashboard-resize-request',
+                }, window.location.origin);
+            } catch (e) {}
+
+            setTimeout(function () {
+                try {
+                    var doc = iframe.contentDocument || iframe.contentWindow.document;
+                    var height = doc && doc.documentElement ? doc.documentElement.scrollHeight : 0;
+
+                    if (height > 200) {
+                        iframe.style.height = height + 'px';
+                    }
+                } catch (err) {}
+            }, 120);
+        },
+
+        loadAgendaLists: function () {
+            if (this._agendaLoaded) {
+                return;
+            }
+
+            this._agendaLoaded = true;
+            this.loadMeetingList();
+            this.loadTaskList();
+        },
+
+        loadMeetingList: function () {
+            var $container = this.$el.find('[data-agenda-list="meetings"]');
+
+            this.getCollectionFactory().create('Meeting', function (collection) {
+                collection.maxSize = 15;
+                collection.orderBy = 'dateStart';
+                collection.order = 'desc';
+
+                collection.fetch()
+                    .then(function () {
+                        this.renderMeetingList($container, collection);
+                    }.bind(this))
+                    .catch(function () {
+                        $container.html('<p class="text-danger">No se pudo cargar las reuniones.</p>');
+                    });
+            }.bind(this));
+        },
+
+        loadTaskList: function () {
+            var $container = this.$el.find('[data-agenda-list="tasks"]');
+
+            this.getCollectionFactory().create('Task', function (collection) {
+                collection.maxSize = 15;
+                collection.orderBy = 'dateEnd';
+                collection.order = 'desc';
+
+                collection.fetch()
+                    .then(function () {
+                        this.renderTaskList($container, collection);
+                    }.bind(this))
+                    .catch(function () {
+                        $container.html('<p class="text-danger">No se pudo cargar las tareas.</p>');
+                    });
+            }.bind(this));
+        },
+
+        renderMeetingList: function ($container, collection) {
+            if (!collection.length) {
+                $container.html('<p class="text-muted">Sin reuniones programadas.</p>');
+
+                return;
+            }
+
+            var rows = collection.models.map(function (model) {
+                var id = model.id;
+                var name = model.get('name') || '—';
+                var dateStart = model.get('dateStart') || '—';
+                var dateEnd = model.get('dateEnd') || '—';
+                var status = model.get('status') || '—';
+                var assigned = model.get('assignedUserName') || '—';
+
+                return '<tr>' +
+                    '<td><a href="#Meeting/view/' + id + '">' + _.escape(name) + '</a></td>' +
+                    '<td>' + _.escape(dateStart) + '</td>' +
+                    '<td>' + _.escape(dateEnd) + '</td>' +
+                    '<td>' + _.escape(status) + '</td>' +
+                    '<td>' + _.escape(assigned) + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $container.html(
+                '<div class="table-responsive">' +
+                    '<table class="table table-condensed table-striped">' +
+                        '<thead><tr>' +
+                            '<th>Reunión</th><th>Inicio</th><th>Fin</th>' +
+                            '<th>Estado</th><th>Asignado</th>' +
+                        '</tr></thead>' +
+                        '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                '</div>'
+            );
+        },
+
+        renderTaskList: function ($container, collection) {
+            if (!collection.length) {
+                $container.html('<p class="text-muted">Sin tareas pendientes.</p>');
+
+                return;
+            }
+
+            var rows = collection.models.map(function (model) {
+                var id = model.id;
+                var name = model.get('name') || '—';
+                var status = model.get('status') || '—';
+                var priority = model.get('priority') || '—';
+                var dateEnd = model.get('dateEnd') || '—';
+                var assigned = model.get('assignedUserName') || '—';
+
+                return '<tr>' +
+                    '<td><a href="#Task/view/' + id + '">' + _.escape(name) + '</a></td>' +
+                    '<td>' + _.escape(status) + '</td>' +
+                    '<td>' + _.escape(priority) + '</td>' +
+                    '<td>' + _.escape(dateEnd) + '</td>' +
+                    '<td>' + _.escape(assigned) + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $container.html(
+                '<div class="table-responsive">' +
+                    '<table class="table table-condensed table-striped">' +
+                        '<thead><tr>' +
+                            '<th>Tarea</th><th>Estado</th><th>Prioridad</th>' +
+                            '<th>Vencimiento</th><th>Asignado</th>' +
+                        '</tr></thead>' +
+                        '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                '</div>'
+            );
         },
 
         loadList: function (index, listCfg) {

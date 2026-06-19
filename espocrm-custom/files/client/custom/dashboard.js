@@ -648,6 +648,16 @@
 
     window.addEventListener('load', ajustarAlturaIframe);
 
+    window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin) {
+            return;
+        }
+
+        if (event.data && event.data.type === 'crm-dashboard-resize-request') {
+            ajustarAlturaIframe();
+        }
+    });
+
     if (typeof ResizeObserver !== 'undefined') {
         document.addEventListener('DOMContentLoaded', function () {
             var dash = document.querySelector('.dashboard');
