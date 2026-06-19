@@ -1,0 +1,43 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {
+                    "name": "name",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cTipoDeDocumento"
+                },
+                {
+                    "name": "cNumeroDeDocumento"
+                }
+            ],
+            [
+                {
+                    "name": "addressStreet",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "cBarrioResidencia"
+                },
+                {
+                    "name": "cMunicipio"
+                }
+            ],
+            [
+                {
+                    "name": "phoneNumber"
+                },
+                {
+                    "name": "emailAddress"
+                }
+            ]
+        ]
+    }
+]

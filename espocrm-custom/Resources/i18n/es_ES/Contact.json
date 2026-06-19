@@ -2,8 +2,22 @@
     "labels": {
         "Create Contact": "Crear persona natural"
     },
+    "fields": {
+        "firstName": "Nombres",
+        "lastName": "Apellidos",
+        "addressStreet": "Dirección",
+        "phoneNumber": "Teléfono",
+        "emailAddress": "Correo electrónico",
+        "cTipoDeDocumento": "Tipo de documento",
+        "cNumeroDeDocumento": "Número de documento",
+        "cBarrioResidencia": "Barrio",
+        "cMunicipio": "Municipio"
+    },
     "links": {
         "account": "Persona jurídica (primaria)",
-        "accounts": "Personas jurídicas"
+        "accounts": "Personas jurídicas",
+        "cases": "Casos (peticionario)",
+        "casesPrimary": "Casos (peticionario)",
+        "casesPerjudicante": "Casos (infractor)"
     }
 }

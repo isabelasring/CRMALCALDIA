@@ -1,0 +1,24 @@
+[
+    {
+        "name": "name",
+        "link": true
+    },
+    {
+        "name": "cNit",
+        "width": 14
+    },
+    {
+        "name": "phoneNumber",
+        "notSortable": true,
+        "width": 14
+    },
+    {
+        "name": "emailAddress",
+        "notSortable": true,
+        "width": 18
+    },
+    {
+        "name": "billingAddressStreet",
+        "width": 22
+    }
+]

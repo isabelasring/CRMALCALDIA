@@ -2,8 +2,20 @@
     "labels": {
         "Create Account": "Crear persona jurídica"
     },
+    "fields": {
+        "name": "Razón social",
+        "cNit": "NIT",
+        "billingAddressStreet": "Dirección",
+        "phoneNumber": "Teléfono",
+        "emailAddress": "Correo electrónico"
+    },
     "links": {
         "contacts": "Personas naturales",
-        "contactsPrimary": "Personas naturales (primario)"
+        "contactsPrimary": "Personas naturales (primario)",
+        "cases": "Casos (peticionario)",
+        "casesPerjudicante": "Casos (infractor)"
+    },
+    "tabs": {
+        "Casos": "Casos"
     }
 }

@@ -5,5 +5,12 @@
       "maxLength": 50,
       "isCustom": true
     }
+  },
+  "links": {
+    "casesPerjudicante": {
+      "type": "hasMany",
+      "entity": "Case",
+      "foreign": "cPerjudicanteCuenta"
+    }
   }
 }

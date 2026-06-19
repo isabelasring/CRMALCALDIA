@@ -26,13 +26,10 @@ class ValidateSolicitudCompletaOnSave implements BeforeSave
 
     /** @var array<string, string> */
     private const TEXT_FIELDS = [
-        'cDireccion' => 'Indique la dirección del peticionario.',
         'cTelefono' => 'Indique el teléfono del peticionario.',
-        'cCorreo' => 'Indique el correo electrónico del peticionario.',
         'cPerjudicante' => 'Indique el nombre o razón social del infractor.',
         'cDocumentoPerjudicante' => 'Indique la cédula o NIT del infractor.',
         'cTelefonoPerjudicante' => 'Indique el teléfono del infractor.',
-        'cDireccionPerjudicante' => 'Indique la dirección del infractor.',
         'cRespuestaInmediata' => 'Indique la respuesta inmediata.',
         'description' => 'Indique la descripción de la queja.',
     ];

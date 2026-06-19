@@ -2,7 +2,7 @@
  * Fuerza etiquetas Persona natural / Persona jurídica en toda la UI.
  */
 (function () {
-    var PATCH_VERSION = '3';
+    var PATCH_VERSION = '4';
     var STORAGE_KEY = 'espo-personas-i18n-version';
 
     var PATCH = {
@@ -28,7 +28,8 @@
             },
             links: {
                 account: 'Persona jurídica (primaria)',
-                accounts: 'Personas jurídicas'
+                accounts: 'Personas jurídicas',
+                cases: 'Casos'
             }
         },
         Account: {
@@ -37,7 +38,11 @@
             },
             links: {
                 contacts: 'Personas naturales',
-                contactsPrimary: 'Personas naturales (primario)'
+                contactsPrimary: 'Personas naturales (primario)',
+                cases: 'Casos'
+            },
+            tabs: {
+                Casos: 'Casos'
             }
         },
         Case: {

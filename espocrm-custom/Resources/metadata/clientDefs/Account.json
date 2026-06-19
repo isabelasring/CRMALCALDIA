@@ -1,0 +1,32 @@
+{
+    "defaultSidePanelDisabled": true,
+    "sidePanels": {
+        "detail": [],
+        "detailSmall": [],
+        "edit": []
+    },
+    "relationshipPanels": {
+        "contacts": {
+            "disabled": true
+        },
+        "opportunities": {
+            "disabled": true
+        },
+        "campaignLogRecords": {
+            "disabled": true
+        },
+        "targetLists": {
+            "disabled": true
+        },
+        "cases": {
+            "create": false,
+            "select": false,
+            "label": "Casos (peticionario)"
+        },
+        "casesPerjudicante": {
+            "create": false,
+            "select": false,
+            "label": "Casos (infractor)"
+        }
+    }
+}

@@ -5,7 +5,6 @@
       "options": [
         "CC",
         "CE",
-        "NIT",
         "Pasaporte",
         "Otro"
       ],
@@ -31,6 +30,19 @@
       "default": "Envigado",
       "maxLength": 100,
       "isCustom": true
+    }
+  },
+  "links": {
+    "casesPrimary": {
+      "layoutRelationshipsDisabled": false
+    },
+    "cases": {
+      "layoutRelationshipsDisabled": true
+    },
+    "casesPerjudicante": {
+      "type": "hasMany",
+      "entity": "Case",
+      "foreign": "cPerjudicanteContact"
     }
   }
 }

@@ -1,0 +1,29 @@
+[
+    {
+        "label": "",
+        "rows": [
+            [
+                {
+                    "name": "name"
+                },
+                {
+                    "name": "cNit"
+                }
+            ],
+            [
+                {
+                    "name": "billingAddressStreet",
+                    "fullWidth": true
+                }
+            ],
+            [
+                {
+                    "name": "phoneNumber"
+                },
+                {
+                    "name": "emailAddress"
+                }
+            ]
+        ]
+    }
+]

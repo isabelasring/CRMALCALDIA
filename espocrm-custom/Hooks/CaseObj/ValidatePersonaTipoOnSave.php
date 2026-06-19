@@ -29,8 +29,6 @@ class ValidatePersonaTipoOnSave implements BeforeSave
         $tipo = trim((string) $entity->get('cTipoPersonaPeticionario'));
         $nombre = trim((string) $entity->get('cPeticionario'));
         $documento = trim((string) $entity->get('cCedula'));
-        $correo = trim((string) $entity->get('cCorreo'));
-        $canal = trim((string) $entity->get('cCanalDeReporte'));
 
         if ($tipo === '' || $tipo === self::PLACEHOLDER) {
             throw new BadRequest('Seleccione el tipo de peticionario (persona natural o jurídica).');
@@ -48,10 +46,6 @@ class ValidatePersonaTipoOnSave implements BeforeSave
             $label = $tipo === self::PERSONA_JURIDICA ? 'NIT' : 'cédula';
 
             throw new BadRequest('Indique la ' . $label . ' del peticionario.');
-        }
-
-        if ($canal === 'Correo' && $correo === '') {
-            throw new BadRequest('Indique el correo cuando el canal de reporte es Correo.');
         }
     }
 

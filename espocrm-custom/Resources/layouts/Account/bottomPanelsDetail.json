@@ -1,0 +1,13 @@
+{
+    "_tabBreak_0": {
+        "index": 0,
+        "tabBreak": true,
+        "tabLabel": "$Casos"
+    },
+    "cases": {
+        "index": 1
+    },
+    "casesPerjudicante": {
+        "index": 2
+    }
+}

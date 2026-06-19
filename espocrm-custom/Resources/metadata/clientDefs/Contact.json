@@ -1,0 +1,38 @@
+{
+    "defaultSidePanelDisabled": true,
+    "sidePanels": {
+        "detail": [],
+        "detailSmall": [],
+        "edit": []
+    },
+    "relationshipPanels": {
+        "cases": {
+            "disabled": true
+        },
+        "opportunities": {
+            "disabled": true
+        },
+        "campaignLogRecords": {
+            "disabled": true
+        },
+        "targetLists": {
+            "disabled": true
+        },
+        "meetings": {
+            "disabled": true
+        },
+        "calls": {
+            "disabled": true
+        },
+        "casesPrimary": {
+            "create": false,
+            "select": false,
+            "label": "Casos (peticionario)"
+        },
+        "casesPerjudicante": {
+            "create": false,
+            "select": false,
+            "label": "Casos (infractor)"
+        }
+    }
+}

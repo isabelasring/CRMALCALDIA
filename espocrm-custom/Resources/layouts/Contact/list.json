@@ -1,0 +1,28 @@
+[
+    {
+        "name": "name",
+        "link": true
+    },
+    {
+        "name": "cTipoDeDocumento",
+        "width": 10
+    },
+    {
+        "name": "cNumeroDeDocumento",
+        "width": 14
+    },
+    {
+        "name": "phoneNumber",
+        "notSortable": true,
+        "width": 14
+    },
+    {
+        "name": "emailAddress",
+        "notSortable": true,
+        "width": 18
+    },
+    {
+        "name": "cBarrioResidencia",
+        "width": 16
+    }
+]

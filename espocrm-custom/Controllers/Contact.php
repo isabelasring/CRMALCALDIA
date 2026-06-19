@@ -1,0 +1,46 @@
+<?php
+
+namespace Espo\Custom\Controllers;
+
+use Espo\Core\Api\Request;
+use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Exceptions\Forbidden;
+use Espo\Custom\Tools\Party\PartyCasosService;
+use Espo\Modules\Crm\Controllers\Contact as BaseContact;
+
+class Contact extends BaseContact
+{
+    /**
+     * GET Contact/action/casosAsociados?contactId=...
+     *
+     * @return array<string, mixed>
+     */
+    public function getActionCasosAsociados(Request $request): array
+    {
+        if (!$this->acl->check('Contact', 'read')) {
+            throw new Forbidden();
+        }
+
+        if (!$this->acl->check('Case', 'read')) {
+            throw new Forbidden();
+        }
+
+        $contactId = trim((string) $request->getQueryParam('contactId'));
+
+        if ($contactId === '') {
+            throw new BadRequest('contactId requerido.');
+        }
+
+        if (!$this->entityManager->getEntityById('Contact', $contactId)) {
+            throw new BadRequest('Persona natural no encontrada.');
+        }
+
+        $service = new PartyCasosService($this->entityManager);
+        $list = $service->serializeCasosForContact($contactId);
+
+        return [
+            'total' => count($list),
+            'list' => $list,
+        ];
+    }
+}
