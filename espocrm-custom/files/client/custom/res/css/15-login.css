@@ -1,0 +1,331 @@
+/**
+ * Login — diseño split (formulario + imagen), solo CSS. No altera lógica del formulario.
+ * EspoCRM no usa body.login-page por defecto; theme-login.js la añade al renderizar #login.
+ */
+
+body.login-page,
+body:not(.has-navbar):has(#login) {
+  min-height: 100vh !important;
+  margin: 0 !important;
+  background: transparent !important;
+  position: relative !important;
+  overflow-x: hidden !important;
+}
+
+html:has(body.login-page),
+html:has(body:not(.has-navbar) #login) {
+  min-height: 100vh !important;
+  background: #e8ede9 !important;
+}
+
+body.login-page::before,
+body:not(.has-navbar):has(#login)::before {
+  content: '';
+  position: fixed;
+  inset: -28px;
+  z-index: 0;
+  background: url('../img/login-hero.png') center / cover no-repeat;
+  filter: blur(20px);
+  -webkit-filter: blur(20px);
+  transform: scale(1.08);
+  pointer-events: none;
+}
+
+body.login-page::after,
+body:not(.has-navbar):has(#login)::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: rgba(240, 244, 248, 0.45);
+  pointer-events: none;
+}
+
+body.login-page > .content,
+body.login-page .container.content,
+body.login-page .content,
+body:not(.has-navbar):has(#login) > .content,
+body:not(.has-navbar):has(#login) .container.content,
+body:not(.has-navbar):has(#login) .content {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 32px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.login-page .container-centering,
+body:not(.has-navbar) .container-centering {
+  width: 100% !important;
+  max-width: 920px !important;
+  margin: 0 auto !important;
+  float: none !important;
+}
+
+#login.panel.block-center-sm {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-template-rows: auto 1fr !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 28px !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.14), 0 8px 24px rgba(15, 23, 42, 0.08) !important;
+}
+
+#login.panel.block-center-sm::after {
+  content: '';
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-height: 520px;
+  background: url('../img/login-hero.png') center center / cover no-repeat;
+}
+
+#login .panel-heading {
+  grid-column: 1;
+  grid-row: 1;
+  background: transparent !important;
+  border: none !important;
+  padding: 40px 40px 8px !important;
+  text-align: center !important;
+}
+
+#login .logo-container {
+  width: auto !important;
+  height: auto !important;
+  max-width: 280px !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+}
+
+#login .logo-container img.logo {
+  max-height: 190px !important;
+  max-width: 100% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
+#login .panel-body {
+  grid-column: 1;
+  grid-row: 2;
+  padding: 8px 40px 40px !important;
+  background: transparent !important;
+}
+
+#login .panel-body::before {
+  content: 'Ingresa a tu cuenta';
+  display: block;
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--crm-text, #0f172a);
+}
+
+#login #login-form {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+#login .cell label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--crm-text-secondary, #64748b);
+}
+
+#login .form-control {
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 0 18px !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  background: #f1f5f9 !important;
+  color: var(--crm-text, #0f172a) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+#login .form-control:focus {
+  background: #fff !important;
+  border-color: var(--crm-primary, #1d8a6e) !important;
+  box-shadow: 0 0 0 3px rgba(29, 138, 110, 0.14) !important;
+  outline: none !important;
+}
+
+#login .form-control::placeholder {
+  color: var(--crm-text-muted, #94a3b8) !important;
+  font-weight: 400 !important;
+}
+
+#login .cell[data-name="password"] [data-role="password-input-container"] {
+  position: relative !important;
+}
+
+#login .cell[data-name="password"] [data-role="password-input-container"] .form-control {
+  padding-right: 46px !important;
+}
+
+#login .cell[data-name="password"] [data-role="password-input-container"] > a[data-action="toggleShowPassword"] {
+  position: absolute !important;
+  top: 50% !important;
+  right: 14px !important;
+  transform: translateY(-50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  color: var(--crm-text-muted, #94a3b8) !important;
+  text-decoration: none !important;
+}
+
+#login .cell[data-name="password"] [data-role="password-input-container"] > a[data-action="toggleShowPassword"]:hover {
+  color: var(--crm-primary, #1d8a6e) !important;
+  background: rgba(29, 138, 110, 0.08) !important;
+}
+
+#login .cell {
+  margin-bottom: 16px !important;
+}
+
+#login .cell[data-name="submit"] {
+  margin-top: 24px !important;
+  margin-bottom: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+#login #btn-login,
+#login #btn-send {
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  margin: 0 !important;
+  padding: 0 24px !important;
+  border: none !important;
+  border-radius: 999px !important;
+  background: var(--crm-primary-dark, #2a5934) !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 8px 20px rgba(42, 89, 52, 0.28) !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+#login #btn-login:hover,
+#login #btn-login:focus,
+#login #btn-send:hover,
+#login #btn-send:focus {
+  background: var(--crm-primary, #1d8a6e) !important;
+  box-shadow: 0 10px 24px rgba(29, 138, 110, 0.32) !important;
+  transform: translateY(-1px);
+  color: #fff !important;
+}
+
+#login .cell[data-name="submit"] .btn-link {
+  display: inline-block !important;
+  float: none !important;
+  margin: 14px 0 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  text-align: center !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--crm-text-secondary, #64748b) !important;
+  text-decoration: none !important;
+}
+
+#login .cell[data-name="submit"] .btn-link:hover {
+  color: var(--crm-primary, #1d8a6e) !important;
+}
+
+#login #sign-in {
+  width: 100% !important;
+  height: 48px !important;
+  border-radius: 999px !important;
+  border: 1px solid var(--crm-border, #e2e8f0) !important;
+  background: #fff !important;
+  color: var(--crm-text, #0f172a) !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+}
+
+#login .cell[data-name="sign-in"] .btn-link.btn-icon {
+  border-radius: 50% !important;
+}
+
+body.login-page > footer,
+body.login-page footer,
+body:not(.has-navbar):has(#login) > footer,
+body:not(.has-navbar):has(#login) footer {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+  border: none !important;
+  color: rgba(15, 23, 42, 0.45) !important;
+  text-align: center;
+  padding: 12px 16px 20px !important;
+}
+
+body.login-page > footer a,
+body.login-page footer a,
+body:not(.has-navbar):has(#login) > footer a,
+body:not(.has-navbar):has(#login) footer a {
+  color: rgba(15, 23, 42, 0.55) !important;
+}
+
+#login:not(:has(.panel-heading)) .panel-body {
+  grid-row: 1 / span 2 !important;
+  padding-top: 40px !important;
+}
+
+#login:not(:has(.panel-heading)) .panel-body::before {
+  content: 'Verificación de acceso' !important;
+}
+
+@media (max-width: 860px) {
+  #login.panel.block-center-sm {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
+  }
+
+  #login.panel.block-center-sm::after {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 180px;
+    border-radius: 0;
+  }
+
+  #login .panel-heading {
+    grid-row: 2;
+    padding-top: 28px !important;
+  }
+
+  #login .panel-body {
+    grid-row: 3;
+    padding: 8px 28px 32px !important;
+  }
+}

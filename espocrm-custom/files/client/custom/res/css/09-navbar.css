@@ -19,6 +19,25 @@ body[data-navbar=side] #navbar > .navbar {
   border-right: 1px solid rgba(255, 255, 255, 0.55) !important;
   border-radius: 0 22px 22px 0 !important;
   box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 100vh !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+body[data-navbar=side] #navbar .navbar-collapse.navbar-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body[data-navbar=side] #navbar {
+  overflow: hidden !important;
 }
 
 body[data-navbar=side].minimized:not(.side-menu-opened) #navbar > .navbar {
@@ -44,19 +63,60 @@ body[data-navbar=side] #navbar a.side-menu-button {
   display: none !important;
 }
 
-/* Espacio superior en menú */
+/* Menú ocupa el espacio central; logo va al fondo del panel */
 body[data-navbar=side] #navbar .navbar-left-container {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
   padding-top: 4px !important;
-  padding-bottom: 12px !important;
+  padding-bottom: 0 !important;
 }
 
-/* Altura lista — evita menú "⋯" vacío */
 body[data-navbar=side] #navbar .navbar-left-container ul.tabs {
-  height: calc(100vh - 120px) !important;
-  max-height: calc(100vh - 120px) !important;
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
   scrollbar-width: thin;
+}
+
+/* Logo Alcaldía de Envigado — pegado al fondo del sidebar, sin desbordar */
+body[data-navbar=side] #navbar > .navbar > .crm-sidebar-brand {
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 12px 8px 16px !important;
+  text-align: center !important;
+  border-top: 1px solid var(--crm-border-light, #f1f5f9) !important;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-radius: 0 0 22px 0 !important;
+}
+
+body[data-navbar=side] #navbar > .navbar > .crm-sidebar-brand img {
+  display: block !important;
+  width: auto !important;
+  max-width: calc(var(--navbar-width, 248px) - 24px) !important;
+  max-height: 110px !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  object-fit: contain !important;
+}
+
+body[data-navbar=side].minimized:not(.side-menu-opened) #navbar > .navbar > .crm-sidebar-brand {
+  padding: 8px 4px 10px !important;
+  border-radius: 0 0 22px 0 !important;
+}
+
+body[data-navbar=side].minimized:not(.side-menu-opened) #navbar > .navbar > .crm-sidebar-brand img {
+  max-width: calc(var(--navbar-minimized-width, 76px) - 10px) !important;
+  max-height: 44px !important;
 }
 
 body[data-navbar=side] #navbar .navbar-left-container ul.tabs::-webkit-scrollbar {
@@ -366,11 +426,7 @@ body[data-navbar=side] #navbar .navbar-nav.navbar-right .notifications-badge-con
   box-shadow: 0 1px 3px rgba(239, 68, 68, 0.35) !important;
 }
 
-/* Evitar que overflow del sidebar recorte la barra superior */
-body[data-navbar=side] #navbar > .navbar,
-body[data-navbar=side] #navbar .navbar .navbar-body {
-  overflow: visible !important;
-}
+/* Evitar que overflow del sidebar recorte la barra superior (barra fija fuera del panel) */
 
 /* Barra superior — esquina superior derecha del body (fuera del sidebar) */
 body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-body > .navbar-right-container {

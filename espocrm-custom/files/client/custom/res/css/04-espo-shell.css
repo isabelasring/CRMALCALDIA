@@ -59,15 +59,7 @@
   transform: translateY(-2px);
 }
 
-/* ── Login ── */
-body.login-page {
-  background: linear-gradient(135deg, var(--crm-primary-dark) 0%, var(--crm-primary) 50%, #0d9488 100%) !important;
-}
-
-body.login-page .panel {
-  border-radius: var(--crm-radius-xl) !important;
-  box-shadow: var(--crm-shadow-lg) !important;
-}
+/* Login → ver 15-login.css */
 
 /* ── Notificaciones dropdown ── */
 .dropdown-menu {

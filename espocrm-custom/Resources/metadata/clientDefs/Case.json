@@ -1,5 +1,5 @@
 {
-    "iconClass": "fas fa-scale-balanced",
+    "iconClass": "fas fa-briefcase",
     "color": "#1d8a6e",
     "nameAttribute": "cNumeroRadicado",
     "kanbanViewMode": true,
