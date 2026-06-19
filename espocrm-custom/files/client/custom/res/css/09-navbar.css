@@ -11,18 +11,18 @@ body[data-navbar=side] {
   --nav-pill-size: 44px;
 }
 
-/* ── Panel cristal ── */
+/* ── Panel lateral (sin backdrop-filter en .navbar: rompe position:fixed de la barra superior) ── */
 body[data-navbar=side] #navbar > .navbar {
-  background: rgba(255, 255, 255, 0.72) !important;
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border-right: 1px solid rgba(255, 255, 255, 0.55) !important;
   border-radius: 0 22px 22px 0 !important;
   box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06) !important;
 }
 
 body[data-navbar=side].minimized:not(.side-menu-opened) #navbar > .navbar {
-  background: rgba(248, 250, 252, 0.82) !important;
+  background: rgba(248, 250, 252, 0.98) !important;
 }
 
 /* Logo oculto — barra tipo iconos (como referencia) */
@@ -300,28 +300,79 @@ body[data-navbar=side] #navbar .navbar-nav.navbar-right > li > a:active {
   color: var(--crm-primary-dark, #2a5934) !important;
 }
 
-body[data-navbar=side].minimized:not(.side-menu-opened) #navbar .navbar-body > .navbar-right-container {
-  border-top: 1px solid rgba(226, 232, 240, 0.6);
-  margin-top: 8px;
-  padding-top: 4px;
+/* Evitar que overflow del sidebar recorte la barra superior */
+body[data-navbar=side] #navbar > .navbar,
+body[data-navbar=side] #navbar .navbar .navbar-body {
+  overflow: visible !important;
 }
 
-body[data-navbar=side].minimized:not(.side-menu-opened) #navbar .navbar-nav.navbar-right {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  width: 100% !important;
-}
-
-body[data-navbar=side].minimized:not(.side-menu-opened) #navbar .navbar-nav.navbar-right > li > a {
-  width: var(--nav-pill-size) !important;
-  height: var(--nav-pill-size) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+/* Barra superior — esquina superior derecha del body (fuera del sidebar) */
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-body > .navbar-right-container {
+  display: contents !important;
+  margin: 0 !important;
   padding: 0 !important;
-  margin: 4px auto !important;
-  border-radius: 12px !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  left: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  max-width: calc(100vw - var(--navbar-minimized-width, 76px) - 16px) !important;
+  height: var(--top-bar-height, 42px) !important;
+  margin: 0 !important;
+  padding: 0 16px 0 12px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 2px !important;
+  z-index: 1060 !important;
+  float: none !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right > li {
+  float: none !important;
+  display: flex !important;
+  flex-shrink: 0 !important;
+  align-items: center !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right > li.global-search-container {
+  display: flex !important;
+  align-items: center !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .global-search-container .input-group {
+  display: flex !important;
+  align-items: center !important;
+  width: 220px !important;
+  max-width: 36vw !important;
+  margin: 0 !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right input.global-search-input {
+  width: 100% !important;
+  min-width: 120px !important;
+  max-width: none !important;
+  height: 32px !important;
+  min-height: 32px !important;
+}
+
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .quick-create-container,
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .notifications-badge-container,
+body[data-navbar=side]:not(.side-menu-opened) #navbar .navbar-nav.navbar-right .menu-container {
+  width: auto !important;
+  flex-shrink: 0 !important;
 }
 
 /* Separadores de sección */

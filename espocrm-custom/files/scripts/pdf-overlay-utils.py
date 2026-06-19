@@ -219,8 +219,90 @@ def field_render_def(field_def, layout):
     return merged
 
 
-def single_line_baseline(box, fontsize):
-    return box.y1 - 1.2
+def field_valign(field_def, layout):
+    field_def = field_def or {}
+    layout = layout or {}
+    return field_def.get("valign", layout.get("defaultFieldValign", "center"))
+
+
+def single_line_baseline(box, fontsize, valign="center"):
+    if valign == "top":
+        return box.y0 + fontsize * 0.82
+
+    if valign == "bottom":
+        return box.y1 - max(1.2, fontsize * 0.15)
+
+    return box.y0 + (box.height + fontsize * 0.72) / 2.0
+
+
+def multiline_content_height(text, box, fontname, fontsize, align):
+    scratch = fitz.open()
+    try:
+        probe_height = max(box.height * 4, 300)
+        page = scratch.new_page(width=box.width + 20, height=probe_height + 20)
+        remaining = page.insert_textbox(
+            fitz.Rect(0, 0, box.width, probe_height),
+            text,
+            fontsize=fontsize,
+            fontname=fontname,
+            align=align,
+        )
+        if remaining < 0:
+            return min(probe_height, box.height)
+        return max(fontsize * 1.15, probe_height - remaining)
+    finally:
+        scratch.close()
+
+
+def apply_vertical_valign(box, content_height, valign):
+    if valign != "center" or content_height >= box.height:
+        return box
+
+    offset = max(0.0, (box.height - content_height) / 2.0)
+    return fitz.Rect(box.x0, box.y0 + offset, box.x1, box.y1)
+
+
+def wrap_text_lines(text, max_width, fontname, fontsize):
+    words = str(text or "").split()
+    if not words:
+        return []
+
+    lines = []
+    current = []
+
+    for word in words:
+        candidate = " ".join(current + [word])
+        if not current or fitz.get_text_length(candidate, fontsize=fontsize, fontname=fontname) <= max_width:
+            current.append(word)
+            continue
+
+        lines.append(" ".join(current))
+        current = [word]
+
+    if current:
+        lines.append(" ".join(current))
+
+    return lines
+
+
+def put_ruled_multiline_text(page, box, text, layout, field_def, fontname, fontsize, color):
+    line_spacing = float(field_def.get("lineSpacing", 14))
+    max_lines = int(field_def.get("maxLines", 5))
+    first_baseline_y = field_def.get("firstBaselineY")
+
+    if first_baseline_y is not None:
+        y = float(first_baseline_y)
+    else:
+        y = box.y0 + float(field_def.get("firstLineOffset", fontsize * 0.85))
+
+    lines = wrap_text_lines(text, box.width, fontname, fontsize)
+
+    for line in lines[:max_lines]:
+        if y > box.y1 + 1:
+            break
+
+        page.insert_text((box.x0, y), line, fontsize=fontsize, fontname=fontname, color=color)
+        y += line_spacing
 
 
 def put_fitted_textbox(page, rect, text, layout, field_def=None):
@@ -245,12 +327,20 @@ def put_fitted_textbox(page, rect, text, layout, field_def=None):
             x = box.x1 - text_width
         else:
             x = box.x0
-        baseline = single_line_baseline(box, fontsize)
+        baseline = single_line_baseline(box, fontsize, field_valign(field_def, layout))
         page.insert_text((x, baseline), value, fontsize=fontsize, fontname=fontname, color=color)
         return
 
+    if field_def.get("ruledText"):
+        put_ruled_multiline_text(page, box, value, layout, field_def, fontname, fontsize, color)
+        return
+
+    valign = field_valign(field_def, layout)
+    content_height = multiline_content_height(value, box, fontname, fontsize, align)
+    render_box = apply_vertical_valign(box, content_height, valign)
+
     page.insert_textbox(
-        box,
+        render_box,
         value,
         fontsize=fontsize,
         fontname=fontname,
@@ -413,14 +503,17 @@ def fit_mark_font_size(label, box, layout, field_def=None):
 def put_mark(page, point, layout, label="X"):
     if point.get("rect"):
         box = fitz.Rect(*point["rect"])
-        fontsize = fit_mark_font_size(label, box, layout, point)
-        page.insert_textbox(
-            box,
+        fontname = font_name(layout, point)
+        fontsize = float(point.get("fontSize", layout.get("markFontSize", 10)))
+        text_width = fitz.get_text_length(label, fontsize=fontsize, fontname=fontname)
+        x = box.x0 + max(0.0, (box.width - text_width) / 2.0)
+        baseline = box.y0 + (box.height + fontsize * 0.72) / 2.0
+        page.insert_text(
+            (x, baseline),
             label,
             fontsize=fontsize,
-            fontname=font_name(layout, point),
+            fontname=fontname,
             color=text_color(layout),
-            align=fitz.TEXT_ALIGN_CENTER,
         )
         return
 

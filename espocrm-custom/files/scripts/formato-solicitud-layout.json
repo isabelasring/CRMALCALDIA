@@ -16,6 +16,7 @@
   "fieldSingleLine": true,
   "truncateOverflow": true,
   "ellipsis": "...",
+  "markFontSize": 10,
   "fields": {
     "fecha": { "rect": [162, 169, 345, 184], "align": "center" },
     "radicado": { "rect": [440, 169, 525, 184], "align": "center" },
@@ -29,17 +30,39 @@
     "telPerjudicante": { "rect": [386, 305, 522, 317] },
     "direccionPerjudicante": { "rect": [192, 319, 345, 333] },
     "barrioPerjudicante": { "rect": [418, 319, 522, 333] },
-    "recibidaPor": { "rect": [210, 634, 522, 648] },
-    "remitidoA": { "rect": [210, 690, 522, 704] }
+    "recibidaPor": {
+      "rect": [210, 634, 522, 648],
+      "valign": "center",
+      "padding": { "left": 2, "right": 4, "top": 0, "bottom": 3 }
+    },
+    "remitidoA": {
+      "rect": [210, 690, 522, 704],
+      "valign": "center",
+      "padding": { "left": 2, "right": 4, "top": 0, "bottom": 3 }
+    }
   },
   "textBoxes": {
-    "descripcion": { "rect": [120, 418, 520, 492], "align": "left", "singleLine": false },
-    "respuestaInmediata": { "rect": [118, 518, 518, 592], "align": "left", "singleLine": false }
+    "descripcion": {
+      "rect": [120, 421, 518, 490],
+      "align": "left",
+      "singleLine": false,
+      "valign": "top",
+      "fontSize": 9,
+      "padding": { "left": 4, "right": 4, "top": 0, "bottom": 0 }
+    },
+    "respuestaInmediata": {
+      "rect": [118, 521, 518, 590],
+      "align": "left",
+      "singleLine": false,
+      "valign": "top",
+      "fontSize": 9,
+      "padding": { "left": 4, "right": 4, "top": 0, "bottom": 0 }
+    }
   },
   "marks": {
-    "aceptaCorreo": { "rect": [503, 278, 521, 287] },
-    "atencionPersonal": { "rect": [265.3, 365.1, 283.3, 374.1] },
-    "atencionTelefonica": { "rect": [475.8, 364.9, 494.5, 374.8] }
+    "aceptaCorreo": { "rect": [503, 278, 521, 287], "fontSize": 9 },
+    "atencionPersonal": { "rect": [264, 363.5, 285, 375.5], "fontSize": 10, "fontName": "hebo" },
+    "atencionTelefonica": { "rect": [474.5, 363.5, 496, 375.5], "fontSize": 10, "fontName": "hebo" }
   },
   "lines": [
     { "from": [103.1, 126.8], "to": [387.2, 126.8] }

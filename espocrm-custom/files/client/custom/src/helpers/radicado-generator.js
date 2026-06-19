@@ -106,10 +106,11 @@ define('custom:helpers/radicado-generator', [
             return;
         }
 
-        recordView.model.set({
-            cNumeroRadicado: preview.radicado,
-            cExpediente: preview.expediente,
-        }, {silent: true});
+        recordView.model.set('cNumeroRadicado', preview.radicado, {silent: true});
+
+        if (!recordView._expedienteDirty) {
+            recordView.model.set('cExpediente', preview.expediente, {silent: true});
+        }
 
         OUTPUT_FIELDS.forEach(function (field) {
             const view = recordView.getFieldView(field);
@@ -156,7 +157,7 @@ define('custom:helpers/radicado-generator', [
         setFieldReadOnly(recordView, 'cRadicadoSiglas', !automatico);
         setFieldReadOnly(recordView, 'cRadicadoAnio', !automatico);
         setFieldReadOnly(recordView, 'cNumeroRadicado', automatico);
-        setFieldReadOnly(recordView, 'cExpediente', automatico);
+        setFieldReadOnly(recordView, 'cExpediente', false);
 
         if (automatico) {
             return refreshAutomaticValues(recordView);

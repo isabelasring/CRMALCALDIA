@@ -31,8 +31,13 @@
                 </div>
             </div>
             <div class="well well-sm radicado-preview">
-                <div><strong>{{translate 'cNumeroRadicado' scope='Case'}}:</strong> <span data-role="preview-radicado">{{previewRadicado}}</span></div>
-                <div><strong>{{translate 'cExpediente' scope='Case'}}:</strong> <span data-role="preview-expediente">{{previewExpediente}}</span></div>
+                <div class="form-group" style="margin-bottom:8px;">
+                    <div><strong>{{translate 'cNumeroRadicado' scope='Case'}}:</strong> <span data-role="preview-radicado">{{previewRadicado}}</span></div>
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="control-label">{{translate 'cExpediente' scope='Case'}}</label>
+                    <input class="form-control input-sm" type="text" data-role="auto-expediente" value="{{previewExpediente}}" placeholder="2026-1">
+                </div>
                 <div class="text-muted small m-t-s">{{translate 'radicadoPreviewHelp' scope='Case'}}</div>
             </div>
         {{else}}

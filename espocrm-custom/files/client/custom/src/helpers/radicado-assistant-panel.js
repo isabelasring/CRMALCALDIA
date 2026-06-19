@@ -82,9 +82,14 @@ define('custom:helpers/radicado-assistant-panel', [
                 + '</div></div>'
                 + '</div>'
                 + '<div class="well well-sm" style="margin-bottom:0;">'
+                + '<div class="form-group" style="margin-bottom:8px;">'
                 + '<div><strong>Número de radicado:</strong> <span data-role="preview-radicado">' + _.escape(radicado) + '</span></div>'
-                + '<div><strong>Expediente:</strong> <span data-role="preview-expediente">' + _.escape(expediente) + '</span></div>'
-                + '<div class="text-muted small" style="margin-top:6px;">El consecutivo se asigna al guardar según siglas y año.</div>'
+                + '</div>'
+                + '<div class="form-group" style="margin-bottom:0;">'
+                + '<label>Expediente</label>'
+                + '<input type="text" class="form-control input-sm" data-role="auto-expediente" value="' + _.escape(manualExpediente) + '" placeholder="2026-1">'
+                + '</div>'
+                + '<div class="text-muted small" style="margin-top:6px;">El radicado se genera automáticamente. El expediente se sugiere según el último registrado; puede editarlo manualmente.</div>'
                 + '</div>';
         } else {
             body += ''
@@ -140,7 +145,7 @@ define('custom:helpers/radicado-assistant-panel', [
 
         if (!RadicacionFields.shouldMutateRadicadoPreview(recordView)) {
             $panel.find('[data-role="preview-radicado"]').text(String(model.get('cNumeroRadicado') || '—'));
-            $panel.find('[data-role="preview-expediente"]').text(String(model.get('cExpediente') || '—'));
+            $panel.find('[data-role="auto-expediente"]').val(String(model.get('cExpediente') || ''));
 
             return;
         }
@@ -150,18 +155,19 @@ define('custom:helpers/radicado-assistant-panel', [
                 return;
             }
 
-            model.set({
-                cNumeroRadicado: response.radicado,
-                cExpediente: response.expediente,
-            }, {silent: true});
-
+            model.set('cNumeroRadicado', response.radicado, {silent: true});
             $panel.find('[data-role="preview-radicado"]').text(response.radicado);
-            $panel.find('[data-role="preview-expediente"]').text(response.expediente);
+
+            if (!$panel.data('expedienteDirty')) {
+                model.set('cExpediente', response.expediente, {silent: true});
+                $panel.find('[data-role="auto-expediente"]').val(response.expediente);
+            }
         });
     };
 
     const bindEvents = function (recordView, $panel) {
         $panel.off('.radicadoPanel');
+        $panel.removeData('expedienteDirty');
 
         $panel.on('change.radicadoPanel', '[data-role="modo"]', function () {
             recordView.model.set('cRadicadoModo', $(this).val());
@@ -169,13 +175,20 @@ define('custom:helpers/radicado-assistant-panel', [
         });
 
         $panel.on('change.radicadoPanel', '[data-role="siglas"]', function () {
+            $panel.removeData('expedienteDirty');
             recordView.model.set('cRadicadoSiglas', $(this).val() || null);
             refreshPreview(recordView, $panel);
         });
 
         $panel.on('change.radicadoPanel keyup.radicadoPanel', '[data-role="anio"]', function () {
+            $panel.removeData('expedienteDirty');
             recordView.model.set('cRadicadoAnio', $(this).val() || null);
             refreshPreview(recordView, $panel);
+        });
+
+        $panel.on('change.radicadoPanel keyup.radicadoPanel', '[data-role="auto-expediente"]', function () {
+            $panel.data('expedienteDirty', true);
+            recordView.model.set('cExpediente', $(this).val());
         });
 
         $panel.on('change.radicadoPanel keyup.radicadoPanel', '[data-role="manual-radicado"]', function () {

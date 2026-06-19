@@ -96,7 +96,30 @@ class AutoGenerateRadicadoOnSave implements BeforeSave
         }
 
         $entity->set('cNumeroRadicado', RadicadoCatalog::buildRadicado($siglas, $consecutivo, $anio));
-        $entity->set('cExpediente', RadicadoCatalog::buildExpediente($anio, $consecutivo));
+        $entity->set('cExpediente', $this->resolveExpediente($entity, $service, $anio, $excludeId));
+    }
+
+    private function resolveExpediente(
+        Entity $entity,
+        RadicadoConsecutivoService $service,
+        int $anio,
+        ?string $excludeId
+    ): string {
+        $manualExpediente = trim((string) $entity->get('cExpediente'));
+
+        if ($manualExpediente !== '') {
+            $parsed = RadicadoCatalog::parseExpediente($manualExpediente);
+
+            if (!$parsed) {
+                throw new BadRequest('Formato de expediente no válido. Use AÑO-NÚMERO (ej. 2026-1).');
+            }
+
+            return RadicadoCatalog::buildExpediente($parsed['anio'], $parsed['consecutivo']);
+        }
+
+        $expedienteConsecutivo = $service->getNextExpedienteConsecutivo($anio, $excludeId);
+
+        return RadicadoCatalog::buildExpediente($anio, $expedienteConsecutivo);
     }
 
     private function resolveSiglasFromRecurso(Entity $entity): ?string

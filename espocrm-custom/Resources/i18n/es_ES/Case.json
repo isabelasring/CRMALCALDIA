@@ -21,7 +21,7 @@
     "cRadicadoModo": "Modo de radicado",
     "cRadicadoSiglas": "Siglas de recurso",
     "cRadicadoAnio": "Año del radicado",
-    "radicadoPreviewHelp": "Formato: ENV-SIGLAS-Nº-AÑO. El expediente se genera como AÑO-Nº.",
+    "radicadoPreviewHelp": "Formato radicado: ENV-SIGLAS-Nº-AÑO. El expediente se sugiere como AÑO-Nº según el último registrado; puede editarlo manualmente.",
     "cPerjudicanteContact": "Persona natural (perjudicante)",
     "cPerjudicanteCuenta": "Persona jurídica (perjudicante)",
     "contact": "Persona natural (peticionario)",

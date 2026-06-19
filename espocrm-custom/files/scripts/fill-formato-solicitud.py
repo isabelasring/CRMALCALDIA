@@ -97,6 +97,13 @@ def load_layout():
         return json.load(handle)
 
 
+def normalize_canal(value):
+    import unicodedata
+
+    text = unicodedata.normalize("NFD", str(value or "").strip().lower())
+    return "".join(ch for ch in text if unicodedata.category(ch) != "Mn")
+
+
 def fill_pdf(template_path, output_path, data):
     layout = load_layout()
     doc = fitz.open(template_path)
@@ -138,16 +145,14 @@ def fill_pdf(template_path, output_path, data):
         overlay.put_fitted_textbox(page, rect, data.get(key), layout, field_def)
 
     marks = layout.get("marks", {})
-    canal = str(data.get("canalDeReporte") or "").strip()
+    canal = normalize_canal(data.get("canalDeReporte"))
+
+    if canal == "personal" and "atencionPersonal" in marks:
+        overlay.put_mark(page, marks["atencionPersonal"], layout)
+    elif canal in ("telefono", "tel") and "atencionTelefonica" in marks:
+        overlay.put_mark(page, marks["atencionTelefonica"], layout)
 
     if data.get("aceptaCorreo") and "aceptaCorreo" in marks:
-        overlay.put_mark(page, marks["aceptaCorreo"], layout)
-
-    if canal == "Personal" and "atencionPersonal" in marks:
-        overlay.put_mark(page, marks["atencionPersonal"], layout)
-    elif canal == "Telefono" and "atencionTelefonica" in marks:
-        overlay.put_mark(page, marks["atencionTelefonica"], layout)
-    elif canal == "Correo" and data.get("correo") and "aceptaCorreo" in marks:
         overlay.put_mark(page, marks["aceptaCorreo"], layout)
 
     doc.save(output_path)

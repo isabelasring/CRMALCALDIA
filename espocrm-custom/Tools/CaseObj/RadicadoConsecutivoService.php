@@ -51,8 +51,36 @@ class RadicadoConsecutivoService
         return $max + 1;
     }
 
+    public function getNextExpedienteConsecutivo(int $anio, ?string $excludeCaseId = null): int
+    {
+        $anio = max(1900, min(9999, $anio));
+        $max = 0;
+
+        $query = $this->entityManager
+            ->getRDBRepository('Case')
+            ->select(['id', 'cExpediente'])
+            ->where([
+                'cExpediente!=' => '',
+                'cExpediente*' => (string) $anio . '-',
+            ]);
+
+        if ($excludeCaseId) {
+            $query->where(['id!=' => $excludeCaseId]);
+        }
+
+        foreach ($query->find() as $case) {
+            $parsed = RadicadoCatalog::parseExpediente((string) $case->get('cExpediente'));
+
+            if ($parsed && $parsed['anio'] === $anio) {
+                $max = max($max, $parsed['consecutivo']);
+            }
+        }
+
+        return $max + 1;
+    }
+
     /**
-     * @return array{consecutivo: int, radicado: string, expediente: string}
+     * @return array{consecutivo: int, radicado: string, expediente: string, expedienteConsecutivo: int}
      */
     public function buildPreview(string $siglas, int $anio, ?string $excludeCaseId = null): array
     {
@@ -64,23 +92,40 @@ class RadicadoConsecutivoService
 
             if ($case) {
                 $parsed = RadicadoCatalog::parseRadicado((string) $case->get('cNumeroRadicado'));
+                $storedExpediente = trim((string) $case->get('cExpediente'));
 
                 if ($parsed && $parsed['siglas'] === $siglas && $parsed['anio'] === $anio) {
+                    $expedienteConsecutivo = $this->getNextExpedienteConsecutivo($anio, $excludeCaseId);
+
+                    if ($storedExpediente !== '') {
+                        $expediente = $storedExpediente;
+                        $parsedExpediente = RadicadoCatalog::parseExpediente($storedExpediente);
+
+                        if ($parsedExpediente) {
+                            $expedienteConsecutivo = $parsedExpediente['consecutivo'];
+                        }
+                    } else {
+                        $expediente = RadicadoCatalog::buildExpediente($anio, $expedienteConsecutivo);
+                    }
+
                     return [
                         'consecutivo' => $parsed['consecutivo'],
                         'radicado' => (string) $case->get('cNumeroRadicado'),
-                        'expediente' => (string) $case->get('cExpediente'),
+                        'expediente' => $expediente,
+                        'expedienteConsecutivo' => $expedienteConsecutivo,
                     ];
                 }
             }
         }
 
         $consecutivo = $this->getNextConsecutivo($siglas, $anio, $excludeCaseId);
+        $expedienteConsecutivo = $this->getNextExpedienteConsecutivo($anio, $excludeCaseId);
 
         return [
             'consecutivo' => $consecutivo,
             'radicado' => RadicadoCatalog::buildRadicado($siglas, $consecutivo, $anio),
-            'expediente' => RadicadoCatalog::buildExpediente($anio, $consecutivo),
+            'expediente' => RadicadoCatalog::buildExpediente($anio, $expedienteConsecutivo),
+            'expedienteConsecutivo' => $expedienteConsecutivo,
         ];
     }
 }

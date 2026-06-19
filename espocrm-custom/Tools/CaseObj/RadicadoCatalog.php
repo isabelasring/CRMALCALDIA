@@ -76,6 +76,27 @@ class RadicadoCatalog
     }
 
     /**
+     * @return array{anio: int, consecutivo: int}|null
+     */
+    public static function parseExpediente(string $expediente): ?array
+    {
+        $expediente = trim($expediente);
+
+        if ($expediente === '') {
+            return null;
+        }
+
+        if (!preg_match('/^(\d{4})-(\d+)$/', $expediente, $matches)) {
+            return null;
+        }
+
+        return [
+            'anio' => (int) $matches[1],
+            'consecutivo' => (int) $matches[2],
+        ];
+    }
+
+    /**
      * @return array{siglas: string, consecutivo: int, anio: int}|null
      */
     public static function parseRadicado(string $radicado): ?array

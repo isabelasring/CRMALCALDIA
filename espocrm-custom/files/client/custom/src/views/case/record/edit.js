@@ -394,7 +394,6 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            this.syncRadicadoAssistantToModel();
             RadicadoGenerator.applyDefaults(this.model);
 
             if (!this.model.get('cRadicadoSiglas')) {
@@ -408,10 +407,13 @@ define('custom:views/case/record/edit', [
             if (
                 !this.model.isNew()
                 && this._lockedRadicadoValues
+                && String(this._lockedRadicadoValues.cNumeroRadicado || '').trim() !== ''
                 && !RadicacionFields.hasRadicadoMetadataChanged(this.model, this._lockedRadicadoValues)
             ) {
                 this.restoreLockedRadicadoValues();
             }
+
+            this.syncRadicadoAssistantToModel();
         },
 
         restoreLockedRadicadoValues: function () {
@@ -451,7 +453,15 @@ define('custom:views/case/record/edit', [
                 this.model.set('cRadicadoAnio', anio, {silent: true});
             }
 
-            if (!RadicadoCatalog.isModoAutomatico(this.model.get('cRadicadoModo'))) {
+            if (RadicadoCatalog.isModoAutomatico(this.model.get('cRadicadoModo'))) {
+                const radicadoText = String($panel.find('[data-role="preview-radicado"]').text() || '').trim();
+
+                if (radicadoText && radicadoText !== '—') {
+                    this.model.set('cNumeroRadicado', radicadoText, {silent: true});
+                }
+
+                this.model.set('cExpediente', $panel.find('[data-role="auto-expediente"]').val() || null, {silent: true});
+            } else {
                 this.model.set('cNumeroRadicado', $panel.find('[data-role="manual-radicado"]').val() || null, {silent: true});
                 this.model.set('cExpediente', $panel.find('[data-role="manual-expediente"]').val() || null, {silent: true});
             }
