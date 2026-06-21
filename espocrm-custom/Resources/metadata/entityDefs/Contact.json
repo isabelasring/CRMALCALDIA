@@ -30,6 +30,94 @@
       "default": "Envigado",
       "maxLength": 100,
       "isCustom": true
+    },
+    "cCasoRecursoTema": {
+      "type": "enum",
+      "notStorable": true,
+      "layoutDetailDisabled": true,
+      "layoutListDisabled": true,
+      "layoutMassUpdateDisabled": true,
+      "options": [
+        "AIRE",
+        "ESPACIO PUBLICOS VERDES",
+        "FAUNA DOMÉSTICA",
+        "FAUNA SILVESTRE",
+        "FLORA",
+        "HÍDRICO",
+        "LOTE-PREDIO",
+        "RESIDUOS SOLIDOS",
+        "SUELO"
+      ],
+      "isCustom": true
+    },
+    "cCasoBarrio": {
+      "type": "varchar",
+      "notStorable": true,
+      "layoutDetailDisabled": true,
+      "layoutListDisabled": true,
+      "layoutMassUpdateDisabled": true,
+      "maxLength": 150,
+      "isCustom": true
+    },
+    "cCasoZonaAlcaldia": {
+      "type": "enum",
+      "notStorable": true,
+      "layoutDetailDisabled": true,
+      "layoutListDisabled": true,
+      "layoutMassUpdateDisabled": true,
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "isCustom": true
+    },
+    "cCasoCanalDeReporte": {
+      "type": "enum",
+      "notStorable": true,
+      "layoutDetailDisabled": true,
+      "layoutListDisabled": true,
+      "layoutMassUpdateDisabled": true,
+      "options": [
+        "Telefono",
+        "Correo",
+        "Personal"
+      ],
+      "isCustom": true
+    },
+    "cCasoEstado": {
+      "type": "enum",
+      "notStorable": true,
+      "layoutDetailDisabled": true,
+      "layoutListDisabled": true,
+      "layoutMassUpdateDisabled": true,
+      "options": [
+        "Pendiente de radicacion",
+        "Radicado",
+        "Asignado",
+        "En proceso",
+        "Visita realizada",
+        "Visita aprobada",
+        "Finalizado",
+        "Proceso cerrado"
+      ],
+      "isCustom": true
+    },
+    "cPanelExpediente": {
+      "type": "text",
+      "notStorable": true,
+      "utility": true,
+      "isCustom": true
     }
   },
   "links": {

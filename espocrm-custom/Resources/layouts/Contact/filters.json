@@ -3,6 +3,11 @@
     "cNumeroDeDocumento",
     "cBarrioResidencia",
     "cMunicipio",
+    "cCasoRecursoTema",
+    "cCasoBarrio",
+    "cCasoZonaAlcaldia",
+    "cCasoCanalDeReporte",
+    "cCasoEstado",
     "phoneNumber",
     "emailAddress"
 ]

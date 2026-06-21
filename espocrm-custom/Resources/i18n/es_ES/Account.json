@@ -7,7 +7,15 @@
         "cNit": "NIT",
         "billingAddressStreet": "Dirección",
         "phoneNumber": "Teléfono",
-        "emailAddress": "Correo electrónico"
+        "emailAddress": "Correo electrónico",
+        "cCasoRecursoTema": "Caso — recurso / tema",
+        "cCasoBarrio": "Caso — barrio",
+        "cCasoZonaAlcaldia": "Caso — zona Alcaldía",
+        "cCasoCanalDeReporte": "Caso — canal de reporte",
+        "cCasoEstado": "Caso — estado"
+    },
+    "primaryFilters": {
+        "conCasosAsociados": "Con casos asociados"
     },
     "links": {
         "contacts": "Personas naturales",

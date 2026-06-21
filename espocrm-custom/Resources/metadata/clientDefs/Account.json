@@ -1,14 +1,11 @@
 {
+    "filterList": [
+        "all",
+        "conCasosAsociados"
+    ],
     "defaultSidePanelDisabled": true,
     "sidePanels": {
-        "detail": [
-            {
-                "name": "partyExpediente",
-                "label": "Expediente único",
-                "view": "custom:views/party/record/panels/expediente-tercero",
-                "sticked": true
-            }
-        ],
+        "detail": [],
         "detailSmall": [],
         "edit": []
     },

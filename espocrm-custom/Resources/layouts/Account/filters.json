@@ -1,5 +1,10 @@
 [
     "cNit",
+    "cCasoRecursoTema",
+    "cCasoBarrio",
+    "cCasoZonaAlcaldia",
+    "cCasoCanalDeReporte",
+    "cCasoEstado",
     "phoneNumber",
     "emailAddress"
 ]

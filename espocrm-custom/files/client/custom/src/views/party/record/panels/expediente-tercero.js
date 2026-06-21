@@ -1,4 +1,4 @@
-define('custom:views/party/record/panels/expediente-tercero', ['view'], function (Dep) {
+define('custom:views/party/record/panels/expediente-tercero', ['views/fields/base'], function (Dep) {
 
     var formatDate = function (value) {
         if (!value) {
@@ -51,9 +51,12 @@ define('custom:views/party/record/panels/expediente-tercero', ['view'], function
 
     return Dep.extend({
 
-        template: 'custom:party/record/panels/expediente-tercero',
+        detailTemplate: 'custom:party/record/panels/expediente-tercero',
+        editTemplate: 'custom:party/record/panels/expediente-tercero',
 
         setup: function () {
+            Dep.prototype.setup.call(this);
+
             this.expediente = {
                 isLoading: true,
                 loadError: false,
@@ -87,6 +90,7 @@ define('custom:views/party/record/panels/expediente-tercero', ['view'], function
         },
 
         afterRender: function () {
+            Dep.prototype.afterRender.call(this);
             this.bindActions();
         },
 

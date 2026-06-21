@@ -11,7 +11,15 @@
         "cTipoDeDocumento": "Tipo de documento",
         "cNumeroDeDocumento": "Número de documento",
         "cBarrioResidencia": "Barrio",
-        "cMunicipio": "Municipio"
+        "cMunicipio": "Municipio",
+        "cCasoRecursoTema": "Caso — recurso / tema",
+        "cCasoBarrio": "Caso — barrio",
+        "cCasoZonaAlcaldia": "Caso — zona Alcaldía",
+        "cCasoCanalDeReporte": "Caso — canal de reporte",
+        "cCasoEstado": "Caso — estado"
+    },
+    "primaryFilters": {
+        "conCasosAsociados": "Con casos asociados"
     },
     "links": {
         "account": "Persona jurídica (primaria)",

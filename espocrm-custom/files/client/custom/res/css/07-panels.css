@@ -43,9 +43,14 @@
   border: 1px solid var(--crm-border-light) !important;
 }
 
-/* Expediente único del tercero */
-.panel-partyExpediente .panel-body {
-  padding: 14px 16px 18px !important;
+.detail[data-scope="Contact"] .panel[data-name="expedienteUnico"] .field[data-name="cPanelExpediente"] .party-expediente,
+.detail[data-scope="Account"] .panel[data-name="expedienteUnico"] .field[data-name="cPanelExpediente"] .party-expediente {
+  padding: 4px 0 8px;
+}
+
+.detail[data-scope="Contact"] .panel[data-name="expedienteUnico"] .field[data-name="cPanelExpediente"] label.control-label,
+.detail[data-scope="Account"] .panel[data-name="expedienteUnico"] .field[data-name="cPanelExpediente"] label.control-label {
+  display: none;
 }
 
 .party-expediente.is-loading {

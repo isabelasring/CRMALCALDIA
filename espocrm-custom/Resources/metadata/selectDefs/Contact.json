@@ -1,0 +1,13 @@
+{
+    "primaryFilterClassNameMap": {
+        "conCasosAsociados": "Espo\\Custom\\Classes\\Select\\Contact\\PrimaryFilters\\ConCasosAsociados"
+    },
+    "whereItemConverterClassNameMap": {
+        "cCasoRecursoTema_equals": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals",
+        "cCasoBarrio_equals": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals",
+        "cCasoBarrio_contains": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals",
+        "cCasoZonaAlcaldia_equals": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals",
+        "cCasoCanalDeReporte_equals": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals",
+        "cCasoEstado_equals": "Espo\\Custom\\Classes\\Select\\Contact\\Where\\ItemConverters\\CaseFieldEquals"
+    }
+}

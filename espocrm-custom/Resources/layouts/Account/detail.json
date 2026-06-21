@@ -1,5 +1,20 @@
 [
     {
+        "name": "expedienteUnico",
+        "style": "default",
+        "label": "Expediente único",
+        "rows": [
+            [
+                {
+                    "name": "cPanelExpediente",
+                    "view": "custom:views/party/record/panels/expediente-tercero",
+                    "noLabel": true,
+                    "fullWidth": true
+                }
+            ]
+        ]
+    },
+    {
         "label": "",
         "rows": [
             [
