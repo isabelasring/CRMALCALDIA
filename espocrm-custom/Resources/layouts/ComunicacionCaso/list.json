@@ -1,0 +1,22 @@
+[
+    {
+        "name": "fecha",
+        "width": 14
+    },
+    {
+        "name": "tipo",
+        "width": 18
+    },
+    {
+        "name": "destinatario",
+        "width": 16
+    },
+    {
+        "name": "asunto",
+        "width": 20
+    },
+    {
+        "name": "esRespuestaFinal",
+        "width": 10
+    }
+]

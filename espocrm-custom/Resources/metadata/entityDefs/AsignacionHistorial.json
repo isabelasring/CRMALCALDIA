@@ -1,0 +1,91 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": false,
+            "maxLength": 255,
+            "trim": true,
+            "readOnly": true
+        },
+        "case": {
+            "type": "link",
+            "required": true,
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "numeroRadicado": {
+            "type": "varchar",
+            "maxLength": 100,
+            "readOnly": true,
+            "isCustom": true
+        },
+        "fecha": {
+            "type": "datetime",
+            "required": true,
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "asignadoPor": {
+            "type": "link",
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "responsableAnterior": {
+            "type": "link",
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "responsableNuevo": {
+            "type": "link",
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "motivo": {
+            "type": "text",
+            "rows": 3,
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "case": {
+            "type": "belongsTo",
+            "entity": "Case",
+            "foreign": "asignacionesHistorial"
+        },
+        "asignadoPor": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "responsableAnterior": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "responsableNuevo": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "entityClassName": "Espo\\Custom\\Entities\\AsignacionHistorial",
+    "collection": {
+        "orderBy": "fecha",
+        "order": "desc",
+        "textFilterFields": ["name", "numeroRadicado", "motivo"]
+    }
+}

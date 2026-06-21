@@ -479,6 +479,12 @@ define('custom:views/case/record/edit', [
                 $cell.toggle(show);
             }
 
+            const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
+
+            if ($motivoCell.length) {
+                $motivoCell.toggle(show);
+            }
+
             if (!show) {
                 if (model.isNew() && model.get('assignedUserId')) {
                     model.set({
@@ -500,6 +506,16 @@ define('custom:views/case/record/edit', [
                 view.setNotReadOnly();
             } else if (!canEdit && typeof view.setReadOnly === 'function') {
                 view.setReadOnly();
+            }
+
+            const motivoView = this.getFieldView('cMotivoReasignacion');
+
+            if (motivoView) {
+                if (canEdit && typeof motivoView.setNotReadOnly === 'function') {
+                    motivoView.setNotReadOnly();
+                } else if (!canEdit && typeof motivoView.setReadOnly === 'function') {
+                    motivoView.setReadOnly();
+                }
             }
         },
 

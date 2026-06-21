@@ -1,0 +1,32 @@
+[
+    {
+        "rows": [
+            [
+                {"name": "case", "readOnly": true},
+                {"name": "numeroRadicado", "readOnly": true}
+            ],
+            [
+                {"name": "tipo"},
+                {"name": "fecha"}
+            ],
+            [
+                {"name": "cPanelDestinatarioSugerencias", "noLabel": true, "fullWidth": true},
+                {"name": "destinatarioTercero", "fullWidth": true}
+            ],
+            [
+                {"name": "asunto", "fullWidth": true}
+            ],
+            [
+                {"name": "esRespuestaFinal"}
+            ],
+            [
+                {"name": "contenido", "fullWidth": true}
+            ],
+            [
+                {"name": "adjuntos", "fullWidth": true}
+            ]
+        ],
+        "style": "default",
+        "label": "Comunicación"
+    }
+]

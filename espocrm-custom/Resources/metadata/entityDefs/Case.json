@@ -446,6 +446,13 @@
         "assignedUser": {
             "default": null
         },
+        "cMotivoReasignacion": {
+            "type": "text",
+            "rows": 2,
+            "maxLength": 500,
+            "tooltip": true,
+            "isCustom": true
+        },
         "cRecursoTema": {
             "type": "enum",
             "required": false,
@@ -664,6 +671,16 @@
         "actuosArchivo": {
             "type": "hasMany",
             "entity": "ActuoArchivo",
+            "foreign": "case"
+        },
+        "asignacionesHistorial": {
+            "type": "hasMany",
+            "entity": "AsignacionHistorial",
+            "foreign": "case"
+        },
+        "comunicacionesCaso": {
+            "type": "hasMany",
+            "entity": "ComunicacionCaso",
             "foreign": "case"
         },
         "cPerjudicanteContact": {

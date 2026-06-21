@@ -1,0 +1,13 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-exchange-alt",
+    "color": "#64748b",
+    "recordViews": {
+        "list": "views/record/list"
+    },
+    "menu": {
+        "list": {
+            "buttons": []
+        }
+    }
+}

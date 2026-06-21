@@ -400,6 +400,12 @@ define('custom:views/case/record/detail', [
             if ($cell.length) {
                 $cell.toggle(show);
             }
+
+            const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
+
+            if ($motivoCell.length) {
+                $motivoCell.hide();
+            }
         },
     });
 });

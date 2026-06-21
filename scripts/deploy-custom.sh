@@ -142,4 +142,12 @@ echo 'Eliminando columnas obsoletas c_categoria / c_tipo...'
 docker cp "$ROOT/scripts/migrate-drop-case-categoria-tipo.php" espocrm:/tmp/migrate-drop-case-categoria-tipo.php
 docker exec espocrm php /tmp/migrate-drop-case-categoria-tipo.php
 
+echo 'Historial de asignaciones (permisos por rol)...'
+docker cp "$ROOT/scripts/configure-asignacion-historial.php" espocrm:/tmp/configure-asignacion-historial.php
+docker exec espocrm php /tmp/configure-asignacion-historial.php
+
+echo 'Comunicaciones por caso (permisos por rol)...'
+docker cp "$ROOT/scripts/configure-comunicacion-caso-entity.php" espocrm:/tmp/configure-comunicacion-caso-entity.php
+docker exec espocrm php /tmp/configure-comunicacion-caso-entity.php
+
 echo 'Listo. Recarga el navegador con Cmd+Shift+R en http://localhost:8080'

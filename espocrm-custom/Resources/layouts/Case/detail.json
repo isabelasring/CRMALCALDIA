@@ -165,6 +165,12 @@
                     "name": "assignedUser"
                 },
                 false
+            ],
+            [
+                {
+                    "name": "cMotivoReasignacion",
+                    "fullWidth": true
+                }
             ]
         ],
         "style": "default",

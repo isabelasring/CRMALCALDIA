@@ -1,0 +1,33 @@
+{
+    "fields": {
+        "name": "Resumen",
+        "case": "Caso",
+        "numeroRadicado": "Número de radicado",
+        "tipo": "Tipo de comunicación",
+        "fecha": "Fecha",
+        "destinatario": "Destinatario",
+        "destinatarioTercero": "Destinatario",
+        "asunto": "Asunto",
+        "contenido": "Contenido / observaciones",
+        "esRespuestaFinal": "Respuesta final al ciudadano",
+        "adjuntos": "Adjuntos"
+    },
+    "labels": {
+        "ComunicacionCaso": "Comunicación",
+        "ComunicacionesCaso": "Comunicaciones"
+    },
+    "options": {
+        "tipo": {
+            "Citación": "Citación",
+            "Respuesta al peticionario": "Respuesta al peticionario",
+            "Notificación al infractor": "Notificación al infractor",
+            "Llamada telefónica": "Llamada telefónica",
+            "Correo electrónico": "Correo electrónico",
+            "Oficio": "Oficio",
+            "Otro": "Otro"
+        }
+    },
+    "links": {
+        "case": "Caso"
+    }
+}

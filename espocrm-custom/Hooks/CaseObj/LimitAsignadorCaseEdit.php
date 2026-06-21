@@ -18,7 +18,7 @@ class LimitAsignadorCaseEdit implements BeforeSave
 
     private const ROLE_ASIGNADOR = 'Asignador';
 
-    private const ALLOWED = ['assignedUserId', 'assignedUserName'];
+    private const ALLOWED = ['assignedUserId', 'assignedUserName', 'cMotivoReasignacion'];
 
     public function __construct(
         private User $user,

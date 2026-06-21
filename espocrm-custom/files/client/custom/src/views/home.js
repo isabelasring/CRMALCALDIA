@@ -50,6 +50,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
         return {
             showTablero: showTablero,
+            showHistorialAsignaciones: profile === 'asignador',
             iframeUrl: iframeUrl,
             lists: lists[profile] || lists.gestion,
         };
@@ -210,6 +211,11 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
             var cfg = this.config;
             var activeTab = sessionStorage.getItem('crm-home-tab') || 'dashboard';
+
+            if (activeTab === 'historial-asignaciones' && !cfg.showHistorialAsignaciones) {
+                activeTab = 'dashboard';
+            }
+
             var html = '<div class="custom-home">';
 
             html += '<nav class="custom-home-tabs" role="tablist" aria-label="Secciones de inicio">';
@@ -218,6 +224,12 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             html += this.buildHomeTabButton('gestion', 'Gestión de casos', activeTab);
             html += '<span class="custom-home-tab-sep" aria-hidden="true">/</span>';
             html += this.buildHomeTabButton('agenda', 'Agenda', activeTab);
+
+            if (cfg.showHistorialAsignaciones) {
+                html += '<span class="custom-home-tab-sep" aria-hidden="true">/</span>';
+                html += this.buildHomeTabButton('historial-asignaciones', 'Historial de asignaciones', activeTab);
+            }
+
             html += '</nav>';
 
             html += '<div class="custom-home-panels">';
@@ -262,6 +274,19 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                 '</div></div></div>' +
                 '</div>';
 
+            if (cfg.showHistorialAsignaciones) {
+                html += '<div class="custom-home-panel custom-home-historial-panel' +
+                    (activeTab === 'historial-asignaciones' ? ' is-active' : '') +
+                    '" data-panel="historial-asignaciones" role="tabpanel">' +
+                    '<div class="panel panel-default custom-home-lista">' +
+                    '<div class="panel-heading"><h4 class="panel-title">Historial de asignaciones</h4></div>' +
+                    '<div class="panel-body">' +
+                    '<div class="custom-home-lista-cuerpo" data-historial-asignaciones="list">' +
+                    '<p class="text-muted">Cargando historial…</p>' +
+                    '</div></div></div>' +
+                    '</div>';
+            }
+
             html += '</div></div>';
 
             var $dashlets = this.$el.find('.dashlets').first();
@@ -279,6 +304,8 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                 this.loadGestionLists();
             } else if (activeTab === 'agenda') {
                 this.loadAgendaLists();
+            } else if (activeTab === 'historial-asignaciones') {
+                this.loadHistorialAsignaciones();
             } else if (activeTab === 'dashboard') {
                 this.refreshDashboardIframeHeight();
             }
@@ -329,6 +356,10 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
             if (tab === 'agenda') {
                 this.loadAgendaLists();
+            }
+
+            if (tab === 'historial-asignaciones') {
+                this.loadHistorialAsignaciones();
             }
 
             if (tab === 'dashboard') {
@@ -508,6 +539,74 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                         '<thead><tr>' +
                             '<th>Tarea</th><th>Estado</th><th>Prioridad</th>' +
                             '<th>Vencimiento</th><th>Asignado</th>' +
+                        '</tr></thead>' +
+                        '<tbody>' + rows + '</tbody>' +
+                    '</table>' +
+                '</div>'
+            );
+        },
+
+        loadHistorialAsignaciones: function () {
+            if (this._historialLoaded) {
+                return;
+            }
+
+            this._historialLoaded = true;
+
+            var $container = this.$el.find('[data-historial-asignaciones="list"]');
+
+            this.getCollectionFactory().create('AsignacionHistorial', function (collection) {
+                collection.maxSize = 50;
+                collection.orderBy = 'fecha';
+                collection.order = 'desc';
+
+                collection.fetch({main: true})
+                    .then(function () {
+                        this.renderHistorialAsignaciones($container, collection);
+                    }.bind(this))
+                    .catch(function () {
+                        $container.html('<p class="text-danger">No se pudo cargar el historial de asignaciones.</p>');
+                    });
+            }.bind(this));
+        },
+
+        renderHistorialAsignaciones: function ($container, collection) {
+            if (!collection.length) {
+                $container.html('<p class="text-muted">Aún no hay reasignaciones registradas.</p>');
+
+                return;
+            }
+
+            var rows = collection.models.map(function (model) {
+                var fecha = model.get('fecha') || '—';
+                var caseId = model.get('caseId');
+                var radicado = model.get('numeroRadicado') || model.get('caseName') || '—';
+                var asignadoPor = model.get('asignadoPorName') || '—';
+                var anterior = model.get('responsableAnteriorName') || 'Sin asignar';
+                var nuevo = model.get('responsableNuevoName') || 'Sin asignar';
+                var motivo = model.get('motivo') || '—';
+                var resumen = anterior + ' → ' + nuevo;
+                var caseLink = caseId
+                    ? '<a href="#Case/view/' + caseId + '">' + _.escape(radicado) + '</a>'
+                    : _.escape(radicado);
+
+                return '<tr>' +
+                    '<td>' + _.escape(fecha) + '</td>' +
+                    '<td>' + caseLink + '<div class="text-muted small">' + _.escape(resumen) + '</div></td>' +
+                    '<td>' + _.escape(asignadoPor) + '</td>' +
+                    '<td>' + _.escape(anterior) + '</td>' +
+                    '<td>' + _.escape(nuevo) + '</td>' +
+                    '<td>' + _.escape(motivo) + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            $container.html(
+                '<div class="table-responsive custom-home-historial-table">' +
+                    '<table class="table table-condensed table-striped">' +
+                        '<thead><tr>' +
+                            '<th>Fecha</th><th>Caso</th><th>Quién asignó</th>' +
+                            '<th>Responsable anterior</th><th>Responsable nuevo</th>' +
+                            '<th>Motivo</th>' +
                         '</tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +

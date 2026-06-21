@@ -1,0 +1,26 @@
+[
+    {
+        "name": "fecha",
+        "width": 16
+    },
+    {
+        "name": "numeroRadicado",
+        "width": 14
+    },
+    {
+        "name": "asignadoPor",
+        "width": 14
+    },
+    {
+        "name": "responsableAnterior",
+        "width": 14
+    },
+    {
+        "name": "responsableNuevo",
+        "width": 14
+    },
+    {
+        "name": "motivo",
+        "width": 28
+    }
+]

@@ -1,0 +1,19 @@
+{
+    "controller": "controllers/record",
+    "iconClass": "fas fa-comments",
+    "color": "#0ea5e9",
+    "recordViews": {
+        "edit": "views/record/edit",
+        "detail": "views/record/detail",
+        "list": "views/record/list"
+    },
+    "fields": {
+        "cPanelDestinatarioSugerencias": {
+            "view": "custom:views/comunicacion-caso/fields/destinatario-sugerencias"
+        }
+    },
+    "modalViews": {
+        "edit": "views/modals/edit",
+        "detail": "views/modals/detail"
+    }
+}

@@ -21,6 +21,9 @@
         "actuosArchivo": {
             "disabled": true
         },
+        "comunicacionesCaso": {
+            "disabled": true
+        },
         "articles": {
             "disabled": true
         },
@@ -55,6 +58,12 @@
                 "label": "Flujo",
                 "view": "views/stream/panel",
                 "notRefreshable": true
+            },
+            {
+                "name": "comunicacionesCasoPanel",
+                "label": "Comunicaciones",
+                "view": "custom:views/case/record/panels/comunicaciones-caso",
+                "notRefreshable": false
             },
             {
                 "name": "actaVisitaPanel",
@@ -109,6 +118,12 @@
                 "label": "Flujo",
                 "view": "views/stream/panel",
                 "notRefreshable": true
+            },
+            {
+                "name": "comunicacionesCasoPanel",
+                "label": "Comunicaciones",
+                "view": "custom:views/case/record/panels/comunicaciones-caso",
+                "notRefreshable": false
             },
             {
                 "name": "activities",

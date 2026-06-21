@@ -1,0 +1,22 @@
+{
+    "fields": {
+        "name": "Resumen",
+        "case": "Caso",
+        "numeroRadicado": "Número de radicado",
+        "fecha": "Fecha",
+        "asignadoPor": "Quién asignó",
+        "responsableAnterior": "Responsable anterior",
+        "responsableNuevo": "Responsable nuevo",
+        "motivo": "Motivo de reasignación"
+    },
+    "labels": {
+        "AsignacionHistorial": "Historial de asignación",
+        "AsignacionesHistorial": "Historial de asignaciones"
+    },
+    "links": {
+        "case": "Caso",
+        "asignadoPor": "Quién asignó",
+        "responsableAnterior": "Responsable anterior",
+        "responsableNuevo": "Responsable nuevo"
+    }
+}

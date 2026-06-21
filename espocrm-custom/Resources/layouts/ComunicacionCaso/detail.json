@@ -1,0 +1,25 @@
+[
+    {
+        "rows": [
+            [
+                {"name": "tipo"},
+                {"name": "fecha"}
+            ],
+            [
+                {"name": "destinatarioTercero", "fullWidth": true},
+                {"name": "asunto"}
+            ],
+            [
+                {"name": "esRespuestaFinal"}
+            ],
+            [
+                {"name": "contenido", "fullWidth": true}
+            ],
+            [
+                {"name": "adjuntos", "fullWidth": true}
+            ]
+        ],
+        "style": "default",
+        "label": "Comunicación"
+    }
+]

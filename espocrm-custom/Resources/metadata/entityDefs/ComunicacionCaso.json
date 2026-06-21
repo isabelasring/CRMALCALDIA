@@ -1,0 +1,110 @@
+{
+    "fields": {
+        "name": {
+            "type": "varchar",
+            "required": false,
+            "maxLength": 255,
+            "trim": true,
+            "readOnly": true
+        },
+        "case": {
+            "type": "link",
+            "required": true,
+            "readOnlyAfterCreate": true,
+            "isCustom": true
+        },
+        "numeroRadicado": {
+            "type": "varchar",
+            "maxLength": 100,
+            "readOnly": true,
+            "isCustom": true
+        },
+        "tipo": {
+            "type": "enum",
+            "required": true,
+            "options": [
+                "Citación",
+                "Respuesta al peticionario",
+                "Notificación al infractor",
+                "Llamada telefónica",
+                "Correo electrónico",
+                "Oficio",
+                "Otro"
+            ],
+            "isCustom": true
+        },
+        "fecha": {
+            "type": "datetime",
+            "required": true,
+            "isCustom": true
+        },
+        "destinatario": {
+            "type": "varchar",
+            "maxLength": 255,
+            "readOnly": true,
+            "isCustom": true
+        },
+        "destinatarioTercero": {
+            "type": "linkParent",
+            "entityList": ["Contact", "Account"],
+            "isCustom": true
+        },
+        "cPanelDestinatarioSugerencias": {
+            "type": "varchar",
+            "notStorable": true,
+            "readOnly": true,
+            "utility": true,
+            "isCustom": true
+        },
+        "asunto": {
+            "type": "varchar",
+            "maxLength": 255,
+            "isCustom": true
+        },
+        "contenido": {
+            "type": "text",
+            "rows": 5,
+            "isCustom": true
+        },
+        "esRespuestaFinal": {
+            "type": "bool",
+            "default": false,
+            "isCustom": true
+        },
+        "adjuntos": {
+            "type": "attachmentMultiple",
+            "previewSize": "medium",
+            "sourceList": ["Document"],
+            "isCustom": true
+        },
+        "createdAt": {
+            "type": "datetime",
+            "readOnly": true
+        },
+        "modifiedAt": {
+            "type": "datetime",
+            "readOnly": true
+        }
+    },
+    "links": {
+        "case": {
+            "type": "belongsTo",
+            "entity": "Case",
+            "foreign": "comunicacionesCaso"
+        },
+        "createdBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        },
+        "modifiedBy": {
+            "type": "belongsTo",
+            "entity": "User"
+        }
+    },
+    "entityClassName": "Espo\\Custom\\Entities\\ComunicacionCaso",
+    "collection": {
+        "orderBy": "fecha",
+        "order": "desc",
+        "textFilterFields": ["name", "numeroRadicado", "destinatario", "asunto", "contenido"]
+    }
+}
