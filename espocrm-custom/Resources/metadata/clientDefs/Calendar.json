@@ -1,7 +1,10 @@
 {
-    "scopeList": ["Meeting"],
+    "scopeList": ["Meeting", "Task", "Case"],
     "calendarView": "custom:views/calendar/calendar",
     "colors": {
-        "Meeting": "#558BBD"
+        "Meeting": "#558BBD",
+        "Task": "#76BAED",
+        "Case": "#1d8a6e",
+        "CaseMore": "#7f8c8d"
     }
 }

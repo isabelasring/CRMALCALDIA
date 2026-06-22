@@ -1,0 +1,44 @@
+.fc-event.calendar-more-link {
+    cursor: pointer;
+    font-weight: 600;
+    opacity: 0.92;
+}
+
+.fc-event.calendar-more-link .fc-event-title {
+    text-decoration: underline;
+}
+
+.calendar-day-events__date {
+    margin-bottom: 4px;
+    text-transform: capitalize;
+}
+
+.calendar-day-events__count {
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.calendar-day-events__list {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.calendar-day-events__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.calendar-day-events__dot {
+    flex-shrink: 0;
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 50%;
+}
+
+.calendar-day-events__name {
+    flex: 1;
+    line-height: 1.35;
+}

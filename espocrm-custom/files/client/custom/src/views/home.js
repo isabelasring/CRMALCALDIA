@@ -1,5 +1,7 @@
 define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep, SearchManager) {
 
+    var PAGE_SIZE = 5;
+
     var detectProfile = function (user) {
         if (user.isAdmin()) {
             return 'gestion';
@@ -25,18 +27,18 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
     var profileConfig = function (profile, userId, appTimestamp) {
         var lists = {
             gestion: [
-                {title: 'Todos los casos', primary: 'todos', limit: 15},
-                {title: 'En seguimiento', primary: 'enSeguimiento', limit: 10},
+                {title: 'Todos los casos', primary: 'todos'},
+                {title: 'En seguimiento', primary: 'enSeguimiento'},
             ],
             radicacion: [
-                {title: 'Pendientes de radicación', primary: 'pendienteRadicacion', limit: 15},
+                {title: 'Pendientes de radicación', primary: 'pendienteRadicacion'},
             ],
             asignador: [
-                {title: 'Pendientes de asignación', primary: 'pendienteAsignacion', limit: 10},
-                {title: 'En seguimiento', primary: 'enSeguimiento', limit: 10},
+                {title: 'Pendientes de asignación', primary: 'pendienteAsignacion'},
+                {title: 'En seguimiento', primary: 'enSeguimiento'},
             ],
             patrullero: [
-                {title: 'Mis casos asignados', primary: 'misCasos', limit: 15},
+                {title: 'Mis casos asignados', primary: 'misCasos'},
             ],
         };
 
@@ -65,6 +67,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             var userId = this.getUser().id;
             var appTimestamp = this.getConfig().get('appTimestamp');
             this.config = profileConfig(profile, userId, appTimestamp);
+            this._pageState = {};
 
             this.sanitizeDashboardPreferences();
             Dep.prototype.setup.call(this);
@@ -304,6 +307,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }
 
             this.bindHomeTabs();
+            this.bindHomePagination();
             this._activeHomeTab = activeTab;
 
             if (activeTab === 'gestion') {
@@ -324,6 +328,126 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                 (isActive ? ' aria-selected="true"' : ' aria-selected="false"') + '>' +
                 _.escape(label) +
                 '</button>';
+        },
+
+        paginationKeyAttr: function (pageKey) {
+            if (typeof pageKey === 'number') {
+                return 'data-list-index="' + pageKey + '"';
+            }
+
+            return 'data-agenda-key="' + pageKey + '"';
+        },
+
+        bindHomePagination: function () {
+            var self = this;
+
+            if (this._homePaginationBound) {
+                return;
+            }
+
+            this._homePaginationBound = true;
+
+            this.$el.on('click', '.custom-home-pagination [data-page-action]', function (e) {
+                e.preventDefault();
+
+                var $btn = $(e.currentTarget);
+
+                if ($btn.prop('disabled')) {
+                    return;
+                }
+
+                var action = $btn.data('page-action');
+                var agendaKey = $btn.data('agenda-key');
+                var listIndex = $btn.data('list-index');
+                var pageKey = agendaKey != null ? agendaKey : listIndex;
+                var currentPage = self._pageState[pageKey] || 1;
+                var totalPages = parseInt($btn.closest('.custom-home-pagination').data('total-pages'), 10) || 1;
+                var targetPage = currentPage;
+
+                if (action === 'prev' && currentPage > 1) {
+                    targetPage = currentPage - 1;
+                }
+
+                if (action === 'next' && currentPage < totalPages) {
+                    targetPage = currentPage + 1;
+                }
+
+                if (action === 'goto') {
+                    targetPage = parseInt($btn.data('page'), 10) || currentPage;
+                }
+
+                if (targetPage === currentPage) {
+                    return;
+                }
+
+                if (agendaKey != null) {
+                    self.loadAgendaList(agendaKey, targetPage);
+
+                    return;
+                }
+
+                var listCfg = self.config.lists[listIndex];
+
+                if (listCfg) {
+                    self.loadList(listIndex, listCfg, targetPage);
+                }
+            });
+        },
+
+        loadAgendaList: function (agendaKey, page) {
+            if (agendaKey === 'meetings') {
+                this.loadMeetingList(page);
+
+                return;
+            }
+
+            if (agendaKey === 'tasks') {
+                this.loadTaskList(page);
+
+                return;
+            }
+
+            if (agendaKey === 'comunicaciones') {
+                this.loadComunicacionList(page);
+            }
+        },
+
+        buildPaginationHtml: function (pageKey, currentPage, total, itemLabel) {
+            itemLabel = itemLabel || 'casos';
+            var totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+            if (totalPages <= 1) {
+                return '';
+            }
+
+            var from = (currentPage - 1) * PAGE_SIZE + 1;
+            var to = Math.min(currentPage * PAGE_SIZE, total);
+            var keyAttr = this.paginationKeyAttr(pageKey);
+            var pagesHtml = '';
+
+            for (var page = 1; page <= totalPages; page++) {
+                var isActive = page === currentPage;
+
+                pagesHtml += '<button type="button" class="custom-home-pagination__page' +
+                    (isActive ? ' is-active' : '') + '" data-page-action="goto" data-page="' + page +
+                    '" ' + keyAttr +
+                    (isActive ? ' aria-current="page"' : '') + '>' + page + '</button>';
+            }
+
+            return '<nav class="custom-home-pagination" ' + keyAttr + ' data-total-pages="' + totalPages + '" aria-label="Paginación">' +
+                '<button type="button" class="custom-home-pagination__arrow" data-page-action="prev" ' + keyAttr +
+                    ' aria-label="Página anterior"' + (currentPage <= 1 ? ' disabled' : '') + '>' +
+                    '<span class="fas fa-chevron-left" aria-hidden="true"></span>' +
+                '</button>' +
+                '<div class="custom-home-pagination__body">' +
+                    '<div class="custom-home-pagination__pages">' + pagesHtml + '</div>' +
+                    '<span class="custom-home-pagination__meta">' + from + '–' + to + ' de ' + total + ' ' + itemLabel + '</span>' +
+                '</div>' +
+                '<button type="button" class="custom-home-pagination__arrow" data-page-action="next" ' + keyAttr +
+                    ' aria-label="Página siguiente"' + (currentPage >= totalPages ? ' disabled' : '') + '>' +
+                    '<span class="fas fa-chevron-right" aria-hidden="true"></span>' +
+                '</button>' +
+                '</nav>';
         },
 
         bindHomeTabs: function () {
@@ -421,12 +545,18 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             this.loadComunicacionList();
         },
 
-        loadMeetingList: function () {
+        loadMeetingList: function (page) {
+            page = page || this._pageState.meetings || 1;
+            this._pageState.meetings = page;
+
             var $container = this.$el.find('[data-agenda-list="meetings"]');
             var userId = this.getUser().id;
 
+            $container.html('<p class="text-muted">Cargando reuniones…</p>');
+
             this.getCollectionFactory().create('Meeting', function (collection) {
-                collection.maxSize = 15;
+                collection.maxSize = PAGE_SIZE;
+                collection.offset = (page - 1) * PAGE_SIZE;
                 collection.orderBy = 'dateStart';
                 collection.order = 'desc';
                 collection.where = [{
@@ -447,7 +577,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
                 collection.fetch({main: true})
                     .then(function () {
-                        this.renderMeetingList($container, collection);
+                        this.renderMeetingList($container, collection, page);
                     }.bind(this))
                     .catch(function () {
                         $container.html('<p class="text-danger">No se pudo cargar las reuniones.</p>');
@@ -455,12 +585,18 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }.bind(this));
         },
 
-        loadTaskList: function () {
+        loadTaskList: function (page) {
+            page = page || this._pageState.tasks || 1;
+            this._pageState.tasks = page;
+
             var $container = this.$el.find('[data-agenda-list="tasks"]');
             var userId = this.getUser().id;
 
+            $container.html('<p class="text-muted">Cargando tareas…</p>');
+
             this.getCollectionFactory().create('Task', function (collection) {
-                collection.maxSize = 15;
+                collection.maxSize = PAGE_SIZE;
+                collection.offset = (page - 1) * PAGE_SIZE;
                 collection.orderBy = 'dateEnd';
                 collection.order = 'desc';
                 collection.where = [{
@@ -471,7 +607,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
                 collection.fetch({main: true})
                     .then(function () {
-                        this.renderTaskList($container, collection);
+                        this.renderTaskList($container, collection, page);
                     }.bind(this))
                     .catch(function () {
                         $container.html('<p class="text-danger">No se pudo cargar las tareas.</p>');
@@ -479,12 +615,18 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }.bind(this));
         },
 
-        loadComunicacionList: function () {
+        loadComunicacionList: function (page) {
+            page = page || this._pageState.comunicaciones || 1;
+            this._pageState.comunicaciones = page;
+
             var $container = this.$el.find('[data-agenda-list="comunicaciones"]');
             var userId = this.getUser().id;
 
+            $container.html('<p class="text-muted">Cargando comunicaciones…</p>');
+
             this.getCollectionFactory().create('ComunicacionCaso', function (collection) {
-                collection.maxSize = 200;
+                collection.maxSize = PAGE_SIZE;
+                collection.offset = (page - 1) * PAGE_SIZE;
                 collection.orderBy = 'fecha';
                 collection.order = 'desc';
                 collection.where = [{
@@ -495,7 +637,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
                 collection.fetch({main: true})
                     .then(function () {
-                        this.renderComunicacionList($container, collection);
+                        this.renderComunicacionList($container, collection, page);
                     }.bind(this))
                     .catch(function () {
                         $container.html('<p class="text-danger">No se pudo cargar las comunicaciones.</p>');
@@ -503,8 +645,10 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }.bind(this));
         },
 
-        renderMeetingList: function ($container, collection) {
-            if (!collection.length) {
+        renderMeetingList: function ($container, collection, currentPage) {
+            var total = collection.total != null ? collection.total : collection.length;
+
+            if (!total) {
                 $container.html('<p class="text-muted">Sin reuniones programadas.</p>');
 
                 return;
@@ -536,12 +680,15 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                         '</tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +
-                '</div>'
+                '</div>' +
+                this.buildPaginationHtml('meetings', currentPage, total, 'reuniones')
             );
         },
 
-        renderTaskList: function ($container, collection) {
-            if (!collection.length) {
+        renderTaskList: function ($container, collection, currentPage) {
+            var total = collection.total != null ? collection.total : collection.length;
+
+            if (!total) {
                 $container.html('<p class="text-muted">Sin tareas pendientes.</p>');
 
                 return;
@@ -573,12 +720,15 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                         '</tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +
-                '</div>'
+                '</div>' +
+                this.buildPaginationHtml('tasks', currentPage, total, 'tareas')
             );
         },
 
-        renderComunicacionList: function ($container, collection) {
-            if (!collection.length) {
+        renderComunicacionList: function ($container, collection, currentPage) {
+            var total = collection.total != null ? collection.total : collection.length;
+
+            if (!total) {
                 $container.html('<p class="text-muted">Sin comunicaciones registradas.</p>');
 
                 return;
@@ -619,7 +769,8 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                         '</tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +
-                '</div>'
+                '</div>' +
+                this.buildPaginationHtml('comunicaciones', currentPage, total, 'comunicaciones')
             );
         },
 
@@ -691,11 +842,17 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             );
         },
 
-        loadList: function (index, listCfg) {
+        loadList: function (index, listCfg, page) {
+            page = page || this._pageState[index] || 1;
+            this._pageState[index] = page;
+
             var $container = this.$el.find('[data-list-index="' + index + '"]');
 
+            $container.html('<p class="text-muted">Cargando casos…</p>');
+
             this.getCollectionFactory().create('Case', function (collection) {
-                collection.maxSize = listCfg.limit;
+                collection.maxSize = PAGE_SIZE;
+                collection.offset = (page - 1) * PAGE_SIZE;
                 collection.orderBy = 'cFechaCaso';
                 collection.order = 'desc';
 
@@ -710,7 +867,7 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
 
                 collection.fetch({main: true})
                     .then(function () {
-                        this.renderList($container, collection);
+                        this.renderList($container, collection, index, page);
                     }.bind(this))
                     .catch(function () {
                         $container.html(
@@ -720,8 +877,10 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
             }.bind(this));
         },
 
-        renderList: function ($container, collection) {
-            if (!collection.length) {
+        renderList: function ($container, collection, listIndex, currentPage) {
+            var total = collection.total != null ? collection.total : collection.length;
+
+            if (!total) {
                 $container.html('<p class="text-muted">Sin casos en esta vista.</p>');
 
                 return;
@@ -755,7 +914,8 @@ define('custom:views/home', ['views/dashboard', 'search-manager'], function (Dep
                         '</tr></thead>' +
                         '<tbody>' + rows + '</tbody>' +
                     '</table>' +
-                '</div>'
+                '</div>' +
+                this.buildPaginationHtml(listIndex, currentPage, total)
             );
         },
     });

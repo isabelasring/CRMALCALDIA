@@ -2,19 +2,26 @@ define('custom:views/calendar/modals/edit', ['crm:views/calendar/modals/edit'], 
 
     return Dep.extend({
 
-        scopeList: ['Meeting'],
+        scopeList: ['Meeting', 'Task'],
 
         setup: function () {
-            this.options.scope = 'Meeting';
-            this.options.scopeList = ['Meeting'];
-            this.options.enabledScopeList = ['Meeting'];
+            var scopeList = (this.options.enabledScopeList || this.options.scopeList || ['Meeting', 'Task'])
+                .filter(function (scope) {
+                    return scope !== 'Case' && scope !== 'CaseMore';
+                });
+
+            if (!scopeList.length) {
+                scopeList = ['Meeting', 'Task'];
+            }
+
+            this.options.scopeList = scopeList;
+            this.options.enabledScopeList = scopeList;
+
+            if (!scopeList.includes(this.options.scope)) {
+                this.options.scope = scopeList[0];
+            }
 
             Dep.prototype.setup.call(this);
-        },
-
-        afterRender: function () {
-            Dep.prototype.afterRender.call(this);
-            this.$el.find('.scope-switcher').remove();
         },
     });
 });

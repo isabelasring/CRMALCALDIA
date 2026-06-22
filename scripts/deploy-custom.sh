@@ -114,7 +114,7 @@ echo 'Menú lateral (tabList global)...'
 docker cp "$ROOT/scripts/configure-global-tablist.php" espocrm:/tmp/configure-global-tablist.php
 docker exec espocrm php /tmp/configure-global-tablist.php
 
-echo 'Calendario: solo reuniones...'
+echo 'Calendario: reuniones, tareas y casos...'
 docker cp "$ROOT/scripts/configure-calendar-meetings-only.php" espocrm:/tmp/configure-calendar-meetings-only.php
 docker exec espocrm php /tmp/configure-calendar-meetings-only.php
 

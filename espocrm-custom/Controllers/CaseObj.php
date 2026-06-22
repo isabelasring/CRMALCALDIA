@@ -6,6 +6,7 @@ use Espo\Core\Api\Request;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
+use Espo\Custom\Tools\Calendar\CaseCalendarEventService;
 use Espo\Custom\Tools\CaseObj\CaseCronogramaService;
 use Espo\Custom\Tools\CaseObj\CaseTimelineService;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
@@ -119,6 +120,29 @@ class CaseObj extends BaseCaseObj
                 : 'Ya existe una persona natural (infractor) con esta cédula. Se cargaron los datos registrados; el caso se vinculará a ese registro.',
             'data' => $data,
         ];
+    }
+
+    /**
+     * GET Case/action/calendarEvents?from=...&to=...
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getActionCalendarEvents(Request $request): array
+    {
+        if (!$this->acl->check('Case', 'read')) {
+            throw new Forbidden();
+        }
+
+        $from = trim((string) $request->getQueryParam('from'));
+        $to = trim((string) $request->getQueryParam('to'));
+
+        if ($from === '' || $to === '') {
+            throw new BadRequest('Parámetros from/to requeridos.');
+        }
+
+        return $this->injectableFactory
+            ->create(CaseCalendarEventService::class)
+            ->fetch($from, $to);
     }
 
     /**
