@@ -12,12 +12,23 @@ use Espo\Custom\Tools\CaseObj\CaseTimelineService;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
 use Espo\Custom\Tools\Party\PartyRegistryService;
+use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\Role;
 use Espo\Entities\User;
 use Espo\Modules\Crm\Controllers\CaseObj as BaseCaseObj;
 
 class CaseObj extends BaseCaseObj
 {
+    /**
+     * GET Case/action/alcaldiaProfile
+     *
+     * @return array<string, bool>
+     */
+    public function getActionAlcaldiaProfile(Request $request): array
+    {
+        return (new AlcaldiaUserProfile($this->entityManager))->build($this->getUser());
+    }
+
     /**
      * GET Case/action/radicadoConsecutivo?siglas=AIR&anio=2026&caseId=...
      *

@@ -47,7 +47,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             return Promise.resolve({});
         }
 
-        profilePromise = Espo.Ajax.getRequest('Alcaldia/action/profile')
+        profilePromise = Espo.Ajax.getRequest('Case/action/alcaldiaProfile')
             .then(function (data) {
                 serverProfile = data || {};
                 notifyProfileReady();
