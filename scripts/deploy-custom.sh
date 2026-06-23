@@ -104,14 +104,6 @@ echo 'Roles y equipos base (despliegue desde cero)...'
 docker cp "$ROOT/scripts/seed-roles.php" espocrm:/tmp/seed-roles.php
 docker exec espocrm php /tmp/seed-roles.php
 
-echo 'Asignar roles a usuarios conocidos (juan, edwin...)...'
-docker cp "$ROOT/scripts/assign-default-user-roles.php" espocrm:/tmp/assign-default-user-roles.php
-docker exec espocrm php /tmp/assign-default-user-roles.php
-
-echo 'Generando defaults Recibida por / Remitido a...'
-docker cp "$ROOT/scripts/configure-case-create-defaults.php" espocrm:/tmp/configure-case-create-defaults.php
-docker exec espocrm php /tmp/configure-case-create-defaults.php
-
 echo 'Catálogos Excel Alcaldía (desplegables)...'
 docker cp "$ROOT/scripts/configure-excel-alcaldia-case-fields.php" espocrm:/tmp/configure-excel-alcaldia-case-fields.php
 docker exec espocrm php /tmp/configure-excel-alcaldia-case-fields.php
@@ -156,25 +148,22 @@ echo 'Documentos: plantillas oficiales (solicitud, acta, actuo)...'
 docker cp "$ROOT/scripts/configure-document-plantillas.php" espocrm:/tmp/configure-document-plantillas.php
 docker exec espocrm php /tmp/configure-document-plantillas.php
 
-echo 'Eliminando columnas obsoletas c_categoria / c_tipo...'
-docker cp "$ROOT/scripts/migrate-drop-case-categoria-tipo.php" espocrm:/tmp/migrate-drop-case-categoria-tipo.php
-docker exec espocrm php /tmp/migrate-drop-case-categoria-tipo.php
-
-echo 'Campos documento del Case (c_documento_peticionario)...'
-docker cp "$ROOT/scripts/migrate-case-documento-fields.php" espocrm:/tmp/migrate-case-documento-fields.php
-docker exec espocrm php /tmp/migrate-case-documento-fields.php
-
-echo 'Campos canónicos del Case (sin duplicados en BD)...'
-docker cp "$ROOT/scripts/migrate-case-canonical-fields.php" espocrm:/tmp/migrate-case-canonical-fields.php
-docker exec espocrm php /tmp/migrate-case-canonical-fields.php
-
-echo 'Columnas peticionario en BD (_peticionario)...'
-docker cp "$ROOT/scripts/migrate-case-peticionario-db-columns.php" espocrm:/tmp/migrate-case-peticionario-db-columns.php
-docker exec espocrm php /tmp/migrate-case-peticionario-db-columns.php
-
-echo 'Renombrar columnas peticionario (simetría con perjudicante)...'
-docker cp "$ROOT/scripts/migrate-case-party-field-names.php" espocrm:/tmp/migrate-case-party-field-names.php
-docker exec espocrm php /tmp/migrate-case-party-field-names.php
+echo 'Eliminando columnas obsoletas / migraciones legacy (si aplica)...'
+docker cp "$ROOT/scripts/needs-legacy-db-migrations.php" espocrm:/tmp/needs-legacy-db-migrations.php
+if docker exec espocrm php /tmp/needs-legacy-db-migrations.php; then
+  docker cp "$ROOT/scripts/migrate-drop-case-categoria-tipo.php" espocrm:/tmp/migrate-drop-case-categoria-tipo.php
+  docker exec espocrm php /tmp/migrate-drop-case-categoria-tipo.php
+  docker cp "$ROOT/scripts/migrate-case-documento-fields.php" espocrm:/tmp/migrate-case-documento-fields.php
+  docker exec espocrm php /tmp/migrate-case-documento-fields.php
+  docker cp "$ROOT/scripts/migrate-case-canonical-fields.php" espocrm:/tmp/migrate-case-canonical-fields.php
+  docker exec espocrm php /tmp/migrate-case-canonical-fields.php
+  docker cp "$ROOT/scripts/migrate-case-peticionario-db-columns.php" espocrm:/tmp/migrate-case-peticionario-db-columns.php
+  docker exec espocrm php /tmp/migrate-case-peticionario-db-columns.php
+  docker cp "$ROOT/scripts/migrate-case-party-field-names.php" espocrm:/tmp/migrate-case-party-field-names.php
+  docker exec espocrm php /tmp/migrate-case-party-field-names.php
+else
+  echo 'BD nueva — migraciones legacy omitidas.'
+fi
 
 echo 'Permisos campos peticionario y perjudicante...'
 docker cp "$ROOT/scripts/configure-case-party-field-access.php" espocrm:/tmp/configure-case-party-field-access.php
@@ -191,5 +180,9 @@ docker exec espocrm php /tmp/configure-asignacion-historial.php
 echo 'Comunicaciones por caso (permisos por rol)...'
 docker cp "$ROOT/scripts/configure-comunicacion-caso-entity.php" espocrm:/tmp/configure-comunicacion-caso-entity.php
 docker exec espocrm php /tmp/configure-comunicacion-caso-entity.php
+
+echo 'Defaults Recibida por / Remitido a (por rol)...'
+docker cp "$ROOT/scripts/configure-case-create-defaults.php" espocrm:/tmp/configure-case-create-defaults.php
+docker exec espocrm php /tmp/configure-case-create-defaults.php
 
 echo 'Listo. Recarga el navegador con Cmd+Shift+R en http://localhost:8080'

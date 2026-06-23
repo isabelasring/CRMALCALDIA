@@ -153,8 +153,6 @@ echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 '
 
 run_php_script seed-roles.php
-run_php_script assign-default-user-roles.php
-run_php_script configure-case-create-defaults.php
 run_php_script configure-excel-alcaldia-case-fields.php
 run_php_script configure-case-enum-placeholders.php
 run_php_script configure-global-tablist.php
@@ -166,15 +164,22 @@ run_php_script configure-case-assignment-permissions.php
 run_php_script configure-acta-visita-entity.php
 run_php_script configure-actuo-archivo-entity.php
 run_php_script configure-document-plantillas.php
-run_php_script migrate-drop-case-categoria-tipo.php
-run_php_script migrate-case-documento-fields.php
-run_php_script migrate-case-canonical-fields.php
-run_php_script migrate-case-peticionario-db-columns.php
-run_php_script migrate-case-party-field-names.php
+
+if "$PHP_BIN" "$SCRIPTS_SOURCE/needs-legacy-db-migrations.php"; then
+  run_php_script migrate-drop-case-categoria-tipo.php
+  run_php_script migrate-case-documento-fields.php
+  run_php_script migrate-case-canonical-fields.php
+  run_php_script migrate-case-peticionario-db-columns.php
+  run_php_script migrate-case-party-field-names.php
+else
+  echo "Skipping legacy DB migrations (fresh install)."
+fi
+
 run_php_script configure-case-party-field-access.php
 run_php_script configure-radicacion-field-level.php
 run_php_script configure-asignacion-historial.php
 run_php_script configure-comunicacion-caso-entity.php
+run_php_script configure-case-create-defaults.php
 
 echo "Rebuild final..."
 (cd "$APP_ROOT" && "$PHP_BIN" command.php rebuild)

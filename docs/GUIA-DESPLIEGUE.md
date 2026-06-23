@@ -99,6 +99,12 @@ bash scripts/deploy-custom.sh
 
 http://localhost:8080 — usuario y contraseña del `.env` (`ESPOCRM_ADMIN_USERNAME` / `ESPOCRM_ADMIN_PASSWORD`).
 
+**7. Crear usuarios y asignar roles**
+
+En **Administración → Usuarios**: crea cada persona y asígnale el rol (Inspección, Radicación, Patrullero o Asignador). Los permisos ya quedaron en el rol al desplegar — no hace falta correr scripts aparte.
+
+En Dokploy, `espocrm-init` ejecuta `deploy-custom-dokploy.sh` solo al levantar el stack.
+
 ---
 
 ## Actualizar código

@@ -1,10 +1,7 @@
 <?php
 
 /**
- * Genera case-create-users.js con IDs de Juan y Edwin para defaults en pantalla.
- *
- * docker cp scripts/configure-case-create-defaults.php espocrm:/tmp/configure-case-create-defaults.php
- * docker exec espocrm php /tmp/configure-case-create-defaults.php
+ * Genera case-create-users.js con defaults según rol (Inspección / Radicación).
  */
 
 require_once '/var/www/html/bootstrap.php';
@@ -18,25 +15,47 @@ $app->setupSystemUser();
 /** @var EntityManager $em */
 $em = $app->getContainer()->getByClass(EntityManager::class);
 
+$findUserByRole = static function (string $roleName) use ($em) {
+    $role = $em->getRDBRepository('Role')->where(['name' => $roleName])->findOne();
+
+    if (!$role) {
+        return null;
+    }
+
+    $roleUser = $em->getRDBRepository('RoleUser')
+        ->join('user')
+        ->where([
+            'roleId' => $role->getId(),
+            'user.isActive' => true,
+        ])
+        ->order('user.createdAt', 'ASC')
+        ->findOne();
+
+    if (!$roleUser) {
+        return null;
+    }
+
+    return $em->getEntityById('User', $roleUser->get('userId'));
+};
+
 $map = [
-    'cRecibidaPor' => 'juan.inspeccion',
-    'cRemitidoA' => 'edwin.radicacion',
+    'cRecibidaPor' => 'Inspección',
+    'cRemitidoA' => 'Radicación',
 ];
 
 $defaults = [];
 
-foreach ($map as $field => $userName) {
-    $user = $em->getRDBRepository('User')
-        ->where(['userName' => $userName, 'isActive' => true])
-        ->findOne();
+foreach ($map as $field => $roleName) {
+    $user = $findUserByRole($roleName);
 
     if (!$user) {
-        echo "Usuario no encontrado (se omite): {$userName}\n";
+        echo "Sin usuario activo con rol {$roleName} (se omite {$field}).\n";
         continue;
     }
 
     $defaults[$field . 'Id'] = $user->getId();
     $defaults[$field . 'Name'] = $user->getName();
+    echo "{$field} → {$user->get('userName')} ({$roleName})\n";
 }
 
 $outPaths = [
@@ -55,7 +74,4 @@ $localPath = dirname(__DIR__) . '/espocrm-custom/files/client/custom/src/config/
 
 if (is_dir(dirname($localPath))) {
     file_put_contents($localPath, $js);
-}
-foreach ($defaults as $key => $value) {
-    echo "  {$key}: {$value}\n";
 }

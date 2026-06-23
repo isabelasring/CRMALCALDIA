@@ -22,21 +22,8 @@ define('custom:helpers/radicacion-fields', [], function () {
 
     const hasRole = function (user, roleKey) {
         const rolesNames = user.get('rolesNames') || {};
-        const fromNames = Object.values(rolesNames);
 
-        if (fromNames.some((name) => normalize(name) === roleKey)) {
-            return true;
-        }
-
-        const roles = user.get('roles') || user.get('rolesIds') || [];
-
-        return roles.some((role) => normalize(String(role.name || role || '')) === roleKey);
-    };
-
-    const matchesUserName = function (user, names) {
-        const userName = normalize(user.get('userName') || '');
-
-        return names.some((name) => userName === normalize(name));
+        return Object.values(rolesNames).some((name) => normalize(name) === roleKey);
     };
 
     const isRadicacionUser = function (user) {
@@ -45,10 +32,6 @@ define('custom:helpers/radicacion-fields', [], function () {
         }
 
         if (user.isAdmin()) {
-            return true;
-        }
-
-        if (matchesUserName(user, ['edwin.radicacion', 'edwin'])) {
             return true;
         }
 
@@ -61,10 +44,6 @@ define('custom:helpers/radicacion-fields', [], function () {
         }
 
         if (user.isAdmin()) {
-            return true;
-        }
-
-        if (matchesUserName(user, ['juan.inspeccion', 'juan'])) {
             return true;
         }
 
