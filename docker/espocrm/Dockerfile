@@ -10,5 +10,3 @@ RUN apt-get update \
         libreoffice-writer \
         libreoffice-core \
     && rm -rf /var/lib/apt/lists/*
-
-USER www-data
