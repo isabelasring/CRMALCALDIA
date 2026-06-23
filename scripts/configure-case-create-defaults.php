@@ -31,8 +31,8 @@ foreach ($map as $field => $userName) {
         ->findOne();
 
     if (!$user) {
-        echo "Usuario no encontrado: {$userName}\n";
-        exit(1);
+        echo "Usuario no encontrado (se omite): {$userName}\n";
+        continue;
     }
 
     $defaults[$field . 'Id'] = $user->getId();

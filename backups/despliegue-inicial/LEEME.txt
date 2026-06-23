@@ -1,6 +1,9 @@
 Despliegue desde cero (sin datos)
 
 1. Copia env.txt a la raíz del proyecto y renómbralo a .env
-2. Sigue la Opción B en docs/GUIA-DESPLIEGUE-PARA-TI.md
+2. Sigue la Opción B en docs/GUIA-DESPLIEGUE.md
+
+deploy-custom.sh crea los roles base (Inspección, Radicación, Patrullero, Asignador).
+Luego creas usuarios en el CRM y les asignas el rol que corresponda.
 
 No uses las carpetas migration-* ni espocrm.dump — esos son respaldos con datos.

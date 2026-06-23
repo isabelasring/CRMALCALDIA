@@ -151,6 +151,7 @@ file_put_contents($path, "<?php\nreturn " . var_export($state, true) . ";\n");
 echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 '
 
+run_php_script seed-roles.php
 run_php_script configure-case-create-defaults.php
 run_php_script configure-case-assignment-permissions.php
 run_php_script configure-radicacion-field-level.php

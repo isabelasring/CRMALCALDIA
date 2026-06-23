@@ -10,5 +10,5 @@ tmp_*.sql
 dump-espocrm-*.sql
 Untitled
 *.md
-!docs/GUIA-DESPLIEGUE-PARA-TI.md
+!docs/GUIA-DESPLIEGUE.md
 *.drawio
