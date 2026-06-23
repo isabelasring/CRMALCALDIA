@@ -20,8 +20,8 @@ $em = $app->getContainer()->getByClass(EntityManager::class);
 $metadata = $app->getContainer()->getByClass(Espo\Core\Utils\Metadata::class);
 
 if (!$metadata->get(['scopes', 'ActaVisita', 'entity'])) {
-    echo "Entidad ActaVisita no encontrada. Ejecuta rebuild después de desplegar metadata.\n";
-    exit(1);
+    echo "AVISO: ActaVisita no encontrada aún. Se omite este paso.\n";
+    return;
 }
 
 $actaFields = array_keys($metadata->get(['entityDefs', 'ActaVisita', 'fields']) ?? []);

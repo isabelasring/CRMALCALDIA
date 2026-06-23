@@ -20,8 +20,8 @@ $em = $app->getContainer()->getByClass(EntityManager::class);
 $metadata = $app->getContainer()->getByClass(Espo\Core\Utils\Metadata::class);
 
 if (!$metadata->get(['scopes', 'ActuoArchivo', 'entity'])) {
-    echo "Entidad ActuoArchivo no encontrada. Ejecuta rebuild después de desplegar metadata.\n";
-    exit(1);
+    echo "AVISO: ActuoArchivo no encontrada aún. Se omite este paso.\n";
+    return;
 }
 
 $actuoFields = array_keys($metadata->get(['entityDefs', 'ActuoArchivo', 'fields']) ?? []);

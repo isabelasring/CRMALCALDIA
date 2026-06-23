@@ -108,14 +108,6 @@ echo 'Generando defaults Recibida por / Remitido a...'
 docker cp "$ROOT/scripts/configure-case-create-defaults.php" espocrm:/tmp/configure-case-create-defaults.php
 docker exec espocrm php /tmp/configure-case-create-defaults.php
 
-echo 'Permisos de asignación (crear caso sin patrullero)...'
-docker cp "$ROOT/scripts/configure-case-assignment-permissions.php" espocrm:/tmp/configure-case-assignment-permissions.php
-docker exec espocrm php /tmp/configure-case-assignment-permissions.php
-
-echo 'Permisos de campo (radicado, fecha vencimiento)...'
-docker cp "$ROOT/scripts/configure-radicacion-field-level.php" espocrm:/tmp/configure-radicacion-field-level.php
-docker exec espocrm php /tmp/configure-radicacion-field-level.php
-
 echo 'Catálogos Excel Alcaldía (desplegables)...'
 docker cp "$ROOT/scripts/configure-excel-alcaldia-case-fields.php" espocrm:/tmp/configure-excel-alcaldia-case-fields.php
 docker exec espocrm php /tmp/configure-excel-alcaldia-case-fields.php
@@ -136,10 +128,6 @@ echo 'Kanban de Casos (todos los usuarios)...'
 docker cp "$ROOT/scripts/configure-case-kanban.php" espocrm:/tmp/configure-case-kanban.php
 docker exec espocrm php /tmp/configure-case-kanban.php
 
-echo 'Permisos ActaVisita por rol (Inspección edita acta)...'
-docker cp "$ROOT/scripts/configure-acta-visita-entity.php" espocrm:/tmp/configure-acta-visita-entity.php
-docker exec espocrm php /tmp/configure-acta-visita-entity.php
-
 echo 'Home: tablero custom + dashlets editables...'
 docker cp "$ROOT/scripts/configure-user-dashboards.php" espocrm:/tmp/configure-user-dashboards.php
 docker exec espocrm php /tmp/configure-user-dashboards.php
@@ -147,6 +135,18 @@ docker exec espocrm php /tmp/configure-user-dashboards.php
 echo 'Acceso completo — menú y permisos para todos los roles...'
 docker cp "$ROOT/scripts/configure-full-access-all-roles.php" espocrm:/tmp/configure-full-access-all-roles.php
 docker exec espocrm php /tmp/configure-full-access-all-roles.php
+
+echo 'Permisos de asignación (crear caso sin patrullero)...'
+docker cp "$ROOT/scripts/configure-case-assignment-permissions.php" espocrm:/tmp/configure-case-assignment-permissions.php
+docker exec espocrm php /tmp/configure-case-assignment-permissions.php
+
+echo 'Permisos ActaVisita por rol (Inspección edita acta)...'
+docker cp "$ROOT/scripts/configure-acta-visita-entity.php" espocrm:/tmp/configure-acta-visita-entity.php
+docker exec espocrm php /tmp/configure-acta-visita-entity.php
+
+echo 'Permisos ActuoArchivo por rol...'
+docker cp "$ROOT/scripts/configure-actuo-archivo-entity.php" espocrm:/tmp/configure-actuo-archivo-entity.php
+docker exec espocrm php /tmp/configure-actuo-archivo-entity.php
 
 echo 'Documentos: plantillas oficiales (solicitud, acta, actuo)...'
 docker cp "$ROOT/scripts/configure-document-plantillas.php" espocrm:/tmp/configure-document-plantillas.php
@@ -175,6 +175,10 @@ docker exec espocrm php /tmp/migrate-case-party-field-names.php
 echo 'Permisos campos peticionario y perjudicante...'
 docker cp "$ROOT/scripts/configure-case-party-field-access.php" espocrm:/tmp/configure-case-party-field-access.php
 docker exec espocrm php /tmp/configure-case-party-field-access.php
+
+echo 'Permisos de campo (radicado, registro Excel, fecha vencimiento)...'
+docker cp "$ROOT/scripts/configure-radicacion-field-level.php" espocrm:/tmp/configure-radicacion-field-level.php
+docker exec espocrm php /tmp/configure-radicacion-field-level.php
 
 echo 'Historial de asignaciones (permisos por rol)...'
 docker cp "$ROOT/scripts/configure-asignacion-historial.php" espocrm:/tmp/configure-asignacion-historial.php

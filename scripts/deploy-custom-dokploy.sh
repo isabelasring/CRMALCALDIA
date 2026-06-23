@@ -153,16 +153,16 @@ echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 
 run_php_script seed-roles.php
 run_php_script configure-case-create-defaults.php
-run_php_script configure-case-assignment-permissions.php
-run_php_script configure-radicacion-field-level.php
 run_php_script configure-excel-alcaldia-case-fields.php
 run_php_script configure-case-enum-placeholders.php
 run_php_script configure-global-tablist.php
 run_php_script configure-calendar-meetings-only.php
 run_php_script configure-case-kanban.php
-run_php_script configure-acta-visita-entity.php
 run_php_script configure-user-dashboards.php
 run_php_script configure-full-access-all-roles.php
+run_php_script configure-case-assignment-permissions.php
+run_php_script configure-acta-visita-entity.php
+run_php_script configure-actuo-archivo-entity.php
 run_php_script configure-document-plantillas.php
 run_php_script migrate-drop-case-categoria-tipo.php
 run_php_script migrate-case-documento-fields.php
@@ -170,6 +170,7 @@ run_php_script migrate-case-canonical-fields.php
 run_php_script migrate-case-peticionario-db-columns.php
 run_php_script migrate-case-party-field-names.php
 run_php_script configure-case-party-field-access.php
+run_php_script configure-radicacion-field-level.php
 run_php_script configure-asignacion-historial.php
 run_php_script configure-comunicacion-caso-entity.php
 
