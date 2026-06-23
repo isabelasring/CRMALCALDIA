@@ -19,10 +19,6 @@ define('custom:helpers/post-radicacion-fields', [], function () {
             return true;
         }
 
-        if (user.get('userName') === 'julian.asignador') {
-            return true;
-        }
-
         const names = [];
 
         Object.values(user.get('rolesNames') || {}).forEach((name) => names.push(name));

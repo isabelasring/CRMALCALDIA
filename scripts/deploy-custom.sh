@@ -104,6 +104,10 @@ echo 'Roles y equipos base (despliegue desde cero)...'
 docker cp "$ROOT/scripts/seed-roles.php" espocrm:/tmp/seed-roles.php
 docker exec espocrm php /tmp/seed-roles.php
 
+echo 'Sincronizar equipos desde roles (sesión cliente usa teamsNames)...'
+docker cp "$ROOT/scripts/sync-user-teams-from-roles.php" espocrm:/tmp/sync-user-teams-from-roles.php
+docker exec espocrm php /tmp/sync-user-teams-from-roles.php
+
 echo 'Catálogos Excel Alcaldía (desplegables)...'
 docker cp "$ROOT/scripts/configure-excel-alcaldia-case-fields.php" espocrm:/tmp/configure-excel-alcaldia-case-fields.php
 docker exec espocrm php /tmp/configure-excel-alcaldia-case-fields.php

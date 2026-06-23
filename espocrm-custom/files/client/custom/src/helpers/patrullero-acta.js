@@ -2,22 +2,24 @@ define('custom:helpers/patrullero-acta', [
     'custom:helpers/inspeccion-acta',
 ], function (InspeccionActa) {
 
-    const TEAM_PATRULLEROS = 'Patrulleros';
+    const normalize = function (value) {
+        return String(value)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    };
 
     const isPatrulleroUser = function (user) {
         if (!user || user.isAdmin()) {
             return false;
         }
 
-        const teams = user.get('teamsNames') || {};
+        const names = [];
 
-        if (Object.values(teams).includes(TEAM_PATRULLEROS)) {
-            return true;
-        }
+        Object.values(user.get('teamsNames') || {}).forEach((name) => names.push(name));
+        Object.values(user.get('rolesNames') || {}).forEach((name) => names.push(name));
 
-        const roles = user.get('rolesNames') || {};
-
-        return Object.values(roles).includes('Patrullero');
+        return names.some((name) => normalize(name).includes('patrullero'));
     };
 
     const isCasePostRadicado = function (model) {

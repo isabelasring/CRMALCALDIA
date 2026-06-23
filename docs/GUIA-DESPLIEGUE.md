@@ -101,7 +101,7 @@ http://localhost:8080 — usuario y contraseña del `.env` (`ESPOCRM_ADMIN_USERN
 
 **7. Crear usuarios y asignar roles**
 
-En **Administración → Usuarios**: crea cada persona y asígnale el rol (Inspección, Radicación, Patrullero o Asignador). Los permisos ya quedaron en el rol al desplegar — no hace falta correr scripts aparte.
+En **Administración → Usuarios**: crea cada persona y asígnale el rol (Inspección, Radicación, Patrullero o Asignador). El deploy sincroniza el equipo homónimo automáticamente (el navegador usa equipos para saber el perfil). Tras asignar rol, el usuario debe **cerrar sesión y volver a entrar**.
 
 En Dokploy, `espocrm-init` ejecuta `deploy-custom-dokploy.sh` solo al levantar el stack.
 

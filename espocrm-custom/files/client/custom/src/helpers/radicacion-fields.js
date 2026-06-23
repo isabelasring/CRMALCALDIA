@@ -20,10 +20,17 @@ define('custom:helpers/radicacion-fields', [], function () {
         'cExpediente',
     ];
 
-    const hasRole = function (user, roleKey) {
-        const rolesNames = user.get('rolesNames') || {};
+    const getProfileNames = function (user) {
+        const names = [];
 
-        return Object.values(rolesNames).some((name) => normalize(name) === roleKey);
+        Object.values(user.get('rolesNames') || {}).forEach((name) => names.push(name));
+        Object.values(user.get('teamsNames') || {}).forEach((name) => names.push(name));
+
+        return names;
+    };
+
+    const hasRole = function (user, roleKey) {
+        return getProfileNames(user).some((name) => normalize(name) === roleKey);
     };
 
     const isRadicacionUser = function (user) {

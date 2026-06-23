@@ -153,6 +153,7 @@ echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 '
 
 run_php_script seed-roles.php
+run_php_script sync-user-teams-from-roles.php
 run_php_script configure-excel-alcaldia-case-fields.php
 run_php_script configure-case-enum-placeholders.php
 run_php_script configure-global-tablist.php
