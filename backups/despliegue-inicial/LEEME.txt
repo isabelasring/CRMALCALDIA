@@ -1,0 +1,6 @@
+Despliegue desde cero (sin datos)
+
+1. Copia env.txt a la raíz del proyecto y renómbralo a .env
+2. Sigue la Opción B en docs/GUIA-DESPLIEGUE-PARA-TI.md
+
+No uses las carpetas migration-* ni espocrm.dump — esos son respaldos con datos.

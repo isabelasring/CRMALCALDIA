@@ -1,6 +1,8 @@
 .env
 *.log
-backups/
+backups/*
+!backups/despliegue-inicial/
+!backups/despliegue-inicial/**
 .DS_Store
 Thumbs.db
 ~$*
@@ -8,4 +10,5 @@ tmp_*.sql
 dump-espocrm-*.sql
 Untitled
 *.md
+!docs/GUIA-DESPLIEGUE-PARA-TI.md
 *.drawio
