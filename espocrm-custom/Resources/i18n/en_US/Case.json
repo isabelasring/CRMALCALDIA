@@ -35,7 +35,14 @@
     "cCorreoPeticionario": "Correo",
     "cBarrioResidencia": "Barrio residencia",
     "cDireccionPeticionario": "Direccion",
-    "cMunicipioPeticionario": "Municipio"
+    "cMunicipioPeticionario": "Municipio",
+    "cRecursoTema": "Recurso / tema",
+    "cAsunto": "Asunto",
+    "cFechaVencimiento": "Fecha de vencimiento",
+    "cUltimaActuacion": "Última actuación",
+    "cProximaActuacion": "Próxima actuación",
+    "cRespuestaInmediata": "Respuesta inmediata",
+    "description": "Descripción"
   },
   "options": {
     "cCanalDeReportePeticionario": {

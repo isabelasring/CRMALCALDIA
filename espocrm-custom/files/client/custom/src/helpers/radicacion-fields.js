@@ -21,9 +21,22 @@ define('custom:helpers/radicacion-fields', [], function () {
     ];
 
     const hasRole = function (user, roleKey) {
-        const roles = Object.values(user.get('rolesNames') || {});
+        const rolesNames = user.get('rolesNames') || {};
+        const fromNames = Object.values(rolesNames);
 
-        return roles.some((name) => normalize(name) === roleKey);
+        if (fromNames.some((name) => normalize(name) === roleKey)) {
+            return true;
+        }
+
+        const roles = user.get('roles') || user.get('rolesIds') || [];
+
+        return roles.some((role) => normalize(String(role.name || role || '')) === roleKey);
+    };
+
+    const matchesUserName = function (user, names) {
+        const userName = normalize(user.get('userName') || '');
+
+        return names.some((name) => userName === normalize(name));
     };
 
     const isRadicacionUser = function (user) {
@@ -35,7 +48,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (user.get('userName') === 'edwin.radicacion') {
+        if (matchesUserName(user, ['edwin.radicacion', 'edwin'])) {
             return true;
         }
 
@@ -51,7 +64,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (user.get('userName') === 'juan.inspeccion') {
+        if (matchesUserName(user, ['juan.inspeccion', 'juan'])) {
             return true;
         }
 
