@@ -2,6 +2,8 @@ define('custom:helpers/radicacion-fields', [], function () {
 
     const ROLE_RADICACION = 'radicacion';
     const ROLE_INSPECCION = 'inspeccion';
+    const ROLE_ASIGNADOR = 'asignador';
+    const ROLE_PATRULLERO = 'patrullero';
     const RADICADO_FIELDS = ['cNumeroRadicado', 'cExpediente'];
     const FECHA_VENCIMIENTO_FIELD = 'cFechaVencimiento';
 
@@ -120,6 +122,38 @@ define('custom:helpers/radicacion-fields', [], function () {
         return hasRole(user, ROLE_INSPECCION);
     };
 
+    const isAsignadorUser = function (user) {
+        if (!user) {
+            return false;
+        }
+
+        if (user.isAdmin()) {
+            return true;
+        }
+
+        if (serverProfile && serverProfile.isAsignador) {
+            return true;
+        }
+
+        return hasRole(user, ROLE_ASIGNADOR);
+    };
+
+    const isPatrulleroUser = function (user) {
+        if (!user) {
+            return false;
+        }
+
+        if (user.isAdmin()) {
+            return false;
+        }
+
+        if (serverProfile && serverProfile.isPatrullero) {
+            return true;
+        }
+
+        return hasRole(user, ROLE_PATRULLERO);
+    };
+
     const shouldShowFechaVencimiento = function (user) {
         return isInspeccionUser(user);
     };
@@ -196,6 +230,8 @@ define('custom:helpers/radicacion-fields', [], function () {
         onProfileReady: onProfileReady,
         isRadicacionUser: isRadicacionUser,
         isInspeccionUser: isInspeccionUser,
+        isAsignadorUser: isAsignadorUser,
+        isPatrulleroUser: isPatrulleroUser,
         isCaseRadicado: isCaseRadicado,
         isCasePostRadicado: isCasePostRadicado,
         shouldShowRadicacionFields: shouldShowRadicacionFields,

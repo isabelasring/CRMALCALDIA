@@ -12,15 +12,24 @@ define('custom:helpers/inspeccion-registro-excel', [
         RadicacionFields.FECHA_VENCIMIENTO_FIELD,
     ];
 
-    const canEditRecursoTema = function (user) {
+    const canEditInspectorFields = function (user) {
         return RadicacionFields.isInspeccionUser(user)
             || RadicacionFields.isRadicacionUser(user);
     };
 
+    const canViewInspectorFields = function (user) {
+        return canEditInspectorFields(user)
+            || RadicacionFields.isAsignadorUser(user);
+    };
+
+    const canEditRecursoTema = function (user) {
+        return canEditInspectorFields(user);
+    };
+
     const togglePanel = function (recordView) {
         const user = recordView.getUser();
-        const showInspectorFields = RadicacionFields.isInspeccionUser(user)
-            || RadicacionFields.isRadicacionUser(user);
+        const showInspectorFields = canViewInspectorFields(user);
+        const editInspectorFields = canEditInspectorFields(user);
         const $panel = recordView.$el.find(
             '.panel[data-name="' + PANEL_NAME + '"], ' +
             '.record-panel[data-name="' + PANEL_NAME + '"], ' +
@@ -51,15 +60,27 @@ define('custom:helpers/inspeccion-registro-excel', [
 
         const recursoView = recordView.getFieldView(RECURSO_TEMA_FIELD);
 
-        if (!recursoView) {
-            return;
+        if (recursoView) {
+            if (canEditRecursoTema(user) && typeof recursoView.setNotReadOnly === 'function') {
+                recursoView.setNotReadOnly();
+            } else if (typeof recursoView.setReadOnly === 'function') {
+                recursoView.setReadOnly();
+            }
         }
 
-        if (canEditRecursoTema(user) && typeof recursoView.setNotReadOnly === 'function') {
-            recursoView.setNotReadOnly();
-        } else if (typeof recursoView.setReadOnly === 'function') {
-            recursoView.setReadOnly();
-        }
+        INSPECTOR_ONLY_FIELDS.forEach(function (field) {
+            const fieldView = recordView.getFieldView(field);
+
+            if (!fieldView) {
+                return;
+            }
+
+            if (editInspectorFields && typeof fieldView.setNotReadOnly === 'function') {
+                fieldView.setNotReadOnly();
+            } else if (typeof fieldView.setReadOnly === 'function') {
+                fieldView.setReadOnly();
+            }
+        });
     };
 
     return {
