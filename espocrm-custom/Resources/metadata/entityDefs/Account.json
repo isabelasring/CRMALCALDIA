@@ -96,6 +96,11 @@
     }
   },
   "links": {
+    "cases": {
+      "type": "hasMany",
+      "entity": "Case",
+      "foreign": "account"
+    },
     "casesPerjudicante": {
       "type": "hasMany",
       "entity": "Case",

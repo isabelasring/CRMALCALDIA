@@ -123,7 +123,9 @@
   },
   "links": {
     "casesPrimary": {
-      "layoutRelationshipsDisabled": false
+      "type": "hasMany",
+      "entity": "Case",
+      "foreign": "contact"
     },
     "cases": {
       "layoutRelationshipsDisabled": true

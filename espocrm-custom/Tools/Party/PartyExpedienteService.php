@@ -182,10 +182,10 @@ class PartyExpedienteService
     private function resolveRol(Entity $case, string $partyType, string $partyId): string
     {
         if ($partyType === 'Contact') {
-            return $case->get('contactId') === $partyId ? 'Peticionario' : 'Infractor';
+            return $this->partyCasosService->resolveRolForContact($case, $partyId);
         }
 
-        return $case->get('accountId') === $partyId ? 'Peticionario' : 'Infractor';
+        return $this->partyCasosService->resolveRolForAccount($case, $partyId);
     }
 
     private function caseLabel(Entity $case): string

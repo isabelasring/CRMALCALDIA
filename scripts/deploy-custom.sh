@@ -193,6 +193,10 @@ echo 'Defaults Recibida por / Remitido a (por rol)...'
 docker cp "$ROOT/scripts/configure-case-create-defaults.php" espocrm:/tmp/configure-case-create-defaults.php
 docker exec espocrm php /tmp/configure-case-create-defaults.php
 
+echo 'Vínculos caso ↔ tercero (peticionario / infractor)...'
+docker cp "$ROOT/scripts/sync-case-party-links.php" espocrm:/tmp/sync-case-party-links.php
+docker exec espocrm php /tmp/sync-case-party-links.php
+
 echo 'Auditoría usuarios y roles...'
 docker cp "$ROOT/scripts/audit-users-roles.php" espocrm:/tmp/audit-users-roles.php
 docker exec espocrm php /tmp/audit-users-roles.php

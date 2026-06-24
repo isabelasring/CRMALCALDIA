@@ -46,7 +46,7 @@ class SyncPeticionarioToContact implements BeforeSave
             return;
         }
 
-        if (!$this->shouldSync($entity)) {
+        if (!$this->shouldSync($entity, $options)) {
             return;
         }
 
@@ -69,8 +69,12 @@ class SyncPeticionarioToContact implements BeforeSave
         }
     }
 
-    private function shouldSync(Entity $entity): bool
+    private function shouldSync(Entity $entity, SaveOptions $options): bool
     {
+        if ($options->get('forcePartyLinkSync')) {
+            return true;
+        }
+
         if ($entity->isNew()) {
             return true;
         }
