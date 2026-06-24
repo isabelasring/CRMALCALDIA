@@ -13,7 +13,6 @@ use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
 use Espo\Custom\Tools\Party\PartyRegistryService;
 use Espo\Custom\Tools\User\AlcaldiaUserProfile;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\Modules\Crm\Controllers\CaseObj as BaseCaseObj;
 
