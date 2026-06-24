@@ -9,8 +9,8 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Al guardar o cambiar la fecha de vencimiento, genera alerta inmediata si aplica
- * (vencido o próximo a vencer en ≤ 3 días).
+ * Al guardar un caso con fecha de vencimiento en zona de alerta
+ * (vencido o próximo a vencer en ≤ 3 días), genera notificación en campana.
  */
 class NotifyOnFechaVencimientoChange implements AfterSave
 {
@@ -22,7 +22,7 @@ class NotifyOnFechaVencimientoChange implements AfterSave
 
     public function afterSave(Entity $entity, SaveOptions $options): void
     {
-        if (!$entity->isAttributeChanged('cFechaVencimiento')) {
+        if (CaseVencimientoHelper::isEstadoFinal($entity->get('status'))) {
             return;
         }
 

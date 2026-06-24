@@ -10,6 +10,8 @@ use DateTimeZone;
  */
 class CaseVencimientoHelper
 {
+    private const DEFAULT_TIMEZONE = 'America/Bogota';
+
     public const ESTADOS_FIN = ['Finalizado', 'Proceso cerrado'];
 
     public const ALERT_VENCIDO = 'vencido';
@@ -63,7 +65,7 @@ class CaseVencimientoHelper
 
     public static function today(): DateTimeImmutable
     {
-        return new DateTimeImmutable('today', new DateTimeZone('UTC'));
+        return new DateTimeImmutable('today', new DateTimeZone(self::DEFAULT_TIMEZONE));
     }
 
     public static function todayKey(): string
@@ -74,7 +76,7 @@ class CaseVencimientoHelper
     private static function parseDate(string $fecha): ?DateTimeImmutable
     {
         $fecha = substr(trim($fecha), 0, 10);
-        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha, new DateTimeZone('UTC'));
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha, new DateTimeZone(self::DEFAULT_TIMEZONE));
 
         return $parsed ?: null;
     }

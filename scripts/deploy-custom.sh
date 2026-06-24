@@ -181,6 +181,10 @@ echo 'Permisos de campo (radicado, registro Excel, fecha vencimiento)...'
 docker cp "$ROOT/scripts/configure-radicacion-field-level.php" espocrm:/tmp/configure-radicacion-field-level.php
 docker exec espocrm php /tmp/configure-radicacion-field-level.php
 
+echo 'Job alertas de vencimiento (campana)...'
+docker cp "$ROOT/scripts/configure-case-vencimiento-alerts.php" espocrm:/tmp/configure-case-vencimiento-alerts.php
+docker exec espocrm php /tmp/configure-case-vencimiento-alerts.php
+
 echo 'Historial de asignaciones (permisos por rol)...'
 docker cp "$ROOT/scripts/configure-asignacion-historial.php" espocrm:/tmp/configure-asignacion-historial.php
 docker exec espocrm php /tmp/configure-asignacion-historial.php

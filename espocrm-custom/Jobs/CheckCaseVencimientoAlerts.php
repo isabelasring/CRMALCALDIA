@@ -28,11 +28,14 @@ class CheckCaseVencimientoAlerts implements JobDataLess
             ->getRDBRepository('Case')
             ->where([
                 'cFechaVencimiento!=' => null,
-                'status!=' => CaseVencimientoHelper::ESTADOS_FIN,
             ])
             ->find();
 
         foreach ($collection as $case) {
+            if (CaseVencimientoHelper::isEstadoFinal($case->get('status'))) {
+                continue;
+            }
+
             $alertTipo = CaseVencimientoHelper::classifyAlert($case->get('cFechaVencimiento'), $hoy);
 
             if ($alertTipo === null) {

@@ -11,14 +11,17 @@ use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 
 /**
- * Notifica alertas de casos a Inspección, Radicación, Asignador
- * y al patrullero asignado (si aplica).
+ * Notifica alertas de casos a Inspección, Radicación, Asignador,
+ * al usuario asignado al caso y a cuentas admin con esos roles.
  */
 class CaseAlertNotifier
 {
-    private const ROLES_FIJOS = ['Inspección', 'Radicación', 'Asignador'];
-
-    private const ROLE_PATRULLERO = 'Patrullero';
+    /** @var string[][] */
+    private const ROLE_GROUPS = [
+        ['Inspección', 'Inspeccion'],
+        ['Radicación', 'Radicacion'],
+        ['Asignador'],
+    ];
 
     public function __construct(
         private EntityManager $entityManager
@@ -113,45 +116,59 @@ class CaseAlertNotifier
     {
         $userIds = [];
 
-        foreach (self::ROLES_FIJOS as $roleName) {
-            foreach ($this->getActiveUserIdsByRole($roleName) as $userId) {
+        foreach (self::ROLE_GROUPS as $roleNames) {
+            foreach ($this->getActiveUserIdsByRoles($roleNames) as $userId) {
                 $userIds[] = $userId;
             }
         }
 
+        foreach ($this->getActiveAdminUserIds() as $userId) {
+            $userIds[] = $userId;
+        }
+
         $assignedUserId = $case->get('assignedUserId');
 
-        if ($assignedUserId && $this->userHasRoleById($assignedUserId, self::ROLE_PATRULLERO)) {
+        if ($assignedUserId) {
             $userIds[] = $assignedUserId;
         }
 
         return array_values(array_unique($userIds));
     }
 
-    /** @return string[] */
-    private function getActiveUserIdsByRole(string $roleName): array
+    /**
+     * @param string[] $roleNames
+     * @return string[]
+     */
+    private function getActiveUserIdsByRoles(array $roleNames): array
     {
-        $role = $this->entityManager
-            ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => $roleName])
-            ->findOne();
+        $roleIds = [];
 
-        if (!$role) {
+        foreach ($roleNames as $roleName) {
+            $role = $this->entityManager
+                ->getRDBRepositoryByClass(Role::class)
+                ->where(['name' => $roleName])
+                ->findOne();
+
+            if ($role) {
+                $roleIds[] = $role->getId();
+            }
+        }
+
+        if ($roleIds === []) {
             return [];
         }
 
-        $roleId = $role->getId();
         $userIds = [];
 
         foreach (
             $this->entityManager
                 ->getRDBRepositoryByClass(User::class)
-                ->where(['isActive' => true, 'type' => User::TYPE_REGULAR])
+                ->where(['isActive' => true])
                 ->find() as $user
         ) {
             $roles = $user->getLinkMultipleIdList('roles') ?? [];
 
-            if (in_array($roleId, $roles, true)) {
+            if (array_intersect($roleIds, $roles) !== []) {
                 $userIds[] = $user->getId();
             }
         }
@@ -159,26 +176,21 @@ class CaseAlertNotifier
         return $userIds;
     }
 
-    private function userHasRoleById(string $userId, string $roleName): bool
+    /** @return string[] */
+    private function getActiveAdminUserIds(): array
     {
-        $role = $this->entityManager
-            ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => $roleName])
-            ->findOne();
+        $userIds = [];
 
-        if (!$role) {
-            return false;
+        foreach (
+            $this->entityManager
+                ->getRDBRepositoryByClass(User::class)
+                ->where(['isActive' => true, 'type' => 'admin'])
+                ->find() as $user
+        ) {
+            $userIds[] = $user->getId();
         }
 
-        $user = $this->entityManager->getEntityById(User::ENTITY_TYPE, $userId);
-
-        if (!$user) {
-            return false;
-        }
-
-        $roles = $user->getLinkMultipleIdList('roles') ?? [];
-
-        return in_array($role->getId(), $roles, true);
+        return $userIds;
     }
 
     private function hasAlertNotification(

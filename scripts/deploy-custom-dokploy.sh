@@ -179,6 +179,7 @@ fi
 
 run_php_script configure-case-party-field-access.php
 run_php_script configure-radicacion-field-level.php
+run_php_script configure-case-vencimiento-alerts.php
 run_php_script configure-asignacion-historial.php
 run_php_script configure-comunicacion-caso-entity.php
 run_php_script configure-case-create-defaults.php
