@@ -12,7 +12,7 @@ define('custom:views/case/record/panels/status-timeline', [
             this._loadTimer = null;
             this.timelineData = CaseStatusTimeline.createPlaceholder(this);
 
-            this.listenTo(this.model, 'change:status sync', function () {
+            this.listenTo(this.model, 'change:status change:cNumeroRadicado change:cExpediente change:assignedUserId sync', function () {
                 CaseDetailPanels.invalidate(this.model.id);
                 this.scheduleLoad();
             });

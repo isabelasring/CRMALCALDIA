@@ -7,6 +7,24 @@
     "enSeguimiento": "En seguimiento"
   },
   "labels": {
+    "caseTimeline": "Línea de tiempo",
+    "caseTimelineProgress": "Progreso del caso",
+    "caseTimelineStepOf": "Paso {current} de {total}",
+    "caseTimelineInProgress": "En curso",
+    "caseTimelineCurrentStep": "Paso actual",
+    "caseTimelinePendingDate": "Pendiente",
+    "caseCronogramaTimeZone": "Zona horaria",
+    "caseCronogramaCurrentStatus": "Estado actual",
+    "caseCronogramaDeadline": "Plazo del trámite",
+    "caseCronogramaMilestone": "Hito",
+    "caseCronogramaStatus": "Situación",
+    "caseCronogramaSinVencimiento": "Sin fecha límite registrada",
+    "caseCronogramaTramiteCerrado": "Trámite finalizado",
+    "caseCronogramaVenceHoy": "Vence hoy",
+    "caseCronogramaRestanDia": "1 día restante",
+    "caseCronogramaRestanDias": "{n} días restantes",
+    "caseCronogramaRetrasoDia": "1 día de retraso",
+    "caseCronogramaRetrasoDias": "{n} días de retraso",
     "caseCreatedSuccess": "Case created successfully.",
     "caseEditedSuccess": "Case edited successfully.",
     "caseSavedSuccess": "Saved successfully.",
@@ -44,7 +62,27 @@
     "cRespuestaInmediata": "Respuesta inmediata",
     "description": "Descripción"
   },
+  "caseTimelineShort": {
+    "Pendiente de radicacion": "Pend. radicación",
+    "Radicado": "Radicado",
+    "Asignado": "Asignado",
+    "En proceso": "En proceso",
+    "Visita realizada": "Visita hecha",
+    "Visita aprobada": "Visita aprob.",
+    "Finalizado": "Finalizado",
+    "Proceso cerrado": "Proc. cerrado"
+  },
   "options": {
+    "status": {
+      "Pendiente de radicacion": "Pendiente de radicación",
+      "Radicado": "Radicado",
+      "Asignado": "Asignado",
+      "En proceso": "En proceso",
+      "Visita realizada": "Visita realizada",
+      "Visita aprobada": "Visita aprobada",
+      "Finalizado": "Finalizado",
+      "Proceso cerrado": "Proceso cerrado"
+    },
     "cCanalDeReportePeticionario": {
       "Correo": "Correo",
       "Telefono": "Telefono",

@@ -15,6 +15,7 @@ define('custom:helpers/case-fetch-cache', [], function () {
         delete actaCache[caseId];
         delete actuoCache[caseId];
         delete panelesCache[caseId];
+        delete panelesInflight[caseId];
     };
 
     const invalidateActa = function (caseId) {

@@ -98,25 +98,10 @@ class CaseTimelineService
             ->find();
 
         foreach ($collection as $note) {
-            $data = $note->get('data');
-
-            if ($data instanceof \stdClass) {
-                $data = get_object_vars($data);
-            }
-
-            if (!is_array($data)) {
-                continue;
-            }
-
-            $status = null;
-
-            if (!empty($data['statusValue'])) {
-                $status = (string) $data['statusValue'];
-            }
-
-            if (!$status && $note->get('type') === 'Create') {
-                $status = self::STATUS_FLOW[0];
-            }
+            $status = $this->extractStatusFromNote(
+                (string) $note->get('type'),
+                $note->get('data')
+            );
 
             if ($status && !isset($dates[$status])) {
                 $dates[$status] = (string) $note->get('createdAt');
@@ -134,6 +119,59 @@ class CaseTimelineService
         }
 
         return $dates;
+    }
+
+    /**
+     * @param mixed $data
+     */
+    private function extractStatusFromNote(string $type, mixed $data): ?string
+    {
+        if ($type === 'Create') {
+            return self::STATUS_FLOW[0];
+        }
+
+        if ($data instanceof \stdClass) {
+            $data = get_object_vars($data);
+        }
+
+        if (!is_array($data)) {
+            return null;
+        }
+
+        if (!empty($data['statusValue']) && $this->isValidFlowStatus((string) $data['statusValue'])) {
+            return (string) $data['statusValue'];
+        }
+
+        if (!empty($data['value']) && $this->isValidFlowStatus((string) $data['value'])) {
+            return (string) $data['value'];
+        }
+
+        $attributes = $data['attributes'] ?? null;
+
+        if ($attributes instanceof \stdClass) {
+            $attributes = get_object_vars($attributes);
+        }
+
+        if (!is_array($attributes)) {
+            return null;
+        }
+
+        $became = $attributes['became'] ?? null;
+
+        if ($became instanceof \stdClass) {
+            $became = get_object_vars($became);
+        }
+
+        if (is_array($became) && !empty($became['status']) && $this->isValidFlowStatus((string) $became['status'])) {
+            return (string) $became['status'];
+        }
+
+        return null;
+    }
+
+    private function isValidFlowStatus(string $status): bool
+    {
+        return in_array($status, self::STATUS_FLOW, true);
     }
 
     /**
