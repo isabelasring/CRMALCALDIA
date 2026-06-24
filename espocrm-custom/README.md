@@ -47,7 +47,7 @@ Los módulos AMD usan el prefijo `custom:` — **no renombrar archivos** sin act
 files/scripts/      # Invocados por PHP al generar PDF/Excel
   fill-formato-solicitud.py
   fill-formato-acta-visita.py
-  upsert-crm-excel.py
+  upsert-excel-alcaldia.py
   ...
 ```
 

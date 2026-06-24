@@ -84,7 +84,11 @@ echo "Removing obsolete classes..."
 rm -f \
   "$CUSTOM_TARGET/Hooks/CaseObj/SyncCasePartyFullNamesOnSave.php" \
   "$CUSTOM_TARGET/Hooks/CaseObj/SyncLegacyCaseFieldsOnSave.php" \
-  "$CUSTOM_TARGET/Tools/CaseObj/LegacyCaseFieldMirror.php"
+  "$CUSTOM_TARGET/Hooks/CaseObj/ExportCaseSolicitudExcelOnSave.php" \
+  "$CUSTOM_TARGET/Tools/CaseObj/LegacyCaseFieldMirror.php" \
+  "$CUSTOM_TARGET/Tools/CaseObj/CrmRegistroExcelExporter.php" \
+  "$CUSTOM_TARGET/files/scripts/upsert-crm-excel.py"
+rm -f "$APP_ROOT/data/exports/casos-solicitud.xlsx"
 
 if [ -d "$FORMATOS_SOURCE" ]; then
   echo "Copying templates from formatos/..."

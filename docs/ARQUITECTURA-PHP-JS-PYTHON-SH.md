@@ -100,7 +100,7 @@ EspoCRM **no genera bien** Word/PDF/Excel complejos solo con PHP. Por eso hay sc
 | `fill-formato-acta-visita.py` | Rellena **acta de visita** |
 | `fill-formato-actuo-archivo.py` | Rellena **acto de archivo** |
 | `pdf-overlay-utils.py` | Superpone texto en PDF (marcas/casillas del formato) |
-| `upsert-crm-excel.py` / `upsert-excel-alcaldia.py` | Sincroniza filas con el **Excel oficial** de la Alcaldía |
+| `upsert-excel-alcaldia.py` | Sincroniza filas con el **Excel oficial** de la Alcaldía (`excelAlcaldia.xlsx`) |
 | `generate-reporte-gerencial.py` | Arma el HTML/PDF del **reporte gerencial** |
 
 **Flujo típico:** el usuario guarda un caso o acta → un **Hook PHP** (`GenerateFormato...OnSave`) arma un JSON con los datos → **llama a Python** → Python escribe el `.docx`/`.pdf`/`.xlsx` → PHP lo adjunta al caso como Documento.

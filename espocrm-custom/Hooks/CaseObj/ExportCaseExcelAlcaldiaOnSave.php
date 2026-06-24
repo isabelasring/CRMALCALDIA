@@ -4,11 +4,15 @@ namespace Espo\Custom\Hooks\CaseObj;
 
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\InjectableFactory;
-use Espo\Custom\Tools\CaseObj\CrmRegistroExcelExporter;
+use Espo\Custom\Tools\CaseObj\CasePartyNameHelper;
+use Espo\Custom\Tools\CaseObj\ExcelAlcaldiaExporter;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
-class ExportCaseSolicitudExcelOnSave implements AfterSave
+/**
+ * Actualiza excelAlcaldia.xlsx al guardar un caso radicado (radicado + expediente).
+ */
+class ExportCaseExcelAlcaldiaOnSave implements AfterSave
 {
     public static int $order = 46;
 
@@ -58,8 +62,6 @@ class ExportCaseSolicitudExcelOnSave implements AfterSave
         'cBarrioPerjudicante',
         'cRespuestaInmediata',
         'description',
-        'cRecibidaPorId',
-        'cRemitidoAId',
         'assignedUserId',
     ];
 
@@ -69,7 +71,7 @@ class ExportCaseSolicitudExcelOnSave implements AfterSave
 
     public function afterSave(Entity $entity, SaveOptions $options): void
     {
-        if ($options->get('skipCaseSolicitudExcel')) {
+        if ($options->get('skipCaseExcelAlcaldia') || $options->get('skipCaseSolicitudExcel')) {
             return;
         }
 
@@ -77,14 +79,16 @@ class ExportCaseSolicitudExcelOnSave implements AfterSave
             return;
         }
 
-        $this->injectableFactory->create(CrmRegistroExcelExporter::class)->exportCase($entity);
+        $this->injectableFactory->create(ExcelAlcaldiaExporter::class)->exportCase($entity);
     }
 
     private function shouldExport(Entity $entity): bool
     {
-        $exporter = $this->injectableFactory->create(CrmRegistroExcelExporter::class);
+        if (!CasePartyNameHelper::hasPeticionarioName($entity)) {
+            return false;
+        }
 
-        if (!$exporter->hasPeticionario($entity)) {
+        if (!$this->isPostRadicado($entity)) {
             return false;
         }
 
@@ -99,5 +103,13 @@ class ExportCaseSolicitudExcelOnSave implements AfterSave
         }
 
         return false;
+    }
+
+    private function isPostRadicado(Entity $entity): bool
+    {
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
+
+        return $numero !== '' && $expediente !== '';
     }
 }

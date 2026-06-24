@@ -14,7 +14,11 @@ echo 'Eliminando hooks y clases obsoletas (no presentes en el repo)...'
 docker exec espocrm rm -f \
   /var/www/html/custom/Espo/Custom/Hooks/CaseObj/SyncCasePartyFullNamesOnSave.php \
   /var/www/html/custom/Espo/Custom/Hooks/CaseObj/SyncLegacyCaseFieldsOnSave.php \
-  /var/www/html/custom/Espo/Custom/Tools/CaseObj/LegacyCaseFieldMirror.php
+  /var/www/html/custom/Espo/Custom/Hooks/CaseObj/ExportCaseSolicitudExcelOnSave.php \
+  /var/www/html/custom/Espo/Custom/Tools/CaseObj/LegacyCaseFieldMirror.php \
+  /var/www/html/custom/Espo/Custom/Tools/CaseObj/CrmRegistroExcelExporter.php \
+  /var/www/html/custom/Espo/Custom/files/scripts/upsert-crm-excel.py
+docker exec espocrm rm -f /var/www/html/data/exports/casos-solicitud.xlsx
 
 if [ -d "$ROOT/formatos" ]; then
   echo 'Copiando plantillas desde formatos/...'

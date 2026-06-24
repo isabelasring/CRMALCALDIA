@@ -31,11 +31,11 @@ foreach ($tables as $table) {
     echo str_replace('"', '', $table) . ": {$count} filas eliminadas\n";
 }
 
-$excelPath = '/var/www/html/data/exports/casos-solicitud.xlsx';
+$excelPath = '/var/www/html/data/exports/excelAlcaldia.xlsx';
 
 if (is_file($excelPath)) {
     unlink($excelPath);
-    echo "Excel maestro eliminado.\n";
+    echo "excelAlcaldia.xlsx eliminado (se recrea al radicar).\n";
 }
 
 echo "Listo.\n";

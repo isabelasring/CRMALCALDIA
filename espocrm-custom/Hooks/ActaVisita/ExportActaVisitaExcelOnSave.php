@@ -4,12 +4,13 @@ namespace Espo\Custom\Hooks\ActaVisita;
 
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\InjectableFactory;
-use Espo\Custom\Tools\CaseObj\CrmRegistroExcelExporter;
+use Espo\Custom\Tools\CaseObj\ExcelAlcaldiaExporter;
 use Espo\ORM\Entity;
+use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Actualiza la misma fila del Excel maestro con datos del acta de visita.
+ * Refresca excelAlcaldia.xlsx del caso al guardar un acta de visita.
  */
 class ExportActaVisitaExcelOnSave implements AfterSave
 {
@@ -38,7 +39,8 @@ class ExportActaVisitaExcelOnSave implements AfterSave
     ];
 
     public function __construct(
-        private InjectableFactory $injectableFactory
+        private InjectableFactory $injectableFactory,
+        private EntityManager $entityManager
     ) {}
 
     public function afterSave(Entity $entity, SaveOptions $options): void
@@ -55,7 +57,20 @@ class ExportActaVisitaExcelOnSave implements AfterSave
             return;
         }
 
-        $this->injectableFactory->create(CrmRegistroExcelExporter::class)->exportActa($entity);
+        $case = $this->entityManager->getEntityById('Case', $entity->get('caseId'));
+
+        if (!$case) {
+            return;
+        }
+
+        $numero = trim((string) $case->get('cNumeroRadicado'));
+        $expediente = trim((string) $case->get('cExpediente'));
+
+        if ($numero === '' || $expediente === '') {
+            return;
+        }
+
+        $this->injectableFactory->create(ExcelAlcaldiaExporter::class)->exportCase($case);
     }
 
     private function shouldExport(Entity $entity): bool

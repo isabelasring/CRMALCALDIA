@@ -137,13 +137,6 @@ $n = (int) $pdo->exec("
 ");
 echo "phone_number (huérfanos): {$n} filas eliminadas\n";
 
-$excelPath = '/var/www/html/data/exports/casos-solicitud.xlsx';
-
-if (is_file($excelPath)) {
-    unlink($excelPath);
-    echo "casos-solicitud.xlsx eliminado (se recrea al radicar).\n";
-}
-
 $alcaldiaExcel = '/var/www/html/data/exports/excelAlcaldia.xlsx';
 $removeScript = null;
 
