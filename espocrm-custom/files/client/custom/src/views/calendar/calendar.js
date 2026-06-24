@@ -35,6 +35,12 @@ define('custom:views/calendar/calendar', [
 
             this._dayEventsByDate = {};
             this._recordModal = new RecordModalHelper();
+
+            ['isMoreLink', 'moreDate', 'caseEventType'].forEach(function (prop) {
+                if (this.extendedProps.indexOf(prop) < 0) {
+                    this.extendedProps.push(prop);
+                }
+            }, this);
         },
 
         getEventDateKey: function (event) {
@@ -105,18 +111,31 @@ define('custom:views/calendar/calendar', [
         },
 
         convertToFcEvent: function (event) {
+            if (event.isMoreLink) {
+                var moreEvent = Dep.prototype.convertToFcEvent.call(this, {
+                    scope: 'CaseMore',
+                    id: 'more-' + event.moreDate,
+                    name: event.name,
+                    dateStartDate: event.dateStartDate,
+                    dateEndDate: event.dateEndDate,
+                    color: event.color || this.colors.CaseMore,
+                });
+
+                moreEvent.id = 'CaseMore-more-' + event.moreDate;
+                moreEvent.recordId = null;
+                moreEvent.isMoreLink = true;
+                moreEvent.moreDate = event.moreDate;
+                moreEvent.editable = false;
+                moreEvent.className = ['calendar-more-link'];
+
+                return moreEvent;
+            }
+
             var fcEvent = Dep.prototype.convertToFcEvent.call(this, event);
             var uniqueId = event.uid || event.id;
 
             fcEvent.id = event.scope + '-' + uniqueId;
             fcEvent.recordId = event.recordId || event.id;
-
-            if (event.isMoreLink) {
-                fcEvent.editable = false;
-                fcEvent.className = ['calendar-more-link'];
-                fcEvent.moreDate = event.moreDate;
-                fcEvent.isMoreLink = true;
-            }
 
             if (event.caseEventType) {
                 fcEvent.caseEventType = event.caseEventType;
@@ -181,6 +200,14 @@ define('custom:views/calendar/calendar', [
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
 
+            var self = this;
+
+            setTimeout(function () {
+                self.bindCalendarInteractions();
+            }, 200);
+        },
+
+        bindCalendarInteractions: function () {
             if (!this.calendar) {
                 return;
             }
@@ -207,10 +234,19 @@ define('custom:views/calendar/calendar', [
         },
 
         handleCalendarEventClick: async function (info) {
-            var props = info.event.extendedProps;
+            var props = info.event.extendedProps || {};
+            var eventId = String(info.event.id || '');
 
-            if (props.isMoreLink || props.scope === 'CaseMore') {
-                this.showDayEventsModal(props.moreDate || this.getEventDateKey(props));
+            if (
+                props.isMoreLink
+                || props.scope === 'CaseMore'
+                || eventId.indexOf('CaseMore-more-') === 0
+            ) {
+                this.showDayEventsModal(
+                    props.moreDate
+                    || (eventId.indexOf('CaseMore-more-') === 0 ? eventId.slice('CaseMore-more-'.length) : '')
+                    || this.getEventDateKey(props)
+                );
 
                 return;
             }
@@ -258,6 +294,12 @@ define('custom:views/calendar/calendar', [
             }
 
             var events = this._dayEventsByDate[dateKey] || [];
+
+            if (!events.length) {
+                Espo.Ui.warning(this.translate('dayEventsEmpty', 'labels', 'Calendar'));
+
+                return;
+            }
 
             Espo.Ui.notifyWait();
 

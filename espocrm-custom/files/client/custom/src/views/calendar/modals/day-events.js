@@ -46,12 +46,18 @@ define('custom:views/calendar/modals/day-events', ['views/modal'], function (Dep
                 dateLabel: dateLabel,
                 countLabel: this.eventsList.length + ' actividad(es)',
                 items: this.eventsList.map(function (event) {
+                    if (event.isMoreLink || event.scope === 'CaseMore') {
+                        return null;
+                    }
+
                     return {
                         scope: event.scope,
                         recordId: event.recordId || event.id,
                         name: event.name || '',
                         color: event.color || '#1d8a6e',
                     };
+                }).filter(function (item) {
+                    return item && item.scope && item.recordId;
                 }),
             };
         },
