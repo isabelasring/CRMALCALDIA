@@ -157,6 +157,7 @@ run_php_script sync-user-teams-from-roles.php
 run_php_script configure-excel-alcaldia-case-fields.php
 run_php_script configure-case-enum-placeholders.php
 run_php_script configure-global-tablist.php
+run_php_script configure-default-locale.php
 run_php_script configure-calendar-meetings-only.php
 run_php_script configure-case-kanban.php
 run_php_script configure-user-dashboards.php

@@ -120,6 +120,10 @@ echo 'Menú lateral (tabList global)...'
 docker cp "$ROOT/scripts/configure-global-tablist.php" espocrm:/tmp/configure-global-tablist.php
 docker exec espocrm php /tmp/configure-global-tablist.php
 
+echo 'Idioma español (menú Personas naturales / jurídicas)...'
+docker cp "$ROOT/scripts/configure-default-locale.php" espocrm:/tmp/configure-default-locale.php
+docker exec espocrm php /tmp/configure-default-locale.php
+
 echo 'Calendario: reuniones, tareas y casos...'
 docker cp "$ROOT/scripts/configure-calendar-meetings-only.php" espocrm:/tmp/configure-calendar-meetings-only.php
 docker exec espocrm php /tmp/configure-calendar-meetings-only.php

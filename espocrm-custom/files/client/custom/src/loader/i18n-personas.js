@@ -2,24 +2,44 @@
  * Fuerza etiquetas Persona natural / Persona jurídica en toda la UI.
  */
 (function () {
-    var PATCH_VERSION = '7';
+    var PATCH_VERSION = '8';
     var STORAGE_KEY = 'espo-personas-i18n-version';
 
     var PATCH = {
         Global: {
             scopeNames: {
+                Case: 'Caso',
+                User: 'Usuario',
                 Contact: 'Persona natural',
-                Account: 'Persona jurídica'
+                Account: 'Persona jurídica',
+                Document: 'Documento',
+                Template: 'Plantilla PDF',
+                Calendar: 'Calendario',
+                Task: 'Tarea',
+                Team: 'Equipo'
             },
             scopeNamesPlural: {
+                Case: 'Casos',
+                User: 'Usuarios',
                 Contact: 'Personas naturales',
-                Account: 'Personas jurídicas'
+                Account: 'Personas jurídicas',
+                Document: 'Documentos',
+                Template: 'Plantillas PDF',
+                Task: 'Tareas',
+                Team: 'Equipos'
             },
             labels: {
+                Home: 'Inicio',
                 contacts: 'Personas naturales',
                 accounts: 'Personas jurídicas',
                 Contacts: 'Personas naturales',
-                Accounts: 'Personas jurídicas'
+                Accounts: 'Personas jurídicas',
+                Cases: 'Casos',
+                Users: 'Usuarios',
+                Documents: 'Documentos',
+                Templates: 'Plantillas PDF',
+                Teams: 'Equipos',
+                Tasks: 'Tareas'
             }
         },
         Contact: {
@@ -82,10 +102,30 @@
     };
 
     var DOM_REPLACEMENTS = {
+        'Home': 'Inicio',
+        'Cases': 'Casos',
+        'Users': 'Usuarios',
+        'Contacts': 'Personas naturales',
+        'Accounts': 'Personas jurídicas',
+        'Documents': 'Documentos',
+        'PDF Templates': 'Plantillas PDF',
+        'Templates': 'Plantillas PDF',
+        'Calendar': 'Calendario',
+        'Tasks': 'Tareas',
+        'Teams': 'Equipos',
         'Contactos': 'Personas naturales',
         'Cuentas': 'Personas jurídicas',
+        'Casos': 'Casos',
+        'Usuarios': 'Usuarios',
+        'Documentos': 'Documentos',
+        'Plantillas PDF': 'Plantillas PDF',
+        'Calendario': 'Calendario',
+        'Tareas': 'Tareas',
+        'Equipos': 'Equipos',
         'Crear Contacto': 'Crear persona natural',
-        'Crear Cuenta': 'Crear persona jurídica'
+        'Crear Cuenta': 'Crear persona jurídica',
+        'Create Contact': 'Crear persona natural',
+        'Create Account': 'Crear persona jurídica'
     };
 
     function mergeScope(target, source) {
@@ -119,7 +159,7 @@
 
     function patchDomLabels() {
         document.querySelectorAll(
-            '#navbar a, .page-header h3, .header-title, .breadcrumb a, .panel-heading .panel-title'
+            '#navbar a, #navbar .item-label, .page-header h3, .header-title, .breadcrumb a, .panel-heading .panel-title'
         ).forEach(function (el) {
             var text = (el.textContent || '').trim();
 
@@ -147,6 +187,20 @@
         applyLanguagePatch(language);
         patchDomLabels();
         localStorage.setItem(STORAGE_KEY, PATCH_VERSION);
+
+        if (!window.__espoPersonasNavbarObserver) {
+            window.__espoPersonasNavbarObserver = new MutationObserver(function () {
+                patchDomLabels();
+            });
+            var navbar = document.querySelector('#navbar');
+
+            if (navbar) {
+                window.__espoPersonasNavbarObserver.observe(navbar, {
+                    childList: true,
+                    subtree: true,
+                });
+            }
+        }
     }
 
     function waitForApp() {

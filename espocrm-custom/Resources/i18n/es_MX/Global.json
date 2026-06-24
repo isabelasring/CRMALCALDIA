@@ -1,16 +1,36 @@
 {
   "scopeNames": {
     "Account": "Persona jurídica",
-    "Contact": "Persona natural"
+    "Case": "Caso",
+    "Contact": "Persona natural",
+    "Document": "Documento",
+    "Template": "Plantilla PDF",
+    "User": "Usuario",
+    "Team": "Equipo",
+    "Task": "Tarea",
+    "Calendar": "Calendario"
   },
   "scopeNamesPlural": {
     "Account": "Personas jurídicas",
-    "Contact": "Personas naturales"
+    "Case": "Casos",
+    "Contact": "Personas naturales",
+    "Document": "Documentos",
+    "Template": "Plantillas PDF",
+    "User": "Usuarios",
+    "Team": "Equipos",
+    "Task": "Tareas"
   },
   "labels": {
+    "Home": "Inicio",
     "contacts": "Personas naturales",
     "accounts": "Personas jurídicas",
     "Contacts": "Personas naturales",
-    "Accounts": "Personas jurídicas"
+    "Accounts": "Personas jurídicas",
+    "Cases": "Casos",
+    "Users": "Usuarios",
+    "Documents": "Documentos",
+    "Templates": "Plantillas PDF",
+    "Teams": "Equipos",
+    "Tasks": "Tareas"
   }
 }
