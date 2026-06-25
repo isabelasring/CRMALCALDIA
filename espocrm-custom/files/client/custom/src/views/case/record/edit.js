@@ -719,10 +719,10 @@ define('custom:views/case/record/edit', [
             }
 
             const isPureAsignador = AsignadorEditMode.isPureAsignadorUser(user);
+            const inAsignadorEdit = isPureAsignador && this.isAsignarMode();
             const show = !model.isNew() && PostRadicacionFields.shouldShowAsignacion(user, model);
-            const canEdit = isPureAsignador
-                ? this.isAsignarMode()
-                : PostRadicacionFields.canEditAsignacion(user, model);
+            const canEdit = inAsignadorEdit
+                || PostRadicacionFields.canEditAsignacion(user, model);
 
             this.findPanel('gestionPosteriorRadicacion').toggle(show);
 
@@ -737,7 +737,7 @@ define('custom:views/case/record/edit', [
             }
 
             const showMotivo = show && (
-                (isPureAsignador && this.isAsignarMode())
+                inAsignadorEdit
                 || PostRadicacionFields.shouldShowMotivoReasignacion(
                     user,
                     model,
@@ -751,7 +751,7 @@ define('custom:views/case/record/edit', [
                 $motivoCell.toggle(showMotivo);
             }
 
-            if (!showMotivo && model.get('cMotivoReasignacion')) {
+            if (!showMotivo && !isPureAsignador && model.get('cMotivoReasignacion')) {
                 model.set('cMotivoReasignacion', null, {silent: true});
             }
 
@@ -786,6 +786,8 @@ define('custom:views/case/record/edit', [
                 } else if (!canEdit && typeof motivoView.setReadOnly === 'function') {
                     motivoView.setReadOnly();
                 }
+            } else if (motivoView && inAsignadorEdit && typeof motivoView.setNotReadOnly === 'function') {
+                motivoView.setNotReadOnly();
             }
         },
 

@@ -272,39 +272,29 @@ define('custom:views/case/record/detail', [
             const model = this.model;
             const $editBtn = this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li');
 
-            if (!AsignadorEditMode.isPureAsignadorUser(user)) {
-                if (this._asignarButtonAdded) {
-                    this.safeRemoveMenuItem('asignarCaso');
-                    this._asignarButtonAdded = false;
-                }
-
-                return;
-            }
-
             if (this._asignarButtonAdded) {
                 this.safeRemoveMenuItem('asignarCaso');
                 this._asignarButtonAdded = false;
             }
 
-            $editBtn.hide();
-
-            if (!AsignadorEditMode.shouldShowAsignarButton(user, model)) {
+            if (!AsignadorEditMode.isPureAsignadorUser(user)) {
                 return;
             }
 
-            const hasAssignee = !!String(model.get('assignedUserId') || '').trim();
-            const label = hasAssignee
-                ? this.translate('editarAsignacion', 'labels', 'Case')
-                : this.translate('asignarCaso', 'labels', 'Case');
+            if (!AsignadorEditMode.shouldShowAsignarButton(user, model)) {
+                $editBtn.hide();
 
-            if (this.safeAddMenuItem({
-                label: label,
-                name: 'asignarCaso',
-                action: 'asignarCaso',
-                style: 'primary',
-            })) {
-                this._asignarButtonAdded = true;
+                return;
             }
+
+            $editBtn.show();
+
+            const editLabel = this.translate('Edit', 'labels', 'Global');
+
+            $editBtn.find('.title, .btn-text').text(editLabel);
+            $editBtn.contents().filter(function () {
+                return this.nodeType === 3;
+            }).first().replaceWith(editLabel);
         },
 
         updateRadicacionDetailActions: function () {
@@ -595,8 +585,7 @@ define('custom:views/case/record/detail', [
                 $cell.toggle(show);
             }
 
-            const motivo = String(model.get('cMotivoReasignacion') || '').trim();
-            const showMotivo = show && (isPureAsignador || motivo !== '');
+            const showMotivo = show && isPureAsignador;
 
             const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
 
