@@ -5,6 +5,8 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
         setup: function () {
             Dep.prototype.setup.call(this);
 
+            this.$el.addClass('case-list-root');
+
             if (!this.getAcl().check(this.scope, 'create')) {
                 this.menu = this.menu || {};
 
@@ -36,14 +38,28 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
                 : true;
         },
 
+        getKanbanRoot: function () {
+            if (this.$el.hasClass('list-kanban')) {
+                return this.$el;
+            }
+
+            var $kanban = this.$el.find('.list-kanban').first();
+
+            return $kanban.length ? $kanban : null;
+        },
+
         decorateKanbanBoard: function () {
-            if (!this.$el.hasClass('list-kanban')) {
+            var $kanban = this.getKanbanRoot();
+
+            this.$el.toggleClass('case-kanban-active', !!$kanban);
+
+            if (!$kanban) {
                 return;
             }
 
-            var $headers = this.$el.find('.kanban-head-container th.group-header');
+            var $headers = $kanban.find('.kanban-head-container th.group-header');
 
-            this.$el.find('td.group-column').each(function (index) {
+            $kanban.find('td.group-column').each(function (index) {
                 var $column = $(this);
                 var count = $column.find('.item').length;
                 var $header = $headers.eq(index);
@@ -60,6 +76,70 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
                 $label.attr('data-base-label', baseLabel);
                 $label.text(baseLabel + ' (' + count + ')');
             });
+
+            this.decorateKanbanDueDates($kanban);
+        },
+
+        decorateKanbanDueDates: function ($kanban) {
+            var self = this;
+            var today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+
+            $kanban.find('.item').each(function () {
+                var $item = $(this);
+                var id = $item.data('id');
+                var model = self.collection.get(id);
+                var $dueField = $item.find('.field[data-name="cFechaVencimiento"]');
+
+                $dueField.removeClass('case-kanban-vencimiento--vencida case-kanban-vencimiento--proxima');
+
+                if (!model || !$dueField.length) {
+                    return;
+                }
+
+                var dueRaw = model.get('cFechaVencimiento');
+
+                if (!dueRaw) {
+                    return;
+                }
+
+                var due = self.parseDateOnly(dueRaw);
+
+                if (!due) {
+                    return;
+                }
+
+                if (due < today) {
+                    $dueField.addClass('case-kanban-vencimiento--vencida');
+                } else if ((due - today) <= (3 * 24 * 60 * 60 * 1000)) {
+                    $dueField.addClass('case-kanban-vencimiento--proxima');
+                }
+            });
+        },
+
+        parseDateOnly: function (value) {
+            var text = String(value || '').trim();
+
+            if (!text) {
+                return null;
+            }
+
+            var match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+            if (match) {
+                return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+            }
+
+            var parsed = new Date(text);
+
+            if (isNaN(parsed.getTime())) {
+                return null;
+            }
+
+            parsed.setHours(0, 0, 0, 0);
+
+            return parsed;
         },
     });
 });

@@ -17,6 +17,10 @@
         "isMuted": true
     },
     {
+        "name": "cFechaVencimiento",
+        "isMuted": true
+    },
+    {
         "name": "cFechaCaso",
         "isMuted": true
     },
