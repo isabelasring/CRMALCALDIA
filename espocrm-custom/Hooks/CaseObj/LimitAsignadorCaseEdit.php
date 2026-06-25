@@ -3,7 +3,7 @@
 namespace Espo\Custom\Hooks\CaseObj;
 
 use Espo\Core\Hook\Hook\BeforeSave;
-use Espo\Entities\Role;
+use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
@@ -16,8 +16,6 @@ class LimitAsignadorCaseEdit implements BeforeSave
 {
     public static int $order = 8;
 
-    private const ROLE_ASIGNADOR = 'Asignador';
-
     private const ALLOWED = ['assignedUserId', 'assignedUserName', 'cMotivoReasignacion'];
 
     public function __construct(
@@ -27,7 +25,13 @@ class LimitAsignadorCaseEdit implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if ($this->user->isAdmin() || $entity->isNew() || !$this->hasAsignadorRole()) {
+        if ($this->user->isAdmin() || $entity->isNew()) {
+            return;
+        }
+
+        $profile = new AlcaldiaUserProfile($this->entityManager);
+
+        if (!$profile->isAsignador($this->user) || $profile->isInspeccion($this->user)) {
             return;
         }
 
@@ -56,21 +60,5 @@ class LimitAsignadorCaseEdit implements BeforeSave
         $expediente = trim((string) $entity->get('cExpediente'));
 
         return $numero !== '' && $expediente !== '';
-    }
-
-    private function hasAsignadorRole(): bool
-    {
-        $role = $this->entityManager
-            ->getRDBRepositoryByClass(Role::class)
-            ->where(['name' => self::ROLE_ASIGNADOR])
-            ->findOne();
-
-        if (!$role) {
-            return false;
-        }
-
-        $roles = $this->user->getLinkMultipleIdList('roles') ?? [];
-
-        return in_array($role->getId(), $roles, true);
     }
 }

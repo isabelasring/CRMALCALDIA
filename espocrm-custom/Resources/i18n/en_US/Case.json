@@ -9,6 +9,8 @@
   },
   "labels": {
     "radicarCaso": "Radicar",
+    "asignarCaso": "Asignar",
+    "editarAsignacion": "Editar asignación",
     "caseTimeline": "Línea de tiempo",
     "caseTimelineProgress": "Progreso del caso",
     "caseTimelineStepOf": "Paso {current} de {total}",
@@ -105,6 +107,9 @@
   },
   "messages": {
     "radicarUseButton": "Use el botón Radicar para registrar el radicado y el expediente por primera vez.",
-    "radicacionCannotCreateCase": "El rol de radicación no puede crear casos nuevos."
+    "radicacionCannotCreateCase": "El rol de radicación no puede crear casos nuevos.",
+    "asignarUseButton": "Use el botón Asignar para asignar el patrullero al caso.",
+    "asignadorCannotCreateCase": "El rol de asignación no puede crear casos nuevos.",
+    "asignadorCaseNotReady": "Solo puede asignar casos que ya tengan radicado y expediente."
   }
 }

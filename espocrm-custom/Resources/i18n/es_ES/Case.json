@@ -94,6 +94,8 @@
     "actaVisitaPrintBlocked": "Permita ventanas emergentes para imprimir el acta.",
     "editarActaVisita": "Editar acta",
     "radicarCaso": "Radicar",
+    "asignarCaso": "Asignar",
+    "editarAsignacion": "Editar asignación",
     "actaVisitaPanelHelp": "Diligencie el acta oficial de visita para este caso.",
     "actaVisitaEditHelp": "El acta ya fue diligenciada. Puede revisarla o modificarla.",
     "actaVisitaInspeccionHelp": "El acta ya fue diligenciada. Puede editarla desde aquí.",
@@ -260,6 +262,9 @@
   },
   "messages": {
     "radicarUseButton": "Use el botón Radicar para registrar el radicado y el expediente por primera vez.",
-    "radicacionCannotCreateCase": "El rol de radicación no puede crear casos nuevos."
+    "radicacionCannotCreateCase": "El rol de radicación no puede crear casos nuevos.",
+    "asignarUseButton": "Use el botón Asignar para asignar el patrullero al caso.",
+    "asignadorCannotCreateCase": "El rol de asignación no puede crear casos nuevos.",
+    "asignadorCaseNotReady": "Solo puede asignar casos que ya tengan radicado y expediente."
   }
 }

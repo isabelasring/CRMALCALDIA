@@ -114,9 +114,31 @@ if ($asignadorRole) {
     ];
 
     $asignadorRole->set('fieldData', $fieldData);
+
+    $data = $asignadorRole->get('data');
+
+    if ($data instanceof stdClass) {
+        $data = json_decode(json_encode($data), true);
+    }
+
+    if (!is_array($data)) {
+        $data = [];
+    }
+
+    if (!isset($data['Case']) || !is_array($data['Case'])) {
+        $data['Case'] = [];
+    }
+
+    $data['Case']['create'] = 'no';
+    $data['Case']['read'] = $data['Case']['read'] ?? 'all';
+    $data['Case']['edit'] = $data['Case']['edit'] ?? 'all';
+    $data['Case']['delete'] = 'no';
+    $data['Case']['stream'] = $data['Case']['stream'] ?? 'all';
+
+    $asignadorRole->set('data', $data);
     $em->saveEntity($asignadorRole);
 
-    echo "Rol Asignador: campo cMotivoReasignacion habilitado en Case.\n";
+    echo "Rol Asignador: cMotivoReasignacion editable; Case create=no.\n";
 }
 
 echo "Listo.\n";

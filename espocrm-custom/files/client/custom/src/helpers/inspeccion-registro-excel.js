@@ -1,7 +1,8 @@
 define('custom:helpers/inspeccion-registro-excel', [
     'custom:helpers/radicacion-fields',
     'custom:helpers/radicacion-edit-mode',
-], function (RadicacionFields, RadicacionEditMode) {
+    'custom:helpers/asignador-edit-mode',
+], function (RadicacionFields, RadicacionEditMode, AsignadorEditMode) {
 
     const PANEL_NAME = 'registroExcelAlcaldia';
 
@@ -16,6 +17,10 @@ define('custom:helpers/inspeccion-registro-excel', [
 
     const canEditRegistroExcelFields = function (user, recordView) {
         if (recordView && RadicacionEditMode.isPureRadicacionUser(user)) {
+            return false;
+        }
+
+        if (recordView && AsignadorEditMode.isPureAsignadorUser(user)) {
             return false;
         }
 

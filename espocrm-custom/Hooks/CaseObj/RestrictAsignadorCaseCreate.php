@@ -11,9 +11,9 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Rol Asignador: no crear casos; solo editar casos post-radicados (radicado + expediente).
+ * Rol Asignador (sin Inspección/Radicación): no puede crear casos nuevos.
  */
-class RestrictAsignadorCaseAccess implements BeforeSave
+class RestrictAsignadorCaseCreate implements BeforeSave
 {
     public function __construct(
         private User $user,
@@ -22,7 +22,7 @@ class RestrictAsignadorCaseAccess implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if ($this->user->isAdmin()) {
+        if ($this->user->isAdmin() || !$entity->isNew()) {
             return;
         }
 
@@ -32,20 +32,6 @@ class RestrictAsignadorCaseAccess implements BeforeSave
             return;
         }
 
-        if ($entity->isNew()) {
-            throw new Forbidden('Los asignadores no pueden crear casos.');
-        }
-
-        if (!$this->isPostRadicado($entity)) {
-            throw new Forbidden('Solo puede gestionar casos con radicado y expediente.');
-        }
-    }
-
-    private function isPostRadicado(Entity $entity): bool
-    {
-        $numero = trim((string) $entity->get('cNumeroRadicado'));
-        $expediente = trim((string) $entity->get('cExpediente'));
-
-        return $numero !== '' && $expediente !== '';
+        throw new Forbidden('El rol de asignación no puede crear casos nuevos.');
     }
 }

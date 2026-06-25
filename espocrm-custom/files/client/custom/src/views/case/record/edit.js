@@ -12,8 +12,9 @@ define('custom:views/case/record/edit', [
     'custom:helpers/radicado-assistant-panel',
     'custom:helpers/inspeccion-registro-excel',
     'custom:helpers/radicacion-edit-mode',
+    'custom:helpers/asignador-edit-mode',
     'custom:helpers/direccion-estructurada',
-], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, CaseCreateDefaults, PersonaTipoFields, PartyDocumentLookup, RadicadoGenerator, RadicadoCatalog, RadicadoAssistantPanel, InspeccionRegistroExcel, RadicacionEditMode, DireccionEstructurada) {
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, CaseCreateDefaults, PersonaTipoFields, PartyDocumentLookup, RadicadoGenerator, RadicadoCatalog, RadicadoAssistantPanel, InspeccionRegistroExcel, RadicacionEditMode, AsignadorEditMode, DireccionEstructurada) {
 
     return Dep.extend({
 
@@ -56,15 +57,21 @@ define('custom:views/case/record/edit', [
                 }
 
                 this.enforceRadicacionEntry();
+                this.enforceAsignadorEntry();
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
                 this.toggleRegistroExcelPanel();
                 this.applyRadicacionFieldAccess();
+                this.applyAsignadorFieldAccess();
             });
         },
 
         isRadicarMode: function () {
             return RadicacionEditMode.isRadicarMode(this);
+        },
+
+        isAsignarMode: function () {
+            return AsignadorEditMode.isAsignarMode(this);
         },
 
         enforceRadicacionEntry: function () {
@@ -87,6 +94,50 @@ define('custom:views/case/record/edit', [
 
             Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
             this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+        },
+
+        enforceAsignadorEntry: function () {
+            if (!AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                return;
+            }
+
+            if (this.model.isNew()) {
+                Espo.Ui.warning(this.translate('asignadorCannotCreateCase', 'messages', 'Case'));
+                this.getRouter().navigate('#Home', {trigger: true});
+
+                return;
+            }
+
+            if (!PostRadicacionFields.isCasePostRadicado(this.model)) {
+                Espo.Ui.warning(this.translate('asignadorCaseNotReady', 'messages', 'Case'));
+                this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+
+                return;
+            }
+
+            if (this.isAsignarMode()) {
+                this._asignarMode = true;
+
+                return;
+            }
+
+            Espo.Ui.warning(this.translate('asignarUseButton', 'messages', 'Case'));
+            this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+        },
+
+        applyAsignadorFieldAccess: function () {
+            if (!AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                return;
+            }
+
+            AsignadorEditMode.applyRestrictedEdit(this);
+
+            if (!this.isAsignarMode()) {
+                return;
+            }
+
+            this.$el.find('.panel[data-name], .panel[data-panel-name], .record-panel[data-name]').show();
+            AsignadorEditMode.scheduleRestrictedEdit(this);
         },
 
         hideRadicacionSaveActions: function () {
@@ -289,8 +340,14 @@ define('custom:views/case/record/edit', [
             const self = this;
             const applyRoleUi = function () {
                 self.enforceRadicacionEntry();
+                self.enforceAsignadorEntry();
 
-                if (!RadicacionEditMode.isPureRadicacionUser(self.getUser()) || self.isRadicarMode()) {
+                if (
+                    !RadicacionEditMode.isPureRadicacionUser(self.getUser())
+                    && !AsignadorEditMode.isPureAsignadorUser(self.getUser())
+                ) {
+                    self.applyFieldModes();
+                } else if (self.isRadicarMode() || self.isAsignarMode()) {
                     self.applyFieldModes();
                 }
 
@@ -310,6 +367,7 @@ define('custom:views/case/record/edit', [
                 }
 
                 self.applyRadicacionFieldAccess();
+                self.applyAsignadorFieldAccess();
                 self.ensureInspeccionEditAccess();
             };
 
@@ -384,6 +442,16 @@ define('custom:views/case/record/edit', [
         },
 
         applyFieldModes: function () {
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                AsignadorEditMode.applyRestrictedEdit(this);
+
+                if (this.isAsignarMode()) {
+                    return;
+                }
+
+                return;
+            }
+
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 RadicacionEditMode.applyRestrictedEdit(this);
 
@@ -440,6 +508,10 @@ define('custom:views/case/record/edit', [
 
         ensureInspeccionEditAccess: function () {
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+                return;
+            }
+
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
                 return;
             }
 
@@ -646,10 +718,17 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
+            const isPureAsignador = AsignadorEditMode.isPureAsignadorUser(user);
             const show = !model.isNew() && PostRadicacionFields.shouldShowAsignacion(user, model);
-            const canEdit = PostRadicacionFields.canEditAsignacion(user, model);
+            const canEdit = isPureAsignador
+                ? this.isAsignarMode()
+                : PostRadicacionFields.canEditAsignacion(user, model);
 
             this.findPanel('gestionPosteriorRadicacion').toggle(show);
+
+            if (isPureAsignador && show) {
+                AsignadorEditMode.moveAssignmentPanelToTop(this);
+            }
 
             const $cell = this.$el.find('[data-name="assignedUser"]').closest('.cell');
 
@@ -657,10 +736,13 @@ define('custom:views/case/record/edit', [
                 $cell.toggle(show);
             }
 
-            const showMotivo = show && PostRadicacionFields.shouldShowMotivoReasignacion(
-                user,
-                model,
-                this._initialAssignedUserId
+            const showMotivo = show && (
+                (isPureAsignador && this.isAsignarMode())
+                || PostRadicacionFields.shouldShowMotivoReasignacion(
+                    user,
+                    model,
+                    this._initialAssignedUserId
+                )
             );
 
             const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');

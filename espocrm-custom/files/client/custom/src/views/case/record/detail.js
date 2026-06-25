@@ -16,7 +16,8 @@ define('custom:views/case/record/detail', [
     'custom:helpers/case-documentos',
     'custom:helpers/case-detail-panels',
     'custom:helpers/radicacion-edit-mode',
-], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus, InspeccionActuoArchivo, ActuoArchivoModal, ActuoArchivoCaseStatus, PersonaTipoFields, RadicadoGenerator, RadicadoAssistantPanel, InspeccionRegistroExcel, CaseDocumentos, CaseDetailPanels, RadicacionEditMode) {
+    'custom:helpers/asignador-edit-mode',
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus, InspeccionActuoArchivo, ActuoArchivoModal, ActuoArchivoCaseStatus, PersonaTipoFields, RadicadoGenerator, RadicadoAssistantPanel, InspeccionRegistroExcel, CaseDocumentos, CaseDetailPanels, RadicacionEditMode, AsignadorEditMode) {
 
     return Dep.extend({
 
@@ -64,6 +65,7 @@ define('custom:views/case/record/detail', [
             this._actaVisitaButtonAdded = false;
             this._actuoArchivoButtonAdded = false;
             this._radicarButtonAdded = false;
+            this._asignarButtonAdded = false;
 
             this.listenTo(this.model, 'change', function () {
                 this.toggleActaPanels();
@@ -75,6 +77,7 @@ define('custom:views/case/record/detail', [
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
                 this.updateRadicacionDetailActions();
+                this.updateAsignadorDetailActions();
                 this.scheduleRefreshActaVisitaPanel();
                 this.scheduleRefreshFormatoGeneradoDocs();
             });
@@ -113,6 +116,7 @@ define('custom:views/case/record/detail', [
                 this.togglePostRadicacionFields();
                 this.toggleRegistroExcelPanel();
                 this.updateRadicacionDetailActions();
+                this.updateAsignadorDetailActions();
             });
         },
 
@@ -225,6 +229,18 @@ define('custom:views/case/record/detail', [
         },
 
         actionEdit: function () {
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                if (!AsignadorEditMode.shouldShowAsignarButton(this.getUser(), this.model)) {
+                    Espo.Ui.warning(this.translate('asignarUseButton', 'messages', 'Case'));
+
+                    return;
+                }
+
+                AsignadorEditMode.openAsignadoEdit(this);
+
+                return;
+            }
+
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 if (!RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)) {
                     Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
@@ -245,6 +261,50 @@ define('custom:views/case/record/detail', [
 
         actionRadicarCaso: function () {
             RadicacionEditMode.openRadicadoEdit(this);
+        },
+
+        actionAsignarCaso: function () {
+            AsignadorEditMode.openAsignadoEdit(this);
+        },
+
+        updateAsignadorDetailActions: function () {
+            const user = this.getUser();
+            const model = this.model;
+            const $editBtn = this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li');
+
+            if (!AsignadorEditMode.isPureAsignadorUser(user)) {
+                if (this._asignarButtonAdded) {
+                    this.safeRemoveMenuItem('asignarCaso');
+                    this._asignarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            if (this._asignarButtonAdded) {
+                this.safeRemoveMenuItem('asignarCaso');
+                this._asignarButtonAdded = false;
+            }
+
+            $editBtn.hide();
+
+            if (!AsignadorEditMode.shouldShowAsignarButton(user, model)) {
+                return;
+            }
+
+            const hasAssignee = !!String(model.get('assignedUserId') || '').trim();
+            const label = hasAssignee
+                ? this.translate('editarAsignacion', 'labels', 'Case')
+                : this.translate('asignarCaso', 'labels', 'Case');
+
+            if (this.safeAddMenuItem({
+                label: label,
+                name: 'asignarCaso',
+                action: 'asignarCaso',
+                style: 'primary',
+            })) {
+                this._asignarButtonAdded = true;
+            }
         },
 
         updateRadicacionDetailActions: function () {
@@ -326,6 +386,7 @@ define('custom:views/case/record/detail', [
             this.updateActaVisitaButton();
             this.updateActuoArchivoButton();
             this.updateRadicacionDetailActions();
+            this.updateAsignadorDetailActions();
             this.toggleActaPanels();
             this.toggleActuoArchivoPanels();
             this.setActaFieldsReadOnlyForReview();
@@ -338,6 +399,7 @@ define('custom:views/case/record/detail', [
                 self.toggleActaPanels();
                 self.updateActaVisitaButton();
                 self.updateRadicacionDetailActions();
+                self.updateAsignadorDetailActions();
                 self.refreshActaVisitaPanel();
             };
 
@@ -518,9 +580,14 @@ define('custom:views/case/record/detail', [
         togglePostRadicacionFields: function () {
             const user = this.getUser();
             const model = this.model;
+            const isPureAsignador = AsignadorEditMode.isPureAsignadorUser(user);
             const show = PostRadicacionFields.shouldShowAsignacion(user, model);
 
             this.findPanel('gestionPosteriorRadicacion').toggle(show);
+
+            if (isPureAsignador && show) {
+                AsignadorEditMode.moveAssignmentPanelToTop(this);
+            }
 
             const $cell = this.$el.find('[data-name="assignedUser"]').closest('.cell');
 
@@ -529,7 +596,7 @@ define('custom:views/case/record/detail', [
             }
 
             const motivo = String(model.get('cMotivoReasignacion') || '').trim();
-            const showMotivo = show && motivo !== '';
+            const showMotivo = show && (isPureAsignador || motivo !== '');
 
             const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
 
