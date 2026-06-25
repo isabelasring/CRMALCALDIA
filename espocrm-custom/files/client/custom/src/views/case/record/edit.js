@@ -75,6 +75,25 @@ define('custom:views/case/record/edit', [
             return AsignadorEditMode.isAsignarMode(this);
         },
 
+        updateRadicarPageTitle: function () {
+            if (!RadicacionEditMode.isPureRadicacionUser(this.getUser()) || !this.isRadicarMode()) {
+                return;
+            }
+
+            const label = this.translate('radicarCaso', 'labels', 'Case');
+            let view = this;
+
+            while (view) {
+                if (typeof view.setPageTitle === 'function') {
+                    view.setPageTitle(label);
+
+                    return;
+                }
+
+                view = typeof view.getParentView === 'function' ? view.getParentView() : null;
+            }
+        },
+
         enforceRadicacionEntry: function () {
             if (!RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 return;
@@ -89,6 +108,7 @@ define('custom:views/case/record/edit', [
 
             if (this.isRadicarMode()) {
                 this._radicarMode = true;
+                this.updateRadicarPageTitle();
 
                 return;
             }
@@ -388,6 +408,7 @@ define('custom:views/case/record/edit', [
                 self.applyRadicacionFieldAccess();
                 self.applyAsignadorFieldAccess();
                 self.ensureInspeccionEditAccess();
+                self.updateRadicarPageTitle();
             };
 
             const scheduleRoleUiRetry = function () {

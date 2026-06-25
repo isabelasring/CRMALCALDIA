@@ -84,7 +84,7 @@ define('custom:helpers/radicacion-edit-mode', [
         activateRadicarMode(recordView.model.id);
 
         recordView.getRouter().navigate(
-            '#' + recordView.entityType + '/edit/' + recordView.model.id,
+            '#' + recordView.entityType + '/edit/' + recordView.model.id + '?radicar=1',
             {trigger: true}
         );
     };

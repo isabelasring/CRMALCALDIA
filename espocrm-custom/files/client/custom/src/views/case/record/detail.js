@@ -250,10 +250,13 @@ define('custom:views/case/record/detail', [
             }
 
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                if (
-                    RadicacionEditMode.shouldShowRadicarButton(this.getUser(), this.model)
-                    || RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)
-                ) {
+                if (RadicacionEditMode.shouldShowRadicarButton(this.getUser(), this.model)) {
+                    RadicacionEditMode.openRadicadoEdit(this);
+
+                    return;
+                }
+
+                if (RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)) {
                     RadicacionEditMode.openRadicadoEdit(this);
 
                     return;
@@ -318,6 +321,27 @@ define('custom:views/case/record/detail', [
                 .hide();
         },
 
+        getDetailActionElements: function () {
+            let $root = this.$el;
+            const header = typeof this.getHeaderView === 'function' ? this.getHeaderView() : null;
+
+            if (header && header.$el) {
+                $root = $root.add(header.$el);
+            }
+
+            return $root;
+        },
+
+        findPrimaryActionButton: function (action) {
+            return this.getDetailActionElements()
+                .find('[data-action="' + action + '"]')
+                .filter(function () {
+                    return $(this).closest('.dropdown-menu').length === 0;
+                })
+                .closest('.btn, a.btn, .dropdown-item, li')
+                .first();
+        },
+
         setPrimaryActionButtonLabel: function ($btn, label) {
             $btn.find('.title, .btn-text').text(label);
             $btn.contents().filter(function () {
@@ -325,29 +349,89 @@ define('custom:views/case/record/detail', [
             }).first().replaceWith(label);
         },
 
-        updateRadicacionDetailActions: function () {
-            const user = this.getUser();
-            const model = this.model;
-            const $editBtn = this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li');
+        ensureRadicarActionButton: function () {
+            const label = this.translate('radicarCaso', 'labels', 'Case');
+            let $radicarBtn = this.findPrimaryActionButton('radicarCaso');
 
+            if (!$radicarBtn.length) {
+                const $editBtn = this.findPrimaryActionButton('edit');
+
+                if ($editBtn.length) {
+                    $radicarBtn = $editBtn.clone(true);
+                    $radicarBtn.attr('data-action', 'radicarCaso');
+                    $radicarBtn.find('[data-action]').attr('data-action', 'radicarCaso');
+                    $editBtn.after($radicarBtn);
+                } else {
+                    $radicarBtn = $('<a role="button" tabindex="0" class="btn btn-primary btn-xs-wide" data-action="radicarCaso"></a>');
+                    const $host = this.getDetailActionElements()
+                        .find('.page-header-row .btn-group, .header-buttons, .button-container')
+                        .first();
+
+                    if ($host.length) {
+                        $host.append($radicarBtn);
+                    } else if (!this.safeAddMenuItem({
+                        label: label,
+                        name: 'radicarCaso',
+                        action: 'radicarCaso',
+                        style: 'primary',
+                    })) {
+                        return null;
+                    } else {
+                        this._radicarButtonAdded = true;
+
+                        return this.findPrimaryActionButton('radicarCaso');
+                    }
+                }
+            }
+
+            this.setPrimaryActionButtonLabel($radicarBtn, label);
+            $radicarBtn.show();
+
+            return $radicarBtn;
+        },
+
+        hideRadicarActionButton: function () {
             if (this._radicarButtonAdded) {
                 this.safeRemoveMenuItem('radicarCaso');
                 this._radicarButtonAdded = false;
             }
 
+            this.findPrimaryActionButton('radicarCaso').hide();
+        },
+
+        scheduleRadicacionDetailActions: function () {
+            const self = this;
+
+            [0, 120, 400].forEach(function (delay) {
+                window.setTimeout(function () {
+                    if (!self.isRendered || !self.isRendered()) {
+                        return;
+                    }
+
+                    self.updateRadicacionDetailActions();
+                }, delay);
+            });
+        },
+
+        updateRadicacionDetailActions: function () {
+            const user = this.getUser();
+            const model = this.model;
+            const $editBtn = this.findPrimaryActionButton('edit');
+
             if (!RadicacionEditMode.isPureRadicacionUser(user)) {
+                this.hideRadicarActionButton();
+
                 return;
             }
 
             if (RadicacionEditMode.shouldShowRadicarButton(user, model)) {
-                $editBtn.show();
-                this.setPrimaryActionButtonLabel(
-                    $editBtn,
-                    this.translate('radicarCaso', 'labels', 'Case')
-                );
+                $editBtn.hide();
+                this.ensureRadicarActionButton();
 
                 return;
             }
+
+            this.hideRadicarActionButton();
 
             if (RadicacionEditMode.shouldShowEditRadicadoButton(user, model)) {
                 $editBtn.show();
@@ -401,6 +485,7 @@ define('custom:views/case/record/detail', [
             this.updateActaVisitaButton();
             this.updateActuoArchivoButton();
             this.updateRadicacionDetailActions();
+            this.scheduleRadicacionDetailActions();
             this.updateAsignadorDetailActions();
             this.updatePatrulleroDetailActions();
             this.toggleActaPanels();
@@ -415,6 +500,7 @@ define('custom:views/case/record/detail', [
                 self.toggleActaPanels();
                 self.updateActaVisitaButton();
                 self.updateRadicacionDetailActions();
+                self.scheduleRadicacionDetailActions();
                 self.updateAsignadorDetailActions();
                 self.updatePatrulleroDetailActions();
                 self.refreshActaVisitaPanel();
