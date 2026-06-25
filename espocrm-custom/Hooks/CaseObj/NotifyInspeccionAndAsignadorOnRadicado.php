@@ -4,6 +4,7 @@ namespace Espo\Custom\Hooks\CaseObj;
 
 use Espo\Core\Field\LinkParent;
 use Espo\Core\Hook\Hook\AfterSave;
+use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\Mail\EmailSender;
 use Espo\Entities\Email;
 use Espo\Entities\Notification;
@@ -16,14 +17,14 @@ use Espo\Core\Utils\Config;
 use Exception;
 
 /**
- * Cuando Radicación (Edwin) guarda radicado/expediente, avisa a Inspección (Juan) y Asignador (Julian).
+ * Cuando un caso pasa a radicado (radicado + expediente), avisa a Inspección y Asignador.
  */
-class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
+class NotifyInspeccionAndAsignadorOnRadicado implements BeforeSave, AfterSave
 {
-    public static int $order = 26;
+    public static int $order = 16;
 
-    private const ROLE_INSPECCION = 'Inspección';
-    private const ROLE_ASIGNADOR = 'Asignador';
+    /** @var array<string, bool> */
+    private static array $pendingRadicadoNotify = [];
 
     public function __construct(
         private EntityManager $entityManager,
@@ -33,27 +34,50 @@ class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
         private AlcaldiaUserProfile $profile
     ) {}
 
+    public function beforeSave(Entity $entity, SaveOptions $options): void
+    {
+        if ($entity->isNew() || !$entity->hasId()) {
+            return;
+        }
+
+        $prevNumero = trim((string) $entity->getFetched('cNumeroRadicado'));
+        $prevExpediente = trim((string) $entity->getFetched('cExpediente'));
+        $wasPostRadicado = $prevNumero !== '' && $prevExpediente !== '';
+
+        $numero = trim((string) $entity->get('cNumeroRadicado'));
+        $expediente = trim((string) $entity->get('cExpediente'));
+        $isPostRadicado = $numero !== '' && $expediente !== '';
+
+        self::$pendingRadicadoNotify[$entity->getId()] = !$wasPostRadicado && $isPostRadicado;
+    }
+
     public function afterSave(Entity $entity, SaveOptions $options): void
     {
-        if ($entity->isNew() || $this->isJustCreated($entity)) {
+        $caseId = $entity->getId();
+
+        if (!$caseId) {
             return;
         }
 
-        if (!$this->profile->isRadicacion($this->user)) {
-            return;
-        }
+        $shouldNotify = self::$pendingRadicadoNotify[$caseId] ?? false;
+        unset(self::$pendingRadicadoNotify[$caseId]);
 
-        if (!$this->becamePostRadicado($entity)) {
+        if (!$shouldNotify) {
             return;
         }
 
         $numero = trim((string) $entity->get('cNumeroRadicado'));
         $expediente = trim((string) $entity->get('cExpediente'));
-        $numeroLabel = $numero !== '' ? $numero : 'sin número';
-        $linkLabel = $numero !== '' ? $numero : ($expediente !== '' ? $expediente : 'Caso');
+
+        if ($numero === '' || $expediente === '') {
+            return;
+        }
+
+        $numeroLabel = $numero;
+        $linkLabel = $numero;
         $recordUrl = rtrim((string) $this->config->get('siteUrl'), '/')
-            . '/#Case/view/' . $entity->getId();
-        $caseHref = '#Case/view/' . $entity->getId();
+            . '/#Case/view/' . $caseId;
+        $caseHref = '#Case/view/' . $caseId;
 
         $this->notifyInspeccion(
             $entity,
@@ -74,34 +98,6 @@ class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
         );
     }
 
-    private function becamePostRadicado(Entity $entity): bool
-    {
-        if (!$this->isPostRadicado($entity)) {
-            return false;
-        }
-
-        $prevNumero = trim((string) $entity->getFetched('cNumeroRadicado'));
-        $prevExpediente = trim((string) $entity->getFetched('cExpediente'));
-
-        return $prevNumero === '' || $prevExpediente === '';
-    }
-
-    private function isPostRadicado(Entity $entity): bool
-    {
-        $numero = trim((string) $entity->get('cNumeroRadicado'));
-        $expediente = trim((string) $entity->get('cExpediente'));
-
-        return $numero !== '' && $expediente !== '';
-    }
-
-    private function isJustCreated(Entity $entity): bool
-    {
-        $createdAt = $entity->get('createdAt');
-        $modifiedAt = $entity->get('modifiedAt');
-
-        return $createdAt && $modifiedAt && $createdAt === $modifiedAt;
-    }
-
     private function notifyInspeccion(
         Entity $entity,
         string $linkLabel,
@@ -110,10 +106,10 @@ class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
         string $caseHref,
         string $recordUrl
     ): void {
-        $userIds = array_unique(array_merge(
-            $this->profile->findActiveUserIdsByRoleName(self::ROLE_INSPECCION),
-            $this->profile->findActiveUserIdsByRoleName(AlcaldiaUserProfile::ROLE_INSPECCION_ALT)
-        ));
+        $userIds = $this->profile->findActiveUserIdsByRoleOrTeamNames([
+            AlcaldiaUserProfile::ROLE_INSPECCION,
+            AlcaldiaUserProfile::ROLE_INSPECCION_ALT,
+        ]);
 
         foreach ($userIds as $userId) {
             $this->notifyUser(
@@ -137,7 +133,11 @@ class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
         string $caseHref,
         string $recordUrl
     ): void {
-        foreach ($this->profile->findActiveUserIdsByRoleName(self::ROLE_ASIGNADOR) as $userId) {
+        $userIds = $this->profile->findActiveUserIdsByRoleOrTeamNames([
+            AlcaldiaUserProfile::ROLE_ASIGNADOR,
+        ]);
+
+        foreach ($userIds as $userId) {
             $this->notifyUser(
                 $entity,
                 $userId,

@@ -235,4 +235,45 @@ class AlcaldiaUserProfile
 
         return array_values(array_unique($ids));
     }
+
+    /**
+     * Usuarios activos con alguno de los roles o equipos indicados (por nombre).
+     *
+     * @param string[] $names
+     * @return string[]
+     */
+    public function findActiveUserIdsByRoleOrTeamNames(array $names): array
+    {
+        $ids = [];
+
+        foreach ($names as $name) {
+            $ids = array_merge($ids, $this->findActiveUserIdsByRoleName($name));
+        }
+
+        foreach ($names as $name) {
+            $team = $this->entityManager
+                ->getRDBRepositoryByClass(Team::class)
+                ->where(['name' => $name])
+                ->findOne();
+
+            if (!$team) {
+                continue;
+            }
+
+            foreach (
+                $this->entityManager
+                    ->getRDBRepositoryByClass(User::class)
+                    ->where(['isActive' => true, 'type' => User::TYPE_REGULAR])
+                    ->find() as $user
+            ) {
+                $teams = $user->getLinkMultipleIdList('teams') ?? [];
+
+                if (in_array($team->getId(), $teams, true)) {
+                    $ids[] = $user->getId();
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
 }
