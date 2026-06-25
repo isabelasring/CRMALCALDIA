@@ -58,6 +58,7 @@ define('custom:views/case/record/edit', [
 
                 this.enforceRadicacionEntry();
                 this.enforceAsignadorEntry();
+                this.enforcePatrulleroEntry();
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
                 this.toggleRegistroExcelPanel();
@@ -122,6 +123,22 @@ define('custom:views/case/record/edit', [
             }
 
             Espo.Ui.warning(this.translate('asignarUseButton', 'messages', 'Case'));
+            this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+        },
+
+        enforcePatrulleroEntry: function () {
+            if (!PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                return;
+            }
+
+            Espo.Ui.warning(this.translate('patrulleroReadOnlyCase', 'messages', 'Case'));
+
+            if (this.model.isNew()) {
+                this.getRouter().navigate('#Home', {trigger: true});
+
+                return;
+            }
+
             this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
         },
 
@@ -341,10 +358,12 @@ define('custom:views/case/record/edit', [
             const applyRoleUi = function () {
                 self.enforceRadicacionEntry();
                 self.enforceAsignadorEntry();
+                self.enforcePatrulleroEntry();
 
                 if (
                     !RadicacionEditMode.isPureRadicacionUser(self.getUser())
                     && !AsignadorEditMode.isPureAsignadorUser(self.getUser())
+                    && !PatrulleroActa.isPurePatrulleroUser(self.getUser())
                 ) {
                     self.applyFieldModes();
                 } else if (self.isRadicarMode() || self.isAsignarMode()) {
@@ -442,6 +461,14 @@ define('custom:views/case/record/edit', [
         },
 
         applyFieldModes: function () {
+            if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                if (typeof this.setReadOnly === 'function') {
+                    this.setReadOnly();
+                }
+
+                return;
+            }
+
             if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
                 AsignadorEditMode.applyRestrictedEdit(this);
 
@@ -465,7 +492,10 @@ define('custom:views/case/record/edit', [
             const user = this.getUser();
             const model = this.model;
 
-            if (PatrulleroActa.shouldShowLlenarActaButton(user, model)) {
+            if (
+                InspeccionActa.isInspeccionUser(user)
+                && PatrulleroActa.shouldShowLlenarActaButton(user, model)
+            ) {
                 this.setReadOnlyExcept([
                     'cActaFechaVisita',
                     'cActaHoraVisita',
@@ -512,6 +542,10 @@ define('custom:views/case/record/edit', [
             }
 
             if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                return;
+            }
+
+            if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
                 return;
             }
 

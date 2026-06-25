@@ -78,6 +78,7 @@ define('custom:views/case/record/detail', [
                 this.togglePostRadicacionFields();
                 this.updateRadicacionDetailActions();
                 this.updateAsignadorDetailActions();
+                this.updatePatrulleroDetailActions();
                 this.scheduleRefreshActaVisitaPanel();
                 this.scheduleRefreshFormatoGeneradoDocs();
             });
@@ -117,6 +118,7 @@ define('custom:views/case/record/detail', [
                 this.toggleRegistroExcelPanel();
                 this.updateRadicacionDetailActions();
                 this.updateAsignadorDetailActions();
+                this.updatePatrulleroDetailActions();
             });
         },
 
@@ -229,6 +231,12 @@ define('custom:views/case/record/detail', [
         },
 
         actionEdit: function () {
+            if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                Espo.Ui.warning(this.translate('patrulleroReadOnlyCase', 'messages', 'Case'));
+
+                return;
+            }
+
             if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
                 if (!AsignadorEditMode.shouldShowAsignarButton(this.getUser(), this.model)) {
                     Espo.Ui.warning(this.translate('asignarUseButton', 'messages', 'Case'));
@@ -297,6 +305,16 @@ define('custom:views/case/record/detail', [
             }).first().replaceWith(editLabel);
         },
 
+        updatePatrulleroDetailActions: function () {
+            if (!PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                return;
+            }
+
+            this.$el.find('[data-action="edit"], [data-action="delete"], [data-action="remove"]')
+                .closest('.btn, .dropdown-item, li')
+                .hide();
+        },
+
         updateRadicacionDetailActions: function () {
             const user = this.getUser();
             const model = this.model;
@@ -344,6 +362,12 @@ define('custom:views/case/record/detail', [
         },
 
         actionDelete: function (data) {
+            if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                Espo.Ui.warning(this.translate('patrulleroReadOnlyCase', 'messages', 'Case'));
+
+                return Promise.resolve(false);
+            }
+
             return this.confirm({
                 message: this.translate('removeRecordConfirmation', 'messages')
                     .replace('{entityType}', this.translateEntityType(this.entityType, 'singular')),
@@ -377,6 +401,7 @@ define('custom:views/case/record/detail', [
             this.updateActuoArchivoButton();
             this.updateRadicacionDetailActions();
             this.updateAsignadorDetailActions();
+            this.updatePatrulleroDetailActions();
             this.toggleActaPanels();
             this.toggleActuoArchivoPanels();
             this.setActaFieldsReadOnlyForReview();
@@ -390,6 +415,7 @@ define('custom:views/case/record/detail', [
                 self.updateActaVisitaButton();
                 self.updateRadicacionDetailActions();
                 self.updateAsignadorDetailActions();
+                self.updatePatrulleroDetailActions();
                 self.refreshActaVisitaPanel();
             };
 

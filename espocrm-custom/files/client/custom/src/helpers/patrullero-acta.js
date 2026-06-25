@@ -7,6 +7,20 @@ define('custom:helpers/patrullero-acta', [
         return RadicacionFields.isPatrulleroUser(user);
     };
 
+    const isPurePatrulleroUser = function (user) {
+        if (!user || user.isAdmin()) {
+            return false;
+        }
+
+        if (!isPatrulleroUser(user)) {
+            return false;
+        }
+
+        return !isInspeccionUser(user)
+            && !RadicacionFields.isRadicacionUser(user)
+            && !RadicacionFields.isAsignadorUser(user);
+    };
+
     const isInspeccionUser = function (user) {
         return InspeccionActa.isInspeccionUser(user);
     };
@@ -104,6 +118,7 @@ define('custom:helpers/patrullero-acta', [
 
     return {
         isPatrulleroUser: isPatrulleroUser,
+        isPurePatrulleroUser: isPurePatrulleroUser,
         isInspeccionUser: isInspeccionUser,
         isCasePostRadicado: isCasePostRadicado,
         isCaseReadyForActa: isCaseReadyForActa,

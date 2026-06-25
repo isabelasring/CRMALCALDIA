@@ -11,10 +11,9 @@ use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Rol Patrullero: solo consulta casos asignados, sin editar el caso.
- * El acta de visita se diligencia en la entidad ActaVisita.
+ * Rol Patrullero (sin Inspección): no puede crear casos nuevos.
  */
-class LimitPatrulleroCaseEdit implements BeforeSave
+class RestrictPatrulleroCaseCreate implements BeforeSave
 {
     public function __construct(
         private User $user,
@@ -23,7 +22,7 @@ class LimitPatrulleroCaseEdit implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
-        if ($this->user->isAdmin()) {
+        if ($this->user->isAdmin() || !$entity->isNew()) {
             return;
         }
 
@@ -33,10 +32,6 @@ class LimitPatrulleroCaseEdit implements BeforeSave
             return;
         }
 
-        if ($options->get('skipPatrulleroCaseLimit') || $options->get('skipCaseStatusUpdate')) {
-            return;
-        }
-
-        throw new Forbidden('Los patrulleros solo pueden consultar el caso asignado.');
+        throw new Forbidden('El rol de patrullero no puede crear casos nuevos.');
     }
 }
