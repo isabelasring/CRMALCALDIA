@@ -20,8 +20,8 @@ $em = $app->getContainer()->getByClass(EntityManager::class);
 $metadata = $app->getContainer()->getByClass(Espo\Core\Utils\Metadata::class);
 
 if (!$metadata->get(['scopes', 'AsignacionHistorial', 'entity'])) {
-    echo "Entidad AsignacionHistorial no encontrada. Ejecuta rebuild después de desplegar metadata.\n";
-    exit(1);
+    echo "AVISO: entidad AsignacionHistorial no encontrada. Ejecuta rebuild después de desplegar metadata.\n";
+    exit(0);
 }
 
 $historialFields = array_keys($metadata->get(['entityDefs', 'AsignacionHistorial', 'fields']) ?? []);

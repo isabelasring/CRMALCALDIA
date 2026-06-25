@@ -5,8 +5,6 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
         setup: function () {
             Dep.prototype.setup.call(this);
 
-            this.$el.addClass('case-list-root');
-
             if (!this.getAcl().check(this.scope, 'create')) {
                 this.menu = this.menu || {};
 
@@ -19,13 +17,21 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
                 this.menu.hiddenItemList = hidden;
             }
 
-            this.listenTo(this.collection, 'sync', function () {
-                this.decorateKanbanBoard();
-            });
+            if (this.collection) {
+                this.listenTo(this.collection, 'sync', function () {
+                    this.decorateKanbanBoard();
+                });
+            }
+        },
 
-            this.listenTo(this, 'after:render', function () {
-                this.decorateKanbanBoard();
-            });
+        afterRender: function () {
+            Dep.prototype.afterRender.call(this);
+
+            if (this.$el && this.$el.length) {
+                this.$el.addClass('case-list-root');
+            }
+
+            this.decorateKanbanBoard();
         },
 
         checkAccessAction: function (action) {
@@ -39,6 +45,10 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
         },
 
         getKanbanRoot: function () {
+            if (!this.$el || !this.$el.length) {
+                return null;
+            }
+
             if (this.$el.hasClass('list-kanban')) {
                 return this.$el;
             }
@@ -49,38 +59,49 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
         },
 
         decorateKanbanBoard: function () {
-            var $kanban = this.getKanbanRoot();
-
-            this.$el.toggleClass('case-kanban-active', !!$kanban);
-
-            if (!$kanban) {
-                return;
-            }
-
-            var $headers = $kanban.find('.kanban-head-container th.group-header');
-
-            $kanban.find('td.group-column').each(function (index) {
-                var $column = $(this);
-                var count = $column.find('.item').length;
-                var $header = $headers.eq(index);
-                var $label = $header.find('.kanban-group-label');
-
-                if (!$label.length) {
+            try {
+                if (!this.$el || !this.$el.length) {
                     return;
                 }
 
-                var baseLabel = String($label.attr('data-base-label') || $label.text())
-                    .replace(/\s*\(\d+\)\s*$/, '')
-                    .trim();
+                var $kanban = this.getKanbanRoot();
 
-                $label.attr('data-base-label', baseLabel);
-                $label.text(baseLabel + ' (' + count + ')');
-            });
+                this.$el.toggleClass('case-kanban-active', !!$kanban);
 
-            this.decorateKanbanDueDates($kanban);
+                if (!$kanban) {
+                    return;
+                }
+
+                var $headers = $kanban.find('.kanban-head-container th.group-header');
+
+                $kanban.find('td.group-column').each(function (index) {
+                    var $column = $(this);
+                    var count = $column.find('.item').length;
+                    var $header = $headers.eq(index);
+                    var $label = $header.find('.kanban-group-label');
+
+                    if (!$label.length) {
+                        return;
+                    }
+
+                    var baseLabel = String($label.attr('data-base-label') || $label.text())
+                        .replace(/\s*\(\d+\)\s*$/, '')
+                        .trim();
+
+                    $label.attr('data-base-label', baseLabel);
+                    $label.text(baseLabel + ' (' + count + ')');
+                });
+
+                this.decorateKanbanDueDates($kanban);
+            } catch (e) {
+                // No bloquear la lista si falla el adorno visual del kanban.
+            }
         },
 
         decorateKanbanDueDates: function ($kanban) {
+            if (!this.collection || !$kanban || !$kanban.length) {
+                return;
+            }
             var self = this;
             var today = new Date();
 
