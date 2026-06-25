@@ -97,24 +97,21 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            this.hideNonRadicacionPanels();
+            this.ensureCasePanelsVisible();
+
+            const self = this;
+
+            window.setTimeout(function () {
+                if (!self.isRadicarMode || !self.isRadicarMode()) {
+                    return;
+                }
+
+                RadicacionEditMode.applyRestrictedEdit(self);
+            }, 150);
         },
 
-        hideNonRadicacionPanels: function () {
-            const $radicacionPanel = this.findPanel('radicacionCaso');
-
-            if ($radicacionPanel.length) {
-                $radicacionPanel.show();
-            }
-
-            this.$el.find('.panel[data-name], .panel[data-panel-name], .record-panel[data-name]').each((index, el) => {
-                const $panel = $(el);
-                const name = $panel.data('name') || $panel.data('panelName');
-
-                if (name && name !== 'radicacionCaso') {
-                    $panel.hide();
-                }
-            });
+        ensureCasePanelsVisible: function () {
+            this.$el.find('.panel[data-name], .panel[data-panel-name], .record-panel[data-name]').show();
         },
 
         save: function (options) {
