@@ -17,5 +17,15 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
                 this.menu.hiddenItemList = hidden;
             }
         },
+
+        checkAccessAction: function (action) {
+            if (action === 'create' && !this.getAcl().check(this.scope, 'create')) {
+                return false;
+            }
+
+            return Dep.prototype.checkAccessAction
+                ? Dep.prototype.checkAccessAction.call(this, action)
+                : true;
+        },
     });
 });

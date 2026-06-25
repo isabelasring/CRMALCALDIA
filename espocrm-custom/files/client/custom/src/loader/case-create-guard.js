@@ -55,7 +55,7 @@
 
         if (app && app.getRouter) {
             app.getRouter().navigate('#Home', {trigger: true, replace: true});
-        } else {
+        } else if (/^#Case\/create/i.test(window.location.hash || '')) {
             window.location.replace(
                 window.location.pathname + window.location.search + '#Home'
             );
