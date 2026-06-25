@@ -4,6 +4,7 @@
     "nameAttribute": "cNumeroRadicado",
     "kanbanViewMode": true,
     "views": {
+        "list": "custom:views/case/list",
         "detail": "custom:views/case/detail",
         "edit": "custom:views/case/edit"
     },
