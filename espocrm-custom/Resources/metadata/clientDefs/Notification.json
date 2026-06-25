@@ -7,5 +7,10 @@
     },
     "recordViews": {
         "list": "custom:views/notification/record/list"
+    },
+    "fields": {
+        "data": {
+            "view": "custom:views/notification/fields/container"
+        }
     }
 }
