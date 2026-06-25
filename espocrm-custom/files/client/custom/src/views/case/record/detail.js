@@ -250,13 +250,16 @@ define('custom:views/case/record/detail', [
             }
 
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                if (!RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)) {
-                    Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
+                if (
+                    RadicacionEditMode.shouldShowRadicarButton(this.getUser(), this.model)
+                    || RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)
+                ) {
+                    RadicacionEditMode.openRadicadoEdit(this);
 
                     return;
                 }
 
-                RadicacionEditMode.openRadicadoEdit(this);
+                Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
 
                 return;
             }
@@ -315,50 +318,48 @@ define('custom:views/case/record/detail', [
                 .hide();
         },
 
+        setPrimaryActionButtonLabel: function ($btn, label) {
+            $btn.find('.title, .btn-text').text(label);
+            $btn.contents().filter(function () {
+                return this.nodeType === 3;
+            }).first().replaceWith(label);
+        },
+
         updateRadicacionDetailActions: function () {
             const user = this.getUser();
             const model = this.model;
             const $editBtn = this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li');
-
-            if (!RadicacionEditMode.isPureRadicacionUser(user)) {
-                if (this._radicarButtonAdded) {
-                    this.safeRemoveMenuItem('radicarCaso');
-                    this._radicarButtonAdded = false;
-                }
-
-                return;
-            }
 
             if (this._radicarButtonAdded) {
                 this.safeRemoveMenuItem('radicarCaso');
                 this._radicarButtonAdded = false;
             }
 
-            $editBtn.hide();
+            if (!RadicacionEditMode.isPureRadicacionUser(user)) {
+                return;
+            }
 
             if (RadicacionEditMode.shouldShowRadicarButton(user, model)) {
-                if (this.safeAddMenuItem({
-                    label: this.translate('radicarCaso', 'labels', 'Case'),
-                    name: 'radicarCaso',
-                    action: 'radicarCaso',
-                    style: 'primary',
-                })) {
-                    this._radicarButtonAdded = true;
-                }
+                $editBtn.show();
+                this.setPrimaryActionButtonLabel(
+                    $editBtn,
+                    this.translate('radicarCaso', 'labels', 'Case')
+                );
 
                 return;
             }
 
             if (RadicacionEditMode.shouldShowEditRadicadoButton(user, model)) {
                 $editBtn.show();
+                this.setPrimaryActionButtonLabel(
+                    $editBtn,
+                    this.translate('Edit', 'labels', 'Global')
+                );
 
-                const editLabel = this.translate('Edit', 'labels', 'Global');
-
-                $editBtn.find('.title, .btn-text').text(editLabel);
-                $editBtn.contents().filter(function () {
-                    return this.nodeType === 3;
-                }).first().replaceWith(editLabel);
+                return;
             }
+
+            $editBtn.hide();
         },
 
         actionDelete: function (data) {
@@ -519,7 +520,9 @@ define('custom:views/case/record/detail', [
         toggleRadicacionFields: function () {
             const user = this.getUser();
             const model = this.model;
-            const show = RadicacionFields.shouldShowRadicacionFields(user, model);
+            const show = RadicacionEditMode.isPureRadicacionUser(user)
+                ? true
+                : RadicacionFields.shouldShowRadicacionFields(user, model);
 
             RadicacionFields.RADICADO_FIELDS.forEach((field) => {
                 const $cell = this.$el.find('[data-name="' + field + '"]').closest('.cell');
