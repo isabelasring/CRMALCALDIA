@@ -414,6 +414,7 @@ define('custom:views/case/record/edit', [
                 self.applyRadicacionFieldAccess();
                 self.applyAsignadorFieldAccess();
                 self.ensureInspeccionEditAccess();
+                self.scheduleInspeccionEditAccess();
                 self.updateRadicarPageTitle();
             };
 
@@ -519,24 +520,6 @@ define('custom:views/case/record/edit', [
             const user = this.getUser();
             const model = this.model;
 
-            if (
-                InspeccionActa.isInspeccionUser(user)
-                && PatrulleroActa.shouldShowLlenarActaButton(user, model)
-            ) {
-                this.setReadOnlyExcept([
-                    'cActaFechaVisita',
-                    'cActaHoraVisita',
-                    'cActaDireccionVisita',
-                    'cActaNombreVisitado',
-                    'cActaDocumentoVisitado',
-                    'cActaHallazgos',
-                    'cActaMedidasTomadas',
-                    'cActaObservaciones',
-                ]);
-
-                return;
-            }
-
             if (InspeccionActa.shouldShowActaRevision(user, model)) {
                 this.setReadOnlyExcept([
                     'cActaVistoBueno',
@@ -563,6 +546,24 @@ define('custom:views/case/record/edit', [
             }
         },
 
+        scheduleInspeccionEditAccess: function () {
+            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+                return;
+            }
+
+            const self = this;
+
+            [150, 450, 900].forEach(function (delay) {
+                window.setTimeout(function () {
+                    if (!self.isEditMode || !self.isEditMode()) {
+                        return;
+                    }
+
+                    self.ensureInspeccionEditAccess();
+                }, delay);
+            });
+        },
+
         ensureInspeccionEditAccess: function () {
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 return;
@@ -580,6 +581,17 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
+            const user = this.getUser();
+            const model = this.model;
+
+            if (
+                InspeccionActa.shouldShowActaRevision(user, model)
+                || InspeccionActa.shouldFinalizeCaseStatus(user, model)
+                || InspeccionActa.shouldShowActoCierre(user, model)
+            ) {
+                return;
+            }
+
             const unlockFields = [
                 'cRecursoTema',
                 'cAsunto',
@@ -591,6 +603,33 @@ define('custom:views/case/record/edit', [
 
             unlockFields.forEach((field) => {
                 const view = this.getFieldView(field);
+
+                if (view && typeof view.setNotReadOnly === 'function') {
+                    view.setNotReadOnly();
+                }
+            });
+
+            const fieldViews = typeof this.getFieldViews === 'function'
+                ? this.getFieldViews()
+                : {};
+
+            const keepReadOnly = [
+                'cNumeroRadicado',
+                'cExpediente',
+                'cRadicadoModo',
+                'cRadicadoSiglas',
+                'cRadicadoAnio',
+                'assignedUser',
+                'cMotivoReasignacion',
+                'cPanelActaVisita',
+            ];
+
+            Object.keys(fieldViews).forEach((field) => {
+                if (keepReadOnly.indexOf(field) !== -1) {
+                    return;
+                }
+
+                const view = fieldViews[field];
 
                 if (view && typeof view.setNotReadOnly === 'function') {
                     view.setNotReadOnly();
