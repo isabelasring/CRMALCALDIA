@@ -32,6 +32,14 @@ define('custom:helpers/radicacion-edit-mode', [
         return false;
     };
 
+    const isCasePostRadicado = function (model) {
+        return RadicacionFields.isCasePostRadicado(model);
+    };
+
+    const isCaseSinRadicar = function (model) {
+        return !isCasePostRadicado(model);
+    };
+
     const isRadicarMode = function (recordView) {
         if (!recordView || !isPureRadicacionUser(recordView.getUser())) {
             return false;
@@ -61,7 +69,24 @@ define('custom:helpers/radicacion-edit-mode', [
     };
 
     const shouldShowRadicarButton = function (user, model) {
-        return isPureRadicacionUser(user) && !!model && !!model.id;
+        return isPureRadicacionUser(user) && !!model && !!model.id && isCaseSinRadicar(model);
+    };
+
+    const shouldShowEditRadicadoButton = function (user, model) {
+        return isPureRadicacionUser(user) && !!model && !!model.id && isCasePostRadicado(model);
+    };
+
+    const openRadicadoEdit = function (recordView) {
+        if (!recordView || !recordView.model || !recordView.model.id) {
+            return;
+        }
+
+        activateRadicarMode(recordView.model.id);
+
+        recordView.getRouter().navigate(
+            '#' + recordView.entityType + '/edit/' + recordView.model.id,
+            {trigger: true}
+        );
     };
 
     const getEditableFields = function () {
@@ -95,7 +120,11 @@ define('custom:helpers/radicacion-edit-mode', [
         isPureRadicacionUser: isPureRadicacionUser,
         activateRadicarMode: activateRadicarMode,
         isRadicarMode: isRadicarMode,
+        isCaseSinRadicar: isCaseSinRadicar,
+        isCasePostRadicado: isCasePostRadicado,
         shouldShowRadicarButton: shouldShowRadicarButton,
+        shouldShowEditRadicadoButton: shouldShowEditRadicadoButton,
+        openRadicadoEdit: openRadicadoEdit,
         getEditableFields: getEditableFields,
         applyRestrictedEdit: applyRestrictedEdit,
     };

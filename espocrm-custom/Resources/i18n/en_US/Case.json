@@ -103,6 +103,6 @@
     }
   },
   "messages": {
-    "radicarUseButton": "Use el botón Radicar para registrar el radicado y el expediente. No puede editar el resto del caso."
+    "radicarUseButton": "Use el botón Radicar para registrar el radicado y el expediente por primera vez."
   }
 }

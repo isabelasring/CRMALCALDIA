@@ -74,6 +74,7 @@ define('custom:views/case/record/detail', [
             this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:assignedUserId change:cFormatoSolicitudPdfId change:status', function () {
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
+                this.updateRadicacionDetailActions();
                 this.scheduleRefreshActaVisitaPanel();
                 this.scheduleRefreshFormatoGeneradoDocs();
             });
@@ -225,7 +226,13 @@ define('custom:views/case/record/detail', [
 
         actionEdit: function () {
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
+                if (!RadicacionEditMode.shouldShowEditRadicadoButton(this.getUser(), this.model)) {
+                    Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
+
+                    return;
+                }
+
+                RadicacionEditMode.openRadicadoEdit(this);
 
                 return;
             }
@@ -237,15 +244,13 @@ define('custom:views/case/record/detail', [
         },
 
         actionRadicarCaso: function () {
-            RadicacionEditMode.activateRadicarMode(this.model.id);
-            this.getRouter().navigate(
-                '#' + this.entityType + '/edit/' + this.model.id,
-                {trigger: true}
-            );
+            RadicacionEditMode.openRadicadoEdit(this);
         },
 
         updateRadicacionDetailActions: function () {
             const user = this.getUser();
+            const model = this.model;
+            const $editBtn = this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li');
 
             if (!RadicacionEditMode.isPureRadicacionUser(user)) {
                 if (this._radicarButtonAdded) {
@@ -256,24 +261,28 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            this.$el.find('[data-action="edit"]').closest('.btn, .dropdown-item, li').hide();
-
             if (this._radicarButtonAdded) {
                 this.safeRemoveMenuItem('radicarCaso');
                 this._radicarButtonAdded = false;
             }
 
-            if (!RadicacionEditMode.shouldShowRadicarButton(user, this.model)) {
+            $editBtn.hide();
+
+            if (RadicacionEditMode.shouldShowRadicarButton(user, model)) {
+                if (this.safeAddMenuItem({
+                    label: this.translate('radicarCaso', 'labels', 'Case'),
+                    name: 'radicarCaso',
+                    action: 'radicarCaso',
+                    style: 'primary',
+                })) {
+                    this._radicarButtonAdded = true;
+                }
+
                 return;
             }
 
-            if (this.safeAddMenuItem({
-                label: this.translate('radicarCaso', 'labels', 'Case'),
-                name: 'radicarCaso',
-                action: 'radicarCaso',
-                style: 'primary',
-            })) {
-                this._radicarButtonAdded = true;
+            if (RadicacionEditMode.shouldShowEditRadicadoButton(user, model)) {
+                $editBtn.show();
             }
         },
 
