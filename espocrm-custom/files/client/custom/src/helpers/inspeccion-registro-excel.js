@@ -33,7 +33,11 @@ define('custom:helpers/inspeccion-registro-excel', [
         return AlcaldiaCaseRoles.isGestionInspeccionUser(user);
     };
 
-    const canViewRegistroExcelFields = function () {
+    const canViewRegistroExcelFields = function (user) {
+        if (RadicacionEditMode.isPureRadicacionUser(user)) {
+            return false;
+        }
+
         return true;
     };
 
@@ -74,7 +78,7 @@ define('custom:helpers/inspeccion-registro-excel', [
         );
 
         if ($panel.length) {
-            $panel.show();
+            $panel.toggle(showFields);
         }
 
         applyFieldVisibility(recordView, showFields);

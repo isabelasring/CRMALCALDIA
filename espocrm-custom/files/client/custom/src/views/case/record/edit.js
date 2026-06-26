@@ -96,6 +96,12 @@ define('custom:views/case/record/edit', [
         },
 
         enforceRadicacionEntry: function () {
+            if (RadicacionEditMode.hasRadicarHash()) {
+                this._radicarMode = true;
+
+                return;
+            }
+
             if (!RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 return;
             }
@@ -199,12 +205,12 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            this.ensureCasePanelsVisible();
+            RadicacionEditMode.showRadicacionPanelOnly(this);
             RadicacionEditMode.scheduleRestrictedEdit(this);
         },
 
         ensureCasePanelsVisible: function () {
-            this.$el.find('.panel[data-name], .panel[data-panel-name], .record-panel[data-name]').show();
+            RadicacionEditMode.showRadicacionPanelOnly(this);
         },
 
         save: function (options) {
@@ -417,6 +423,7 @@ define('custom:views/case/record/edit', [
                 self.ensureInspeccionEditAccess();
                 self.scheduleInspeccionEditAccess();
                 self.updateRadicarPageTitle();
+                RadicacionEditMode.hideNonRadicacionPanels(self);
             };
 
             const scheduleRoleUiRetry = function () {
@@ -771,7 +778,7 @@ define('custom:views/case/record/edit', [
             const user = this.getUser();
             const model = this.model;
 
-            if (RadicacionEditMode.isPureRadicacionUser(user) && this.isRadicarMode()) {
+            if (RadicacionEditMode.isPureRadicacionUser(user)) {
                 this.findPanel('gestionPosteriorRadicacion').hide();
                 this.$el.find('[data-name="assignedUser"], [data-name="cMotivoReasignacion"]')
                     .closest('.cell')
@@ -855,6 +862,10 @@ define('custom:views/case/record/edit', [
         },
 
         toggleRegistroExcelPanel: function () {
+            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+                this.findPanel(InspeccionRegistroExcel.PANEL_NAME).hide();
+            }
+
             InspeccionRegistroExcel.togglePanel(this);
         },
 

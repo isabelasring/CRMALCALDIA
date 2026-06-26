@@ -2,9 +2,10 @@ define('custom:views/case/fields/acta-visita-action', [
     'views/fields/base',
     'custom:helpers/patrullero-acta',
     'custom:helpers/radicacion-fields',
+    'custom:helpers/radicacion-edit-mode',
     'custom:helpers/acta-visita-modal',
     'custom:helpers/acta-visita-case-status',
-], function (Dep, PatrulleroActa, RadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus) {
+], function (Dep, PatrulleroActa, RadicacionFields, RadicacionEditMode, ActaVisitaModal, ActaVisitaCaseStatus) {
 
     return Dep.extend({
 
@@ -67,6 +68,16 @@ define('custom:views/case/fields/acta-visita-action', [
             }
 
             RadicacionFields.ensureProfile().then(function () {
+                if (RadicacionEditMode.isPureRadicacionUser(user)) {
+                    self.actaIsEditMode = false;
+                    self.showButton = false;
+                    self.showPrintManual = false;
+                    self.updatePanelVisibility(false);
+                    self.reRenderIfNeeded();
+
+                    return;
+                }
+
                 ActaVisitaCaseStatus.fetchActaForCase(self.model.id, user, self.model, { bypassCache: true }).then((acta) => {
                     self.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
                     self.showPrintManual = PatrulleroActa.canPrintManualActa(user, self.model);

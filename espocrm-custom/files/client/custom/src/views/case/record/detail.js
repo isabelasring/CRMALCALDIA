@@ -132,6 +132,7 @@ define('custom:views/case/record/detail', [
             this.updatePatrulleroDetailActions();
             this.toggleActaPanels();
             this.toggleActuoArchivoPanels();
+            RadicacionEditMode.hideNonRadicacionPanels(this);
         },
 
         scheduleRoleAwareUi: function () {
@@ -618,6 +619,13 @@ define('custom:views/case/record/detail', [
             const user = this.getUser();
             const model = this.model;
 
+            if (RadicacionEditMode.isPureRadicacionUser(user)) {
+                this.findPanel('actaVisita').hide();
+                this.findPanel('actaRevision').hide();
+
+                return;
+            }
+
             const $acta = this.findPanel('actaVisita');
             const $revision = this.findPanel('actaRevision');
 
@@ -702,6 +710,10 @@ define('custom:views/case/record/detail', [
         },
 
         toggleRegistroExcelPanel: function () {
+            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+                this.findPanel(InspeccionRegistroExcel.PANEL_NAME).hide();
+            }
+
             InspeccionRegistroExcel.togglePanel(this);
         },
 
@@ -750,6 +762,12 @@ define('custom:views/case/record/detail', [
         },
 
         toggleActuoArchivoPanels: function () {
+            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+                this.findPanel('actuoArchivoPanel').hide();
+
+                return;
+            }
+
             const show = InspeccionActuoArchivo.shouldShowActuoArchivoButton(
                 this.getUser(),
                 this.model
@@ -762,6 +780,25 @@ define('custom:views/case/record/detail', [
             const user = this.getUser();
             const model = this.model;
             const isPureAsignador = AsignadorEditMode.isPureAsignadorUser(user);
+
+            if (RadicacionEditMode.isPureRadicacionUser(user)) {
+                this.findPanel('gestionPosteriorRadicacion').hide();
+
+                const $cell = this.$el.find('[data-name="assignedUser"]').closest('.cell');
+
+                if ($cell.length) {
+                    $cell.hide();
+                }
+
+                const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
+
+                if ($motivoCell.length) {
+                    $motivoCell.hide();
+                }
+
+                return;
+            }
+
             const show = PostRadicacionFields.shouldShowAsignacion(user, model);
 
             this.findPanel('gestionPosteriorRadicacion').toggle(show);

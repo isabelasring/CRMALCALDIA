@@ -87,10 +87,14 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         }
 
         foreach ($asignacionFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
+            $fieldData[$scope][$field] = ['read' => 'no', 'edit' => 'no'];
         }
 
-        $fieldData[$scope][$motivoReasignacionField] = ['read' => 'yes', 'edit' => 'no'];
+        $fieldData[$scope][$motivoReasignacionField] = ['read' => 'no', 'edit' => 'no'];
+
+        foreach ($actaVisitaPanelFields as $field) {
+            $fieldData[$scope][$field] = ['read' => 'no', 'edit' => 'no'];
+        }
     } elseif ($roleName === 'Asignador') {
         foreach ($asignacionFields as $field) {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];

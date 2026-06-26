@@ -9,15 +9,59 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
-        if (RadicacionFields.isInspeccionUser(user)) {
-            return false;
-        }
-
         if (!RadicacionFields.isRadicacionUser(user)) {
             return false;
         }
 
+        if (RadicacionFields.isPatrulleroUser(user) || RadicacionFields.isAsignadorUser(user)) {
+            return false;
+        }
+
         return true;
+    };
+
+    const hasRadicarHash = function () {
+        const hash = String(window.location.hash || '');
+
+        return /[?&]radicar=1(?:&|$)/.test(hash) || /[?&]radicar=true(?:&|$)/.test(hash);
+    };
+
+    const PANELS_HIDDEN_FOR_RADICACION = [
+        'actaVisita',
+        'actaRevision',
+        'actuoArchivoPanel',
+        'registroExcelAlcaldia',
+        'gestionPosteriorRadicacion',
+    ];
+
+    const hideNonRadicacionPanels = function (recordView) {
+        if (!recordView || !isPureRadicacionUser(recordView.getUser())) {
+            return;
+        }
+
+        if (typeof recordView.findPanel !== 'function') {
+            return;
+        }
+
+        PANELS_HIDDEN_FOR_RADICACION.forEach(function (name) {
+            recordView.findPanel(name).hide();
+        });
+
+        recordView.$el.find('[data-name="cPanelActaVisita"]').closest('.panel, .record-panel, .cell').hide();
+    };
+
+    const showRadicacionPanelOnly = function (recordView) {
+        if (!recordView || !isPureRadicacionUser(recordView.getUser()) || !isRadicarMode(recordView)) {
+            return;
+        }
+
+        if (typeof recordView.findPanel !== 'function') {
+            return;
+        }
+
+        recordView.$el.find('.panel[data-name], .panel[data-panel-name], .record-panel[data-name]').hide();
+        recordView.findPanel('radicacionCaso').show();
+        hideNonRadicacionPanels(recordView);
     };
 
     const activateRadicarMode = function (caseId) {
@@ -45,7 +89,7 @@ define('custom:helpers/radicacion-edit-mode', [
     };
 
     const isRadicarMode = function (recordView) {
-        if (!recordView || !isPureRadicacionUser(recordView.getUser())) {
+        if (!recordView) {
             return false;
         }
 
@@ -63,13 +107,15 @@ define('custom:helpers/radicacion-edit-mode', [
             return true;
         }
 
-        const hash = String(window.location.hash || '');
-
-        if (/[?&]radicar=1(?:&|$)/.test(hash) || /[?&]radicar=true(?:&|$)/.test(hash)) {
+        if (hasRadicarHash()) {
             return true;
         }
 
-        return consumeRadicarMode(model.id);
+        if (consumeRadicarMode(model.id)) {
+            return true;
+        }
+
+        return false;
     };
 
     const shouldShowRadicarButton = function (user, model) {
@@ -137,10 +183,13 @@ define('custom:helpers/radicacion-edit-mode', [
             }
 
             lockAllFieldViewsExcept(recordView, getEditableFields());
+            showRadicacionPanelOnly(recordView);
 
             recordView.$el.find(
                 '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
             ).closest('.btn, a, .input-group-btn').hide();
+
+            recordView.$el.find('[data-action="save"], [data-action="saveAndContinueEditing"]').show();
 
             return;
         }
@@ -190,5 +239,8 @@ define('custom:helpers/radicacion-edit-mode', [
         getEditableFields: getEditableFields,
         applyRestrictedEdit: applyRestrictedEdit,
         scheduleRestrictedEdit: scheduleRestrictedEdit,
+        hideNonRadicacionPanels: hideNonRadicacionPanels,
+        showRadicacionPanelOnly: showRadicacionPanelOnly,
+        hasRadicarHash: hasRadicarHash,
     };
 });
