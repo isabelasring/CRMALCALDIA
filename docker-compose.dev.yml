@@ -1,10 +1,7 @@
-# Desarrollo local únicamente. Dokploy NO debe usar este archivo.
+# Desarrollo local únicamente. Dokploy usa solo docker-compose.yml.
 # Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 services:
   espocrm:
-    entrypoint: ["/usr/local/bin/entrypoint-with-deploy.sh"]
-    environment:
-      ESPO_RUN_AUTO_DEPLOY: "1"
     volumes:
       - ./espocrm-custom:/opt/bootstrap/repo/espocrm-custom:ro
       - ./scripts:/opt/bootstrap/repo/scripts:ro

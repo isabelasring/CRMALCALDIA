@@ -26,10 +26,7 @@ define('custom:helpers/patrullero-acta', [
     };
 
     const isCasePostRadicado = function (model) {
-        const radicado = String(model.get('cNumeroRadicado') || '').trim();
-        const expediente = String(model.get('cExpediente') || '').trim();
-
-        return radicado !== '' && expediente !== '';
+        return RadicacionFields.isCasePostRadicado(model);
     };
 
     const isCaseReadyForActa = function (model) {

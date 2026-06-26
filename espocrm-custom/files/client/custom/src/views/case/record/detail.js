@@ -104,20 +104,45 @@ define('custom:views/case/record/detail', [
                     ActaVisitaCaseStatus.invalidateCache(this.model.id);
                     ActuoArchivoCaseStatus.invalidateCache(this.model.id);
                 }
+
+                if (this.isRendered()) {
+                    this.refreshRoleAwareUi();
+                }
             });
 
             PersonaTipoFields.setup(this);
 
             RadicacionFields.onProfileReady(() => {
-                if (!this.isRendered()) {
+                if (this.isRendered()) {
+                    this.refreshRoleAwareUi();
+                } else {
+                    this._pendingRoleUiRefresh = true;
+                }
+            });
+        },
+
+        refreshRoleAwareUi: function () {
+            this.toggleRadicacionFields();
+            this.togglePostRadicacionFields();
+            this.toggleRegistroExcelPanel();
+            this.updateDetailActionLabels();
+            this.updateRadicarButton();
+            this.updateActaVisitaButton();
+            this.updateActuoArchivoButton();
+            this.updatePatrulleroDetailActions();
+            this.toggleActaPanels();
+            this.toggleActuoArchivoPanels();
+        },
+
+        scheduleRoleAwareUi: function () {
+            const self = this;
+
+            RadicacionFields.ensureProfile().then(function () {
+                if (!self.isRendered || !self.isRendered()) {
                     return;
                 }
 
-                this.toggleRadicacionFields();
-                this.togglePostRadicacionFields();
-                this.toggleRegistroExcelPanel();
-                this.updateDetailActionLabels();
-                this.updatePatrulleroDetailActions();
+                self.refreshRoleAwareUi();
             });
         },
 
@@ -131,37 +156,109 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, this.getUser(), this.model, { bypassCache: true }).then((acta) => {
-                const show = PatrulleroActa.shouldShowActaVisitaButton(this.getUser(), this.model, acta);
+            const self = this;
 
-                if (!show) {
-                    if (this._actaVisitaButtonAdded) {
-                        this.safeRemoveMenuItem('llenarActaVisita');
-                        this._actaVisitaButtonAdded = false;
-                    }
-
+            RadicacionFields.ensureProfile().then(function () {
+                if (!self.model.id) {
                     return;
                 }
 
-                const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                const label = isEdit
-                    ? this.translate('editarActaVisita', 'Case')
-                    : this.translate('llenarActaVisita', 'Case');
+                ActaVisitaCaseStatus.fetchActaForCase(self.model.id, self.getUser(), self.model, { bypassCache: true }).then((acta) => {
+                    const show = PatrulleroActa.shouldShowActaVisitaButton(self.getUser(), self.model, acta);
 
-                if (this._actaVisitaButtonAdded) {
-                    this.safeRemoveMenuItem('llenarActaVisita');
-                    this._actaVisitaButtonAdded = false;
-                }
+                    if (!show) {
+                        if (self._actaVisitaButtonAdded) {
+                            self.safeRemoveMenuItem('llenarActaVisita');
+                            self._actaVisitaButtonAdded = false;
+                        }
 
-                if (this.safeAddMenuItem({
-                    label: label,
-                    name: 'llenarActaVisita',
-                    action: 'llenarActaVisita',
-                    style: 'primary',
-                })) {
-                    this._actaVisitaButtonAdded = true;
-                }
+                        return;
+                    }
+
+                    const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                    const label = isEdit
+                        ? self.translate('editarActaVisita', 'Case')
+                        : self.translate('llenarActaVisita', 'Case');
+
+                    if (self._actaVisitaButtonAdded) {
+                        self.safeRemoveMenuItem('llenarActaVisita');
+                        self._actaVisitaButtonAdded = false;
+                    }
+
+                    if (self.safeAddMenuItem({
+                        label: label,
+                        name: 'llenarActaVisita',
+                        action: 'llenarActaVisita',
+                        style: 'primary',
+                    })) {
+                        self._actaVisitaButtonAdded = true;
+                    }
+                });
             });
+        },
+
+        updateRadicarButton: function () {
+            if (!this.model.id) {
+                if (this._radicarButtonAdded) {
+                    this.safeRemoveMenuItem('radicarCaso');
+                    this._radicarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            const user = this.getUser();
+            const model = this.model;
+
+            if (!RadicacionEditMode.isPureRadicacionUser(user)) {
+                if (this._radicarButtonAdded) {
+                    this.safeRemoveMenuItem('radicarCaso');
+                    this._radicarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            const showRadicar = RadicacionEditMode.shouldShowRadicarButton(user, model);
+            const showEditRadicado = RadicacionEditMode.shouldShowEditRadicadoButton(user, model);
+
+            if (!showRadicar && !showEditRadicado) {
+                if (this._radicarButtonAdded) {
+                    this.safeRemoveMenuItem('radicarCaso');
+                    this._radicarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            const $editBtn = this.findPrimaryActionButton('edit');
+
+            if ($editBtn.length) {
+                if (this._radicarButtonAdded) {
+                    this.safeRemoveMenuItem('radicarCaso');
+                    this._radicarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            const label = showRadicar
+                ? this.translate('radicarCaso', 'labels', 'Case')
+                : this.translate('Edit', 'labels', 'Global');
+
+            if (this._radicarButtonAdded) {
+                this.safeRemoveMenuItem('radicarCaso');
+                this._radicarButtonAdded = false;
+            }
+
+            if (this.safeAddMenuItem({
+                label: label,
+                name: 'radicarCaso',
+                action: 'radicarCaso',
+                style: 'primary',
+            })) {
+                this._radicarButtonAdded = true;
+            }
         },
 
         actionLlenarActaVisita: function () {
@@ -260,6 +357,14 @@ define('custom:views/case/record/detail', [
         },
 
         updateDetailActionLabels: function () {
+            const self = this;
+
+            RadicacionFields.ensureProfile().then(function () {
+                self.applyDetailActionLabels();
+            });
+        },
+
+        applyDetailActionLabels: function () {
             const user = this.getUser();
             const model = this.model;
             const $editBtn = this.findPrimaryActionButton('edit');
@@ -270,37 +375,54 @@ define('custom:views/case/record/detail', [
 
             // Edwin: solo radicar / editar radicado (prioridad sobre asignador e inspección).
             if (RadicacionEditMode.isPureRadicacionUser(user)) {
-                $editBtn.show();
-
                 if (RadicacionEditMode.shouldShowRadicarButton(user, model)) {
-                    this.setPrimaryActionButtonLabel(
-                        $editBtn,
-                        this.translate('radicarCaso', 'labels', 'Case')
-                    );
-                    this.setPrimaryActionButtonHref(
-                        $editBtn,
-                        this.getCaseEditUrl() + '?radicar=1'
-                    );
+                    if ($editBtn.length) {
+                        $editBtn.show();
+                        this.setPrimaryActionButtonLabel(
+                            $editBtn,
+                            this.translate('radicarCaso', 'labels', 'Case')
+                        );
+                        this.setPrimaryActionButtonHref(
+                            $editBtn,
+                            this.getCaseEditUrl() + '?radicar=1'
+                        );
+                    }
+
+                    this.updateRadicarButton();
 
                     return;
                 }
 
                 if (RadicacionEditMode.shouldShowEditRadicadoButton(user, model)) {
-                    this.setPrimaryActionButtonLabel(
-                        $editBtn,
-                        this.translate('Edit', 'labels', 'Global')
-                    );
-                    this.setPrimaryActionButtonHref(
-                        $editBtn,
-                        this.getCaseEditUrl() + '?radicar=1'
-                    );
+                    if ($editBtn.length) {
+                        $editBtn.show();
+                        this.setPrimaryActionButtonLabel(
+                            $editBtn,
+                            this.translate('Edit', 'labels', 'Global')
+                        );
+                        this.setPrimaryActionButtonHref(
+                            $editBtn,
+                            this.getCaseEditUrl() + '?radicar=1'
+                        );
+                    }
+
+                    this.updateRadicarButton();
 
                     return;
                 }
 
-                $editBtn.hide();
+                if ($editBtn.length) {
+                    $editBtn.hide();
+                }
+
+                this.updateRadicarButton();
 
                 return;
+            }
+
+            if (this._radicarButtonAdded) {
+                this.safeRemoveMenuItem('radicarCaso');
+                this._radicarButtonAdded = false;
             }
 
             // Julian: solo asignar.
@@ -334,13 +456,17 @@ define('custom:views/case/record/detail', [
         },
 
         updatePatrulleroDetailActions: function () {
-            if (!PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
-                return;
-            }
+            const self = this;
 
-            this.$el.find('[data-action="edit"], [data-action="delete"], [data-action="remove"]')
-                .closest('.btn, .dropdown-item, li')
-                .hide();
+            RadicacionFields.ensureProfile().then(function () {
+                if (!PatrulleroActa.isPurePatrulleroUser(self.getUser())) {
+                    return;
+                }
+
+                self.$el.find('[data-action="edit"], [data-action="delete"], [data-action="remove"]')
+                    .closest('.btn, .dropdown-item, li')
+                    .hide();
+            });
         },
 
         getDetailActionElements: function () {
@@ -394,13 +520,13 @@ define('custom:views/case/record/detail', [
         scheduleDetailActionLabels: function () {
             const self = this;
 
-            [0, 120, 400].forEach(function (delay) {
+            [0, 120, 400, 800, 1500].forEach(function (delay) {
                 window.setTimeout(function () {
                     if (!self.isRendered || !self.isRendered()) {
                         return;
                     }
 
-                    self.updateDetailActionLabels();
+                    self.scheduleRoleAwareUi();
                 }, delay);
             });
         },
@@ -445,29 +571,14 @@ define('custom:views/case/record/detail', [
             PersonaTipoFields.applyLabels(this);
             PersonaTipoFields.toggleInfractorFields(this);
             RadicadoGenerator.hideAssistantFields(this);
-            this.updateActaVisitaButton();
-            this.updateActuoArchivoButton();
-            this.updateDetailActionLabels();
+            this.scheduleRoleAwareUi();
             this.scheduleDetailActionLabels();
-            this.updatePatrulleroDetailActions();
-            this.toggleActaPanels();
-            this.toggleActuoArchivoPanels();
             this.setActaFieldsReadOnlyForReview();
 
-            const self = this;
-            const applyRoleUi = function () {
-                self.toggleRadicacionFields();
-                self.togglePostRadicacionFields();
-                self.toggleRegistroExcelPanel();
-                self.toggleActaPanels();
-                self.updateActaVisitaButton();
-                self.updateDetailActionLabels();
-                self.scheduleDetailActionLabels();
-                self.updatePatrulleroDetailActions();
-                self.refreshActaVisitaPanel();
-            };
-
-            RadicacionFields.ensureProfile().then(applyRoleUi);
+            if (this._pendingRoleUiRefresh) {
+                this._pendingRoleUiRefresh = false;
+                this.scheduleRoleAwareUi();
+            }
 
             this.scheduleRefreshActaVisitaPanel();
             this.scheduleRefreshFormatoGeneradoDocs();
@@ -526,11 +637,15 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            ActaVisitaCaseStatus.fetchActaForCase(model.id, user, model, { bypassCache: true }).then((acta) => {
-                const showActa = PatrulleroActa.shouldShowActaVisitaButton(user, model, acta)
-                    || PatrulleroActa.canPrintManualActa(user, model);
+            const self = this;
 
-                $acta.toggle(showActa);
+            RadicacionFields.ensureProfile().then(function () {
+                ActaVisitaCaseStatus.fetchActaForCase(model.id, user, model, { bypassCache: true }).then((acta) => {
+                    const showActa = PatrulleroActa.shouldShowActaVisitaButton(user, model, acta)
+                        || PatrulleroActa.canPrintManualActa(user, model);
+
+                    $acta.toggle(showActa);
+                });
             });
         },
 

@@ -40,9 +40,9 @@ CRMALCALDIA/
 
 ## Despliegue
 
-- **Local (Docker):** `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`
-- **Dokploy:** push + redeploy; solo `docker-compose.yml` (sin `docker-compose.dev.yml`)
-- **Manual (opcional):** `./scripts/deploy-custom.sh` si necesitas forzar sin reiniciar
+- **Local (Docker):** `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build` — monta el código en vivo desde tu disco.
+- **Dokploy:** push + redeploy con **solo** `docker-compose.yml`; el custom se copia en el build y se aplica al arrancar (`espocrm-init` + auto-deploy en `espocrm`).
+- **Manual (opcional):** `./scripts/deploy-custom.sh` si necesitas forzar sin reconstruir la imagen
 
 Ambos flujos automáticos comparten el manifiesto en `scripts/includes/deploy-steps.sh`.
 

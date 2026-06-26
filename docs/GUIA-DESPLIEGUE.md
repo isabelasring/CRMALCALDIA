@@ -111,7 +111,13 @@ Si aparece **API 403** en el tablero, el usuario no tiene rol asignado o no cerr
 
 **Excel oficial y base de datos sin consola:** [ACCESO-BD-Y-EXCEL.md](ACCESO-BD-Y-EXCEL.md).
 
-En Dokploy **no** uses `ESPO_RUN_AUTO_DEPLOY` (solo aplica en local). Tras cada redeploy, el contenedor `espocrm-init` aplica el custom automáticamente cuando EspoCRM ya está instalado.
+En Dokploy usa **solo** `docker-compose.yml` (sin `docker-compose.dev.yml`). Tras cada **rebuild + redeploy**:
+
+1. La imagen incluye `espocrm-custom/`, `scripts/` y `formatos/` (ver `docker/espocrm/Dockerfile`).
+2. **`espocrm-init`** ejecuta `deploy-custom-dokploy.sh` cuando EspoCRM ya está instalado.
+3. **`espocrm`** arranca con `entrypoint-with-deploy.sh` y `ESPO_RUN_AUTO_DEPLOY=1`; si el código cambió respecto al volumen, aplica el custom de nuevo (huella en `data/.custom-deploy-stamp`).
+
+No hace falta `bash scripts/deploy-custom.sh` en el servidor.
 
 ---
 

@@ -24,6 +24,7 @@ services:
       dockerfile: docker/espocrm/Dockerfile
     image: crm-alcaldia/espocrm
     container_name: espocrm
+    entrypoint: ["/usr/local/bin/entrypoint-with-deploy.sh"]
     environment:
       ESPOCRM_DATABASE_PLATFORM: Postgresql
       ESPOCRM_DATABASE_HOST: espocrm-db
@@ -35,6 +36,9 @@ services:
       ESPOCRM_ADMIN_PASSWORD: ${ESPOCRM_ADMIN_PASSWORD}
       ESPOCRM_SITE_URL: ${ESPOCRM_SITE_URL}
       ESPOCRM_TIME_ZONE: ${ESPOCRM_TIME_ZONE}
+      # Aplica espocrm-custom al arrancar si el código en la imagen cambió (Dokploy + local).
+      ESPO_RUN_AUTO_DEPLOY: "1"
+      REPO_ROOT: /opt/bootstrap/repo
     volumes:
       - espocrm:/var/www/html
     restart: always
@@ -72,6 +76,9 @@ services:
   espocrm-init:
     image: crm-alcaldia/espocrm
     container_name: espocrm-init
+    environment:
+      REPO_ROOT: /opt/bootstrap/repo
+      APP_ROOT: /var/www/html
     volumes:
       - espocrm:/var/www/html
     restart: "no"

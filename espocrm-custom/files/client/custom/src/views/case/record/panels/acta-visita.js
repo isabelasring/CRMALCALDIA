@@ -1,9 +1,10 @@
 define('custom:views/case/record/panels/acta-visita', [
     'views/record/panels/side',
     'custom:helpers/patrullero-acta',
+    'custom:helpers/radicacion-fields',
     'custom:helpers/acta-visita-modal',
     'custom:helpers/acta-visita-case-status',
-], function (Dep, PatrulleroActa, ActaVisitaModal, ActaVisitaCaseStatus) {
+], function (Dep, PatrulleroActa, RadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus) {
 
     return Dep.extend({
 
@@ -48,15 +49,20 @@ define('custom:views/case/record/panels/acta-visita', [
                 return;
             }
 
-            ActaVisitaCaseStatus.fetchActaForCase(this.model.id, user, this.model).then((acta) => {
-                this.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                this.showButton = PatrulleroActa.shouldShowActaVisitaButton(user, this.model, acta);
+            const self = this;
 
-                if (this.isRendered()) {
-                    this.reRender();
-                    this.togglePanel();
-                    this.bindButton();
-                }
+            RadicacionFields.ensureProfile().then(function () {
+                ActaVisitaCaseStatus.fetchActaForCase(self.model.id, user, self.model).then((acta) => {
+                    self.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                    self.showButton = PatrulleroActa.shouldShowActaVisitaButton(user, self.model, acta)
+                        || PatrulleroActa.canPrintManualActa(user, self.model);
+
+                    if (self.isRendered()) {
+                        self.reRender();
+                        self.togglePanel();
+                        self.bindButton();
+                    }
+                });
             });
         },
 

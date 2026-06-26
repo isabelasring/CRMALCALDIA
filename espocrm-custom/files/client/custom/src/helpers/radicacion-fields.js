@@ -222,13 +222,37 @@ define('custom:helpers/radicacion-fields', [], function () {
             || isAsignadorUser(user);
     };
 
+    const EMPTY_RADICADO_MARKERS = [
+        'sin radicar',
+        '(vacío)',
+        '(vacio)',
+        'none',
+        '—',
+    ];
+
+    const normalizeRadicadoValue = function (value) {
+        const text = String(value || '').trim();
+
+        if (!text) {
+            return '';
+        }
+
+        const lower = text.toLowerCase();
+
+        if (EMPTY_RADICADO_MARKERS.indexOf(lower) !== -1) {
+            return '';
+        }
+
+        return text;
+    };
+
     const isCaseRadicado = function (model) {
         if (!model) {
             return false;
         }
 
-        const numero = String(model.get('cNumeroRadicado') || '').trim();
-        const expediente = String(model.get('cExpediente') || '').trim();
+        const numero = normalizeRadicadoValue(model.get('cNumeroRadicado'));
+        const expediente = normalizeRadicadoValue(model.get('cExpediente'));
 
         return numero !== '' || expediente !== '';
     };
@@ -238,8 +262,8 @@ define('custom:helpers/radicacion-fields', [], function () {
             return false;
         }
 
-        const numero = String(model.get('cNumeroRadicado') || '').trim();
-        const expediente = String(model.get('cExpediente') || '').trim();
+        const numero = normalizeRadicadoValue(model.get('cNumeroRadicado'));
+        const expediente = normalizeRadicadoValue(model.get('cExpediente'));
 
         return numero !== '' && expediente !== '';
     };
@@ -302,6 +326,7 @@ define('custom:helpers/radicacion-fields', [], function () {
         isInspeccionUser: isInspeccionUser,
         isAsignadorUser: isAsignadorUser,
         isPatrulleroUser: isPatrulleroUser,
+        normalizeRadicadoValue: normalizeRadicadoValue,
         isCaseRadicado: isCaseRadicado,
         isCasePostRadicado: isCasePostRadicado,
         shouldShowRadicacionFields: shouldShowRadicacionFields,
