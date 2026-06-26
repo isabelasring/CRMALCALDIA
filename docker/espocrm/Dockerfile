@@ -21,7 +21,7 @@ COPY espocrm-custom /opt/bootstrap/repo/espocrm-custom
 COPY scripts /opt/bootstrap/repo/scripts
 COPY formatos /opt/bootstrap/repo/formatos
 COPY sql /opt/bootstrap/repo/sql
-COPY exports /opt/bootstrap/repo/exports
+RUN mkdir -p /opt/bootstrap/repo/exports
 COPY docker/espocrm/run-custom-init.sh /usr/local/bin/run-custom-init.sh
 COPY docker/espocrm/entrypoint-with-deploy.sh /usr/local/bin/entrypoint-with-deploy.sh
 COPY docker/espocrm/apache-websocket-proxy.conf /etc/apache2/conf-available/websocket-proxy.conf
