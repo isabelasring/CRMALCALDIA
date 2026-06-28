@@ -1006,6 +1006,8 @@ define('custom:views/case/record/edit', [
         },
 
         exit: function (after) {
+            $('body').removeClass('alcaldia-radicacion-edit-mode');
+
             return Dep.prototype.exit.call(this, after);
         },
     });

@@ -14,6 +14,7 @@ require_once '/var/www/html/bootstrap.php';
 
 use Espo\Core\Application;
 use Espo\Core\DataManager;
+use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
 
 $app = new Application();
@@ -21,7 +22,11 @@ $app->setupSystemUser();
 
 /** @var EntityManager $em */
 $em = $app->getContainer()->getByClass(EntityManager::class);
+/** @var Metadata $metadata */
+$metadata = $app->getContainer()->getByClass(Metadata::class);
 $pdo = $em->getPDO();
+
+$caseFieldNames = array_keys($metadata->get(['entityDefs', 'Case', 'fields']) ?? []);
 
 $exclusiveFields = ['cNumeroRadicado', 'cExpediente', 'cRadicadoModo', 'cRadicadoSiglas', 'cRadicadoAnio'];
 $fechaVencimientoField = 'cFechaVencimiento';
@@ -80,20 +85,17 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
         }
     } elseif ($roleName === $roleRadicacion) {
-        $fieldData[$scope][$recursoTemaField] = ['read' => 'yes', 'edit' => 'no'];
+        foreach ($caseFieldNames as $field) {
+            $canEdit = in_array($field, $exclusiveFields, true);
+            $canRead = $canEdit
+                || !in_array($field, $asignacionFields, true)
+                && $field !== $motivoReasignacionField
+                && !in_array($field, $actaVisitaPanelFields, true);
 
-        foreach ($registroExcelFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
-        }
-
-        foreach ($asignacionFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'no', 'edit' => 'no'];
-        }
-
-        $fieldData[$scope][$motivoReasignacionField] = ['read' => 'no', 'edit' => 'no'];
-
-        foreach ($actaVisitaPanelFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'no', 'edit' => 'no'];
+            $fieldData[$scope][$field] = [
+                'read' => $canRead ? 'yes' : 'no',
+                'edit' => $canEdit ? 'yes' : 'no',
+            ];
         }
     } elseif ($roleName === 'Asignador') {
         foreach ($asignacionFields as $field) {

@@ -149,13 +149,26 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const getAssignedRoleNames = function (user) {
-        if (!user) {
-            return [];
-        }
-
         const names = [];
 
         Object.values(user.get('rolesNames') || {}).forEach((name) => names.push(name));
+
+        const profile = getProfileForUser(user);
+
+        if (profile && Array.isArray(profile.roles)) {
+            profile.roles.forEach(function (name) {
+                names.push(name);
+            });
+        } else if (
+            profileLoaded
+            && profileUserId === getCurrentUserId(user)
+            && serverProfile
+            && Array.isArray(serverProfile.roles)
+        ) {
+            serverProfile.roles.forEach(function (name) {
+                names.push(name);
+            });
+        }
 
         return names;
     };

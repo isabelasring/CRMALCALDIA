@@ -270,6 +270,10 @@ define('custom:helpers/radicacion-edit-mode', [
         lockFormDomExceptAssistant(recordView);
         prepareRadicacionEditView(recordView);
 
+        if (recordView.$el && recordView.$el.closest) {
+            recordView.$el.closest('body').addClass('alcaldia-radicacion-edit-mode');
+        }
+
         recordView.$el.find(
             '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
         ).closest('.btn, a, .input-group-btn').hide();

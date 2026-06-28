@@ -46,7 +46,8 @@ class AlcaldiaUserProfile
      *   isPatrullero: bool,
      *   isAsignador: bool,
      *   canDownloadExcelAlcaldia: bool,
-     *   homeProfile: string
+     *   homeProfile: string,
+     *   roles: string[]
      * }
      */
     public function build(User $user): array
@@ -57,11 +58,31 @@ class AlcaldiaUserProfile
             'isPatrullero' => $this->hasAnyRole($user, self::NAMES_PATRULLERO),
             'isAsignador' => $this->isAsignador($user),
             'canDownloadExcelAlcaldia' => $this->canDownloadExcelAlcaldia($user),
+            'roles' => $this->getAssignedRoleNames($user),
         ];
 
         $flags['homeProfile'] = $this->resolveHomeProfile($user, $flags);
 
         return $flags;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAssignedRoleNames(User $user): array
+    {
+        $names = [];
+        $roleIds = $user->getLinkMultipleIdList('roles') ?? [];
+
+        foreach ($roleIds as $roleId) {
+            $role = $this->entityManager->getEntityById('Role', $roleId);
+
+            if ($role && $role->get('name')) {
+                $names[] = (string) $role->get('name');
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 
     public function canDownloadExcelAlcaldia(User $user): bool

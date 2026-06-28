@@ -112,7 +112,13 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     }
 
     foreach ($partyFields as $field) {
-        $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
+        if ($row['name'] === 'Radicación' || $row['name'] === 'Radicacion') {
+            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
+        } elseif ($row['name'] === 'Inspección' || $row['name'] === 'Inspeccion') {
+            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
+        } else {
+            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
+        }
     }
 
     $update = $pdo->prepare(

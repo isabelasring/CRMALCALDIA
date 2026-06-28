@@ -115,3 +115,22 @@
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
 }
+
+/* Radicación: solo panel asistente editable al radicar */
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .cell.alcaldia-radicacion-readonly,
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .cell:not(:has(.radicado-assistant-panel-mount)) {
+  pointer-events: none;
+  opacity: 0.92;
+}
+
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .radicado-assistant-panel-mount,
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .radicado-assistant-panel-mount * {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .record-buttons,
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .record-buttons * {
+  pointer-events: auto;
+  opacity: 1;
+}
