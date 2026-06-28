@@ -62,6 +62,7 @@ class AlcaldiaUserProfile
         ];
 
         $flags['homeProfile'] = $this->resolveHomeProfile($user, $flags);
+        $flags['canEditRadicado'] = $this->canEditRadicado($user);
 
         return $flags;
     }

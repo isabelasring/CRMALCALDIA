@@ -327,6 +327,31 @@ define('custom:helpers/radicacion-fields', [], function () {
         return 'gestion';
     };
 
+    const canEditRadicadoCase = function (user) {
+        if (!user || user.isAdmin()) {
+            return false;
+        }
+
+        if (isOperationalRadicacionUser(user)) {
+            return true;
+        }
+
+        const userId = getCurrentUserId(user);
+        const cached = readSessionProfileCache(userId);
+
+        if (cached && (cached.canEditRadicado || cached.isRadicacion)) {
+            return true;
+        }
+
+        const profile = getServerProfile();
+
+        if (profile && (profile.canEditRadicado || profile.isRadicacion)) {
+            return true;
+        }
+
+        return false;
+    };
+
     const isOperationalRadicacionUser = function (user) {
         if (!user || user.isAdmin()) {
             return false;
@@ -610,6 +635,7 @@ define('custom:helpers/radicacion-fields', [], function () {
         getAssignedRoleNames: getAssignedRoleNames,
         resolveHomeProfile: resolveHomeProfile,
         isOperationalRadicacionUser: isOperationalRadicacionUser,
+        canEditRadicadoCase: canEditRadicadoCase,
         isRadicacionUser: isRadicacionUser,
         isInspeccionUser: isInspeccionUser,
         isAsignadorUser: isAsignadorUser,

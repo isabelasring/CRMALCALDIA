@@ -61,7 +61,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     }
 
     foreach ($exclusiveFields as $field) {
-        if ($roleName === $roleRadicacion) {
+        if ($roleName === $roleRadicacion || $roleName === 'Radicacion') {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
         } else {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
@@ -84,7 +84,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         foreach ($actaVisitaPanelFields as $field) {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
         }
-    } elseif ($roleName === $roleRadicacion) {
+    } elseif ($roleName === $roleRadicacion || $roleName === 'Radicacion') {
         foreach ($caseFieldNames as $field) {
             $canEdit = in_array($field, $exclusiveFields, true);
             $canRead = $canEdit
@@ -167,7 +167,8 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
 require_once __DIR__ . '/includes/deploy-rebuild.php';
 
-$roleRadicacionEntity = $em->getRDBRepository('Role')->where(['name' => $roleRadicacion])->findOne();
+$roleRadicacionEntity = $em->getRDBRepository('Role')->where(['name' => $roleRadicacion])->findOne()
+    ?? $em->getRDBRepository('Role')->where(['name' => 'Radicacion'])->findOne();
 
 if ($roleRadicacionEntity) {
     $roleData = $roleRadicacionEntity->get('data');

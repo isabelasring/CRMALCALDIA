@@ -13,7 +13,7 @@ define('custom:helpers/radicacion-edit-mode', [
     ];
 
     const isPureRadicacionUser = function (user) {
-        return RadicacionFields.isOperationalRadicacionUser(user);
+        return RadicacionFields.canEditRadicadoCase(user);
     };
 
     const isRadicacionOnlyEdit = function (recordView) {

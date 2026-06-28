@@ -21,6 +21,8 @@ define('custom:views/case/record/radicar-edit', [
             this._radicarMode = true;
             this._lockedRadicadoValues = {};
 
+            RadicacionFields.ensureProfile(this.getUser());
+
             RadicacionFields.RADICADO_ALL_FIELDS.forEach((field) => {
                 this._lockedRadicadoValues[field] = this.model.get(field);
             });
@@ -57,7 +59,7 @@ define('custom:views/case/record/radicar-edit', [
         },
 
         mountAssistantPanel: function () {
-            RadicadoAssistantPanel.mount(this);
+            RadicadoAssistantPanel.mount(this, {force: true});
 
             const $panel = this.$el.find('.radicado-assistant-panel-mount');
 
@@ -69,9 +71,14 @@ define('custom:views/case/record/radicar-edit', [
                 this.$el.find('[data-name="' + field + '"]').closest('.cell').hide();
             });
 
-            $panel.find('input, select, textarea')
+            $panel.find('input, select, textarea, button')
                 .prop('disabled', false)
-                .removeAttr('readonly');
+                .removeAttr('readonly')
+                .removeClass('disabled');
+        },
+
+        setReadOnly: function () {
+            // Pantalla dedicada de radicación: nunca bloquear el asistente.
         },
 
         prepareModelForSave: function () {

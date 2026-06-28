@@ -13,6 +13,7 @@ define('custom:helpers/radicado-assistant-panel', [
             && (
                 recordView.layoutName === 'radicar'
                 || recordView._alcaldiaRadicacionEdit
+                || recordView._radicarMode
             )
         ) {
             return true;
@@ -225,8 +226,10 @@ define('custom:helpers/radicado-assistant-panel', [
         });
     };
 
-    const mount = function (recordView) {
-        if (!canShow(recordView)) {
+    const mount = function (recordView, options) {
+        options = options || {};
+
+        if (!options.force && !canShow(recordView)) {
             unmount(recordView);
 
             return;

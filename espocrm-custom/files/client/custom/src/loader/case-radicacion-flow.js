@@ -4,7 +4,7 @@
  */
 (function () {
 
-    var FLOW_VERSION = 'v4';
+    var FLOW_VERSION = 'v5';
     var PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCache';
     var profileInflight = null;
 
@@ -361,7 +361,7 @@
                 return;
             }
 
-            RadicadoAssistantPanel.mount(recordView);
+            RadicadoAssistantPanel.mount(recordView, {force: true});
 
             var panel = document.querySelector('.edit[data-scope="Case"] .radicado-assistant-panel-mount');
 
