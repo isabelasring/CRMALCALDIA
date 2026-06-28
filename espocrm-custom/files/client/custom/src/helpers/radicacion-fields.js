@@ -193,6 +193,10 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
+        if (profileLoaded && profileUserId === getCurrentUserId(user) && serverProfile && serverProfile.isRadicacion) {
+            return true;
+        }
+
         if (!profileLoaded) {
             ensureProfile(user);
         }
@@ -216,6 +220,10 @@ define('custom:helpers/radicacion-fields', [], function () {
         const profile = getProfileForUser(user);
 
         if (profile && profile.isInspeccion) {
+            return true;
+        }
+
+        if (profileLoaded && profileUserId === getCurrentUserId(user) && serverProfile && serverProfile.isInspeccion) {
             return true;
         }
 

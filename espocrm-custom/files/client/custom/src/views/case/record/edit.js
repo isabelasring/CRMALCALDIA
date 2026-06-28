@@ -41,7 +41,9 @@ define('custom:views/case/record/edit', [
             });
 
             if (!this.model.isNew()) {
-                if (RadicacionEditMode.shouldUseRadicacionRestrictedEdit(this)) {
+                RadicacionFields.ensureProfile(this.getUser());
+
+                if (RadicacionEditMode.isRadicacionCaseEditor(this)) {
                     this._alcaldiaRadicacionEdit = true;
                     this._radicarMode = true;
                 }
@@ -76,10 +78,16 @@ define('custom:views/case/record/edit', [
                 this.enforceRadicacionEntry();
                 this.enforceAsignadorEntry();
                 this.enforcePatrulleroEntry();
+
+                if (RadicacionEditMode.isRadicacionCaseEditor(this)) {
+                    this.setupRadicacionEditUi();
+
+                    return;
+                }
+
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
                 this.toggleRegistroExcelPanel();
-                this.applyRadicacionFieldAccess();
                 this.applyAsignadorFieldAccess();
             });
         },
@@ -200,7 +208,9 @@ define('custom:views/case/record/edit', [
         },
 
         applyRadicacionFieldAccess: function () {
-            this.setupRadicacionEditUi();
+            if (RadicacionEditMode.isRadicacionCaseEditor(this)) {
+                this.setupRadicacionEditUi();
+            }
         },
 
         ensureRadicacionAssistant: function () {
@@ -418,7 +428,7 @@ define('custom:views/case/record/edit', [
             PersonaTipoFields.toggleInfractorFields(this);
             PartyDocumentLookup.bindDom(this);
 
-            if (!this.model.isNew() && RadicacionEditMode.isRadicacionEditSession(this)) {
+            if (!this.model.isNew() && RadicacionEditMode.isRadicacionCaseEditor(this)) {
                 this.setupRadicacionEditUi();
             }
 
@@ -429,7 +439,7 @@ define('custom:views/case/record/edit', [
                 self.enforceAsignadorEntry();
                 self.enforcePatrulleroEntry();
 
-                if (RadicacionEditMode.isRadicacionEditSession(self)) {
+                if (RadicacionEditMode.isRadicacionCaseEditor(self)) {
                     self.setupRadicacionEditUi();
 
                     return;
@@ -441,7 +451,7 @@ define('custom:views/case/record/edit', [
                     && !PatrulleroActa.isPurePatrulleroUser(self.getUser())
                 ) {
                     self.applyFieldModes();
-                } else if (self.isRadicarMode() || self.isAsignarMode()) {
+                } else if (self.isAsignarMode()) {
                     self.applyFieldModes();
                 }
 
@@ -540,8 +550,14 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())
-                || RadicacionEditMode.shouldUseRadicacionRestrictedEdit(this)) {
+            if (RadicacionEditMode.isRadicacionCaseEditor(this)
+                || RadicacionEditMode.isRadicacionEditSession(this)) {
+                RadicacionEditMode.applyRestrictedEdit(this);
+
+                return;
+            }
+
+            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 RadicacionEditMode.applyRestrictedEdit(this);
 
                 return;
@@ -643,7 +659,8 @@ define('custom:views/case/record/edit', [
         },
 
         toggleRadicacionFields: function () {
-            if (RadicacionEditMode.isRadicacionEditSession(this)) {
+            if (RadicacionEditMode.isRadicacionCaseEditor(this)
+                || RadicacionEditMode.isRadicacionEditSession(this)) {
                 this.ensureRadicacionAssistant();
 
                 return;
@@ -932,7 +949,8 @@ define('custom:views/case/record/edit', [
         },
 
         setReadOnly: function () {
-            if (RadicacionEditMode.isRadicacionEditSession(this)) {
+            if (RadicacionEditMode.isRadicacionCaseEditor(this)
+                || RadicacionEditMode.isRadicacionEditSession(this)) {
                 RadicacionEditMode.applyFieldReadOnlyRestrictions(this);
 
                 return;
@@ -942,7 +960,8 @@ define('custom:views/case/record/edit', [
         },
 
         setReadOnlyExcept: function (editableFields) {
-            if (RadicacionEditMode.isRadicacionEditSession(this)) {
+            if (RadicacionEditMode.isRadicacionCaseEditor(this)
+                || RadicacionEditMode.isRadicacionEditSession(this)) {
                 RadicacionEditMode.applyFieldReadOnlyRestrictions(this);
 
                 return;

@@ -11,33 +11,19 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
-        if (RadicacionFields.isAsignadorUser(user) && !RadicacionFields.isRadicacionUser(user)) {
-            return false;
-        }
-
-        if (RadicacionFields.isPatrulleroUser(user) && !RadicacionFields.isRadicacionUser(user)) {
-            return false;
-        }
-
-        if (RadicacionFields.hasRole(user, 'radicacion')) {
-            return true;
-        }
-
-        const profile = RadicacionFields.getProfileForUser(user);
-
-        return !!(profile && profile.isRadicacion && !profile.isInspeccion);
+        return RadicacionFields.isRadicacionUser(user);
     };
 
-    const shouldUseRadicacionRestrictedEdit = function (recordView) {
-        if (!recordView || !recordView.model) {
-            return false;
-        }
-
-        if (recordView.model.isNew && recordView.model.isNew()) {
+    const isRadicacionCaseEditor = function (recordView) {
+        if (!recordView || !recordView.model || recordView.model.isNew()) {
             return false;
         }
 
         return isPureRadicacionUser(recordView.getUser());
+    };
+
+    const shouldUseRadicacionRestrictedEdit = function (recordView) {
+        return isRadicacionCaseEditor(recordView);
     };
 
     const PANELS_HIDDEN_FOR_RADICACION = [
@@ -198,10 +184,40 @@ define('custom:helpers/radicacion-edit-mode', [
 
         const $scope = recordView.$el;
 
+        $scope.find('.cell').each(function () {
+            const $cell = $(this);
+
+            if ($cell.find('.radicado-assistant-panel-mount').length) {
+                return;
+            }
+
+            $cell.addClass('alcaldia-radicacion-readonly');
+
+            $cell.find('input, select, textarea').each(function () {
+                const $input = $(this);
+
+                if ($input.closest('.radicado-assistant-panel-mount').length) {
+                    return;
+                }
+
+                if ($input.attr('type') === 'hidden') {
+                    return;
+                }
+
+                $input.prop('disabled', true).attr('readonly', 'readonly');
+            });
+
+            $cell.find('[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]')
+                .closest('.btn, a, .input-group-btn')
+                .hide();
+        });
+
         $scope.find('input, select, textarea').each(function () {
             const $input = $(this);
 
             if ($input.closest('.radicado-assistant-panel-mount').length) {
+                $input.prop('disabled', false).removeAttr('readonly');
+
                 return;
             }
 
@@ -311,6 +327,7 @@ define('custom:helpers/radicacion-edit-mode', [
 
     return {
         isPureRadicacionUser: isPureRadicacionUser,
+        isRadicacionCaseEditor: isRadicacionCaseEditor,
         shouldUseRadicacionRestrictedEdit: shouldUseRadicacionRestrictedEdit,
         bootstrapRadicarMode: bootstrapRadicarMode,
         isRadicarMode: isRadicarMode,
