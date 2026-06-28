@@ -1,6 +1,7 @@
 define('custom:views/case/radicar', [
     'custom:views/case/edit',
-], function (Dep) {
+    'custom:helpers/radicacion-edit-mode',
+], function (Dep, RadicacionEditMode) {
 
     return Dep.extend({
 
@@ -8,6 +9,18 @@ define('custom:views/case/radicar', [
 
         updatePageTitle: function () {
             this.setPageTitle(this.translate('radicarCaso', 'labels', 'Case'));
+        },
+
+        afterRender: function () {
+            Dep.prototype.afterRender.call(this);
+
+            RadicacionEditMode.hideRadicacionTextButtons(this);
+
+            [100, 400].forEach((delay) => {
+                window.setTimeout(() => {
+                    RadicacionEditMode.hideRadicacionTextButtons(this);
+                }, delay);
+            });
         },
     });
 });

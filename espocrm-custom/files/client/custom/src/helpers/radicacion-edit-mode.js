@@ -126,7 +126,47 @@ define('custom:helpers/radicacion-edit-mode', [
     const prepareRadicacionDedicatedLayout = prepareRadicacionLayout;
     const bootstrapRadicarMode = prepareRadicacionLayout;
 
-    const hideNonRadicacionPanels = function () {};
+    const hideRadicacionTextButtons = function (view) {
+        if (!view || !view.$el) {
+            return;
+        }
+
+        const $roots = view.$el.closest('.detail[data-scope="Case"], .edit[data-scope="Case"]');
+
+        $roots.find('.record-buttons').hide();
+
+        const textPattern = /^(edit|editar|save|guardar|cancel|cancelar)$/i;
+
+        const $scan = $roots
+            .add(view.getDetailActionElements ? view.getDetailActionElements() : $())
+            .add($(document).find(
+                '.page-header.header-page, ' +
+                '.header-page .buttons-header, ' +
+                '.header-page .header-buttons'
+            ));
+
+        $scan.find('.btn, a.btn, button.btn').each(function () {
+            const $btn = $(this);
+
+            if ($btn.closest('.dropdown-menu').length) {
+                return;
+            }
+
+            const $icon = $btn.find('.fa, .fas, .far, .glyphicon, .icon');
+
+            if ($icon.length && !$btn.find('.title, .btn-text').text().trim()) {
+                return;
+            }
+
+            const title = ($btn.find('.title, .btn-text').first().text() || $btn.text() || '').trim();
+            const actionEl = $btn.find('[data-action]').first();
+            const action = (actionEl.attr('data-action') || $btn.attr('data-action') || '').trim();
+
+            if (textPattern.test(title) || (textPattern.test(action) && title.length > 0)) {
+                $btn.hide();
+            }
+        });
+    };
     const applyRestrictedEdit = function () {};
     const scheduleRestrictedEdit = function () {};
     const applyFieldReadOnlyRestrictions = function () {};
@@ -158,6 +198,7 @@ define('custom:helpers/radicacion-edit-mode', [
         openRadicadoEdit: openRadicadoEdit,
         resolveRadicacionEditFlag: resolveRadicacionEditFlag,
         hideNonRadicacionPanels: hideNonRadicacionPanels,
+        hideRadicacionTextButtons: hideRadicacionTextButtons,
         applyRestrictedEdit: applyRestrictedEdit,
         scheduleRestrictedEdit: scheduleRestrictedEdit,
         applyFieldReadOnlyRestrictions: applyFieldReadOnlyRestrictions,

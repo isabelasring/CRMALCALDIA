@@ -157,6 +157,13 @@ body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .radicado-assista
 }
 
 body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .record-buttons,
-body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .record-buttons .btn {
-  display: inline-flex !important;
+body.alcaldia-radicacion-detail-ui .detail[data-scope="Case"] .record-buttons {
+  display: none !important;
+}
+
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .header-buttons .btn .title,
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .buttons-header .btn .title,
+body.alcaldia-radicacion-detail-ui .detail[data-scope="Case"] .detail-button-container .btn .title,
+body.alcaldia-radicacion-detail-ui .detail[data-scope="Case"] .header-buttons .btn .title {
+  display: none !important;
 }

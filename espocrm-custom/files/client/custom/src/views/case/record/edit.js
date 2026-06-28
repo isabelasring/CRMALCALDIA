@@ -43,10 +43,7 @@ define('custom:views/case/record/edit', [
                 this._initialAssignedUserId = this.model.get('assignedUserId') || null;
 
                 if (RadicacionEditMode.isRadicacionOnlyEdit(this)) {
-                    this.buttonList = [
-                        {name: 'save', label: 'Save', style: 'primary', title: 'Save'},
-                        {name: 'cancel', label: 'Cancel'},
-                    ];
+                    this.buttonList = [];
                 }
             }
 
@@ -140,6 +137,7 @@ define('custom:views/case/record/edit', [
             this.updateRadicarPageTitle();
             $('body').addClass('alcaldia-radicacion-radicar-page');
             this.mountRadicacionAssistant();
+            RadicacionEditMode.hideRadicacionTextButtons(this);
 
             [100, 350, 800].forEach((delay) => {
                 window.setTimeout(() => {
@@ -152,6 +150,7 @@ define('custom:views/case/record/edit', [
                     }
 
                     this.mountRadicacionAssistant();
+                    RadicacionEditMode.hideRadicacionTextButtons(this);
                 }, delay);
             });
         },

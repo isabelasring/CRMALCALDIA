@@ -27,18 +27,7 @@ define('custom:views/case/record/radicar-edit', [
                 this._lockedRadicadoValues[field] = this.model.get(field);
             });
 
-            this.buttonList = [
-                {
-                    name: 'save',
-                    label: 'Save',
-                    style: 'primary',
-                    title: 'Save',
-                },
-                {
-                    name: 'cancel',
-                    label: 'Cancel',
-                },
-            ];
+            this.buttonList = [];
         },
 
         afterRender: function () {
@@ -46,6 +35,7 @@ define('custom:views/case/record/radicar-edit', [
 
             $('body').addClass('alcaldia-radicacion-radicar-page');
             this.mountAssistantPanel();
+            RadicacionEditMode.hideRadicacionTextButtons(this);
 
             [100, 350, 800].forEach((delay) => {
                 window.setTimeout(() => {
@@ -54,6 +44,7 @@ define('custom:views/case/record/radicar-edit', [
                     }
 
                     this.mountAssistantPanel();
+                    RadicacionEditMode.hideRadicacionTextButtons(this);
                 }, delay);
             });
         },

@@ -370,8 +370,10 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            // Radicación: lapicito estándar (actionEdit abre pantalla de radicación).
+            // Radicación: solo icono lapicito (sin botón de texto "Editar").
             if (RadicacionEditMode.isPureRadicacionUser(user)) {
+                $('body').addClass('alcaldia-radicacion-detail-ui');
+
                 this.$el.find('.detail-button-container, .edit-buttons').removeClass('hidden').show();
                 this.getDetailActionElements()
                     .find('.detail-button-container, .edit-buttons')
@@ -380,16 +382,16 @@ define('custom:views/case/record/detail', [
 
                 if ($editBtn.length) {
                     $editBtn.show();
-                    this.setPrimaryActionButtonLabel(
-                        $editBtn,
-                        this.translate('Edit', 'labels', 'Global')
-                    );
                     this.setPrimaryActionButtonAction($editBtn, 'edit');
                     this.setPrimaryActionButtonHref($editBtn, this.getCaseEditUrl());
                 }
 
+                RadicacionEditMode.hideRadicacionTextButtons(this);
+
                 return;
             }
+
+            $('body').removeClass('alcaldia-radicacion-detail-ui');
 
             // Julian: solo asignar.
             if (AsignadorEditMode.isPureAsignadorUser(user)) {
@@ -577,6 +579,13 @@ define('custom:views/case/record/detail', [
             this.scheduleRoleAwareUi();
             this.scheduleDetailActionLabels();
             this.setActaFieldsReadOnlyForReview();
+
+            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+                $('body').addClass('alcaldia-radicacion-detail-ui');
+                RadicacionEditMode.hideRadicacionTextButtons(this);
+            } else {
+                $('body').removeClass('alcaldia-radicacion-detail-ui');
+            }
 
             if (this._pendingRoleUiRefresh) {
                 this._pendingRoleUiRefresh = false;

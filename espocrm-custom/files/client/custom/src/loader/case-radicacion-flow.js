@@ -262,6 +262,14 @@
         ).forEach(function (node) {
             node.style.display = 'block';
         });
+
+        document.querySelectorAll(
+            '.edit[data-scope="Case"] .record-buttons, ' +
+            '.page-header .btn[data-action="save"], ' +
+            '.page-header .btn[data-action="cancel"]'
+        ).forEach(function (node) {
+            node.style.display = 'none';
+        });
     }
 
     function walkViews(view, bucket) {
