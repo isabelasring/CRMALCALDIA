@@ -63,11 +63,7 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
-        if (!isPureRadicacionUser(recordView.getUser())) {
-            return false;
-        }
-
-        return isRadicarUrlMode(recordView);
+        return isPureRadicacionUser(recordView.getUser());
     };
 
     const shouldUseRadicacionRestrictedEdit = function (recordView) {
@@ -120,23 +116,19 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
-        if (recordView.layoutName === 'radicar') {
+        if (recordView.layoutName === 'radicar' || recordView._alcaldiaRadicacionEdit) {
             return true;
         }
 
-        if (recordView._alcaldiaRadicacionEdit) {
-            return true;
-        }
-
-        return isRadicarUrlMode(recordView);
+        return isPureRadicacionUser(recordView.getUser());
     };
 
     const isRadicarMode = function (recordView) {
-        return isRadicarUrlMode(recordView);
+        return isRadicacionEditSession(recordView);
     };
 
     const bootstrapRadicarMode = function (recordView) {
-        if (!isRadicarUrlMode(recordView)) {
+        if (!isPureRadicacionUser(recordView.getUser())) {
             return;
         }
 
@@ -144,7 +136,25 @@ define('custom:helpers/radicacion-edit-mode', [
         recordView._alcaldiaRadicacionEdit = true;
     };
 
+    const prepareRadicacionDedicatedLayoutForUser = function (recordView) {
+        if (!recordView || !recordView.model || (recordView.model.isNew && recordView.model.isNew())) {
+            return;
+        }
+
+        if (!isPureRadicacionUser(recordView.getUser())) {
+            return;
+        }
+
+        recordView.layoutName = 'radicar';
+        recordView.sideDisabled = true;
+        recordView.isWide = false;
+        recordView._radicarMode = true;
+        recordView._alcaldiaRadicacionEdit = true;
+    };
+
     const prepareRadicacionDedicatedLayout = function (recordView) {
+        prepareRadicacionDedicatedLayoutForUser(recordView);
+
         if (!hasRadicarUrlHint(recordView)) {
             return;
         }
@@ -472,6 +482,7 @@ define('custom:helpers/radicacion-edit-mode', [
         hideNonRadicacionPanels: hideNonRadicacionPanels,
         prepareRadicacionEditView: prepareRadicacionEditView,
         prepareRadicacionDedicatedLayout: prepareRadicacionDedicatedLayout,
+        prepareRadicacionDedicatedLayoutForUser: prepareRadicacionDedicatedLayoutForUser,
         resolveRadicacionEditFlag: resolveRadicacionEditFlag,
         activateRadicarMode: activateRadicarMode,
         hasRadicarUrlHint: hasRadicarUrlHint,

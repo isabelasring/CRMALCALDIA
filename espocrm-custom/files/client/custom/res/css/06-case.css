@@ -137,16 +137,22 @@ body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .record-buttons * {
   opacity: 1 !important;
 }
 
-/* Radicación: pantalla mínima con ?radicar=1 */
-body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .middle .panel:not([data-name="radicacionCaso"]):not([data-panel-name="radicacionCaso"]),
-body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .bottom .panel,
+/* Radicación: pantalla mínima con ?radicar=1 o rol Radicación en edit */
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .middle .panel,
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .bottom,
 body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .side,
-body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .panel-group-accordion > .panel:not([data-name="radicacionCaso"]):not([data-panel-name="radicacionCaso"]) {
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .panel-group-accordion > .panel {
   display: none !important;
 }
 
 body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .panel[data-name="radicacionCaso"],
 body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .panel[data-panel-name="radicacionCaso"],
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .radicado-assistant-panel,
 body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .radicado-assistant-panel-mount {
   display: block !important;
+}
+
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .record-buttons,
+body.alcaldia-radicacion-radicar-page .edit[data-scope="Case"] .record-buttons .btn {
+  display: inline-flex !important;
 }
