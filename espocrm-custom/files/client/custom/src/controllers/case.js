@@ -64,21 +64,13 @@ define('custom:controllers/case', [
                     return;
                 }
 
-                self.getModelFactory().create(self.name, function (model) {
-                    model.id = id;
-
-                    self.listenToOnce(model, 'sync', function () {
-                        self.main(self.getRadicarViewName(), {
-                            scope: self.name,
-                            model: model,
-                            returnUrl: options.returnUrl || ('#Case/view/' + id),
-                            returnDispatchParams: options.returnDispatchParams,
-                            isReturned: options.isReturned || self.store.get('isReturned'),
-                        });
-                    }, self);
-
-                    model.fetch({main: true});
-                }, self);
+                self.main(self.getRadicarViewName(), {
+                    scope: self.name,
+                    id: id,
+                    returnUrl: options.returnUrl || ('#Case/view/' + id),
+                    returnDispatchParams: options.returnDispatchParams,
+                    isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
+                });
             };
 
             if (RadicacionFields.isProfileLoaded()) {
