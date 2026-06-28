@@ -36,13 +36,36 @@ define('custom:helpers/post-radicacion-fields', [
         return !!String(initialAssignedUserId || '').trim();
     };
 
-    const shouldShowMotivoReasignacion = function (user, model, initialAssignedUserId) {
+    const requiresMotivoReasignacion = function (user, model, initialAssignedUserId, currentAssignedUserId) {
         if (!isAsignadorUser(user)) {
             return false;
         }
 
         if (!isCasePostRadicado(model)) {
             return false;
+        }
+
+        if (!hadPreviousAssignee(initialAssignedUserId)) {
+            return false;
+        }
+
+        const initial = String(initialAssignedUserId || '').trim();
+        const current = String(currentAssignedUserId || '').trim();
+
+        return current !== '' && current !== initial;
+    };
+
+    const shouldShowMotivoReasignacion = function (user, model, initialAssignedUserId, currentAssignedUserId) {
+        if (!isAsignadorUser(user)) {
+            return false;
+        }
+
+        if (!isCasePostRadicado(model)) {
+            return false;
+        }
+
+        if (currentAssignedUserId !== undefined && currentAssignedUserId !== null) {
+            return requiresMotivoReasignacion(user, model, initialAssignedUserId, currentAssignedUserId);
         }
 
         return hadPreviousAssignee(initialAssignedUserId);
@@ -57,6 +80,7 @@ define('custom:helpers/post-radicacion-fields', [
         shouldShowAsignacion: shouldShowAsignacion,
         canEditAsignacion: canEditAsignacion,
         hadPreviousAssignee: hadPreviousAssignee,
+        requiresMotivoReasignacion: requiresMotivoReasignacion,
         shouldShowMotivoReasignacion: shouldShowMotivoReasignacion,
     };
 });

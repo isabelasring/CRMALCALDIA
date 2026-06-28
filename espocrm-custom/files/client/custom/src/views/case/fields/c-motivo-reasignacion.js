@@ -39,10 +39,11 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
             return false;
         }
 
-        return PostRadicacionFields.shouldShowMotivoReasignacion(
+        return PostRadicacionFields.requiresMotivoReasignacion(
             fieldView.getUser(),
             fieldView.model,
-            recordView._initialAssignedUserId
+            recordView._initialAssignedUserId,
+            fieldView.model.get('assignedUserId')
         );
     };
 

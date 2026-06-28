@@ -222,3 +222,8 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="c
   width: 100%;
   min-height: 64px;
 }
+
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-save-link,
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-cancel-link {
+  display: none !important;
+}

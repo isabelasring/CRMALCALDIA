@@ -320,6 +320,16 @@ define('custom:helpers/asignador-edit-mode', [
         editableFields.forEach(function (field) {
             forceAssignmentFieldEditable(recordView.getFieldView(field), recordView);
         });
+
+        const assignedView = recordView.getFieldView('assignedUser');
+
+        if (assignedView) {
+            assignedView.inlineEditDisabled = true;
+
+            if (typeof assignedView.hideAssignmentInlineSaveControls === 'function') {
+                assignedView.hideAssignmentInlineSaveControls();
+            }
+        }
     };
 
     const applyAsignarPageClass = function (recordView) {

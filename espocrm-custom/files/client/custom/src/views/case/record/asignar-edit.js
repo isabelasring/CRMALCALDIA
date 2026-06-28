@@ -117,10 +117,11 @@ define('custom:views/case/record/asignar-edit', [
         },
 
         toggleMotivoReasignacion: function () {
-            const showMotivo = PostRadicacionFields.shouldShowMotivoReasignacion(
+            const showMotivo = PostRadicacionFields.requiresMotivoReasignacion(
                 this.getUser(),
                 this.model,
-                this._initialAssignedUserId
+                this._initialAssignedUserId,
+                this.model.get('assignedUserId')
             );
             const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
 
@@ -217,10 +218,11 @@ define('custom:views/case/record/asignar-edit', [
                 return false;
             }
 
-            const showMotivo = PostRadicacionFields.shouldShowMotivoReasignacion(
+            const showMotivo = PostRadicacionFields.requiresMotivoReasignacion(
                 this.getUser(),
                 this.model,
-                this._initialAssignedUserId
+                this._initialAssignedUserId,
+                assignedUserId
             );
 
             if (showMotivo && !String(this.model.get('cMotivoReasignacion') || '').trim()) {

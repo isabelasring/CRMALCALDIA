@@ -506,10 +506,11 @@ define('custom:views/case/record/detail', [
         getAsignacionEditableFields: function () {
             const fields = ['assignedUser'];
 
-            if (PostRadicacionFields.shouldShowMotivoReasignacion(
+            if (PostRadicacionFields.requiresMotivoReasignacion(
                 this.getUser(),
                 this.model,
-                this._initialAssignedUserId
+                this._initialAssignedUserId,
+                this.model.get('assignedUserId')
             )) {
                 fields.push('cMotivoReasignacion');
             }
@@ -708,7 +709,8 @@ define('custom:views/case/record/detail', [
             let showMotivo = PostRadicacionFields.shouldShowMotivoReasignacion(
                 this.getUser(),
                 this.model,
-                this._initialAssignedUserId
+                this._initialAssignedUserId,
+                this.model.get('assignedUserId')
             );
 
             if (!this._asignacionEditMode) {
@@ -729,6 +731,12 @@ define('custom:views/case/record/detail', [
                     motivoView.enableInlineEdit();
                 } else if (motivoView) {
                     AsignadorEditMode.forceAssignmentFieldEditable(motivoView, this);
+                }
+
+                if (motivoView && motivoView.$textarea && motivoView.$textarea.length) {
+                    window.setTimeout(function () {
+                        motivoView.$textarea.trigger('focus');
+                    }, 80);
                 }
             }
         },
@@ -763,10 +771,11 @@ define('custom:views/case/record/detail', [
                 assignedUserName: this.model.get('assignedUserName'),
             };
 
-            if (PostRadicacionFields.shouldShowMotivoReasignacion(
+            if (PostRadicacionFields.requiresMotivoReasignacion(
                 this.getUser(),
                 this.model,
-                this._initialAssignedUserId
+                this._initialAssignedUserId,
+                assignedUserId
             )) {
                 const motivo = String(this.model.get('cMotivoReasignacion') || '').trim();
 
