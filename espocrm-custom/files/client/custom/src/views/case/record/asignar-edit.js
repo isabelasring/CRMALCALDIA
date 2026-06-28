@@ -15,9 +15,16 @@ define('custom:views/case/record/asignar-edit', [
 
         setup: function () {
             this._asignarMode = true;
-            this._initialAssignedUserId = this.model.get('assignedUserId') || null;
+            this.scope = this.scope || this.options.scope || 'Case';
+            this.entityType = this.entityType || this.options.entityType || this.scope;
 
             Dep.prototype.setup.call(this);
+
+            if (!this.model) {
+                return;
+            }
+
+            this._initialAssignedUserId = this.model.get('assignedUserId') || null;
 
             if (!PostRadicacionFields.isCasePostRadicado(this.model)) {
                 Espo.Ui.warning(this.translate('asignadorCaseNotReady', 'messages', 'Case'));

@@ -6,6 +6,13 @@ define('custom:views/case/asignar', [
 
         recordViewName: 'custom:views/case/record/asignar-edit',
 
+        setup: function () {
+            this.scope = this.options.scope || 'Case';
+            this.entityType = this.options.entityType || this.scope;
+
+            Dep.prototype.setup.call(this);
+        },
+
         updatePageTitle: function () {
             this.setPageTitle(this.translate('asignarCaso', 'labels', 'Case'));
         },

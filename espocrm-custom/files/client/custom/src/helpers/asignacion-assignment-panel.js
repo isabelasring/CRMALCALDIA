@@ -22,7 +22,7 @@ define('custom:helpers/asignacion-assignment-panel', [
             return;
         }
 
-        if (!recordView || !recordView.$el) {
+        if (!recordView || !recordView.$el || !recordView.model) {
             return;
         }
 
