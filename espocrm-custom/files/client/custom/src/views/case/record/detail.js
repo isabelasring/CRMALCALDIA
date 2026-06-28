@@ -142,7 +142,56 @@ define('custom:views/case/record/detail', [
                 this._radicarButtonAdded = false;
             }
 
+            this.configureAsignadorDetailMenu();
             this.updateDetailActionLabels();
+        },
+
+        configureAsignadorDetailMenu: function () {
+            const user = this.getUser();
+            const model = this.model;
+
+            if (!AsignadorEditMode.isPureAsignadorUser(user)) {
+                if (this._asignarButtonAdded) {
+                    this.safeRemoveMenuItem('asignarCaso');
+                    this._asignarButtonAdded = false;
+                }
+
+                return;
+            }
+
+            if (!model || !model.id || !PostRadicacionFields.isCasePostRadicado(model)) {
+                return;
+            }
+
+            this.$el.find('[data-action="delete"], [data-action="remove"]')
+                .closest('.btn, .dropdown-item, li')
+                .hide();
+
+            const $editBtn = this.findPrimaryActionButton('edit');
+
+            if ($editBtn.length) {
+                $editBtn.show();
+                this.setPrimaryActionButtonLabel(
+                    $editBtn,
+                    this.translate('asignarCaso', 'labels', 'Case')
+                );
+                this.setPrimaryActionButtonAction($editBtn, 'asignarCaso');
+                this.setPrimaryActionButtonHref($editBtn, AsignadorEditMode.getCaseAsignarUrl(this));
+            }
+
+            if (this._asignarButtonAdded) {
+                this.safeRemoveMenuItem('asignarCaso');
+                this._asignarButtonAdded = false;
+            }
+
+            if (this.safeAddMenuItem({
+                label: this.translate('asignarCaso', 'labels', 'Case'),
+                name: 'asignarCaso',
+                action: 'asignarCaso',
+                style: 'primary',
+            })) {
+                this._asignarButtonAdded = true;
+            }
         },
 
         dispatchRadicarCase: function () {
@@ -368,6 +417,10 @@ define('custom:views/case/record/detail', [
             }
 
             if (!$editBtn.length) {
+                if (AsignadorEditMode.isPureAsignadorUser(user)) {
+                    this.configureAsignadorDetailMenu();
+                }
+
                 return;
             }
 
@@ -396,15 +449,20 @@ define('custom:views/case/record/detail', [
 
             // Julian: solo asignar.
             if (AsignadorEditMode.isPureAsignadorUser(user)) {
-                $editBtn.show();
-                this.setPrimaryActionButtonLabel(
-                    $editBtn,
-                    this.translate('asignarCaso', 'labels', 'Case')
-                );
-                this.setPrimaryActionButtonHref(
-                    $editBtn,
-                    this.getCaseEditUrl() + '?asignar=1'
-                );
+                if ($editBtn.length) {
+                    $editBtn.show();
+                    this.setPrimaryActionButtonLabel(
+                        $editBtn,
+                        this.translate('asignarCaso', 'labels', 'Case')
+                    );
+                    this.setPrimaryActionButtonAction($editBtn, 'asignarCaso');
+                    this.setPrimaryActionButtonHref(
+                        $editBtn,
+                        AsignadorEditMode.getCaseAsignarUrl(this)
+                    );
+                }
+
+                this.configureAsignadorDetailMenu();
 
                 return;
             }
@@ -542,6 +600,12 @@ define('custom:views/case/record/detail', [
         },
 
         actionDelete: function (data) {
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                Espo.Ui.warning(this.translate('Access denied', 'messages'));
+
+                return;
+            }
+
             if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
                 Espo.Ui.warning(this.translate('patrulleroReadOnlyCase', 'messages', 'Case'));
 
@@ -619,6 +683,22 @@ define('custom:views/case/record/detail', [
                 this._refreshActaTimer = null;
                 this.refreshActaVisitaPanel();
             }, 80);
+        },
+
+        checkAccessAction: function (action) {
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                if (action === 'edit' || action === 'asignarCaso') {
+                    return PostRadicacionFields.isCasePostRadicado(this.model);
+                }
+
+                if (action === 'delete' || action === 'create' || action === 'remove') {
+                    return false;
+                }
+            }
+
+            return Dep.prototype.checkAccessAction
+                ? Dep.prototype.checkAccessAction.call(this, action)
+                : true;
         },
 
         findPanel: function (name) {

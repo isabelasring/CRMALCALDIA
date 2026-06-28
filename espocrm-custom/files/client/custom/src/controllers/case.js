@@ -2,7 +2,9 @@ define('custom:controllers/case', [
     'controllers/record',
     'custom:helpers/radicacion-edit-mode',
     'custom:helpers/radicacion-fields',
-], function (Dep, RadicacionEditMode, RadicacionFields) {
+    'custom:helpers/asignador-edit-mode',
+    'custom:helpers/post-radicacion-fields',
+], function (Dep, RadicacionEditMode, RadicacionFields, AsignadorEditMode, PostRadicacionFields) {
 
     return Dep.extend({
 
@@ -38,6 +40,54 @@ define('custom:controllers/case', [
         getRadicarViewName: function () {
             return this.getMetadata().get(['clientDefs', this.name, 'views', 'radicar'])
                 || 'custom:views/case/radicar';
+        },
+
+        getAsignarViewName: function () {
+            return this.getMetadata().get(['clientDefs', this.name, 'views', 'asignar'])
+                || 'custom:views/case/asignar';
+        },
+
+        loadAsignarView: function (id, options) {
+            options = options || {};
+            var self = this;
+
+            if (!id) {
+                throw new Error('Case id required for asignar.');
+            }
+
+            if (!this.getAcl().check(this.name, 'edit')) {
+                this.accessDenied();
+
+                return;
+            }
+
+            AsignadorEditMode.activateAsignarMode(id);
+
+            var open = function () {
+                if (!AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                    Espo.Ui.warning(self.translate('Access denied', 'messages'));
+                    self.getRouter().navigate('#Case/view/' + id, {trigger: true});
+
+                    return;
+                }
+
+                self.main(self.getAsignarViewName(), {
+                    scope: self.name,
+                    id: id,
+                    returnUrl: options.returnUrl || ('#Case/view/' + id),
+                    returnDispatchParams: options.returnDispatchParams,
+                    isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
+                    asignar: true,
+                });
+            };
+
+            if (RadicacionFields.isProfileLoaded()) {
+                open();
+
+                return;
+            }
+
+            RadicacionFields.ensureProfile(this.getUser()).then(open);
         },
 
         loadRadicarView: function (id, options) {
@@ -123,6 +173,12 @@ define('custom:controllers/case', [
                     return;
                 }
 
+                if (AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                    self.loadAsignarView(options.id, options);
+
+                    return;
+                }
+
                 Dep.prototype.actionEdit.call(self, options);
             };
 
@@ -143,6 +199,16 @@ define('custom:controllers/case', [
             }
 
             this.loadRadicarView(options.id, options);
+        },
+
+        actionAsignar: function (options) {
+            options = options || {};
+
+            if (!options.id) {
+                throw new Error('Case id required for asignar.');
+            }
+
+            this.loadAsignarView(options.id, options);
         },
     });
 });

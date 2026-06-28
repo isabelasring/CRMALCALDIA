@@ -8,13 +8,15 @@
         "list": "custom:views/case/list",
         "detail": "custom:views/case/detail",
         "edit": "custom:views/case/edit",
-        "radicar": "custom:views/case/radicar"
+        "radicar": "custom:views/case/radicar",
+        "asignar": "custom:views/case/asignar"
     },
     "recordViews": {
         "edit": "custom:views/case/record/edit",
         "detail": "custom:views/case/record/detail",
         "editSmall": "custom:views/case/record/edit",
-        "radicar": "custom:views/case/record/radicar-edit"
+        "radicar": "custom:views/case/record/radicar-edit",
+        "asignar": "custom:views/case/record/asignar-edit"
     },
     "quickEditDisabled": true,
     "defaultSidePanelDisabled": true,

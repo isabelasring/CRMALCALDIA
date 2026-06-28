@@ -5,5 +5,12 @@
             "action": "radicar"
         },
         "order": 5
+    },
+    "Case/asignar/:id": {
+        "params": {
+            "controller": "Case",
+            "action": "asignar"
+        },
+        "order": 6
     }
 }

@@ -62,11 +62,19 @@ define('custom:helpers/asignador-edit-mode', [
             return true;
         }
 
+        if (recordView.layoutName === 'asignar') {
+            return true;
+        }
+
         if (recordView.options && recordView.options.asignar) {
             return true;
         }
 
         const hash = String(window.location.hash || '');
+
+        if (/^#Case\/asignar\//i.test(hash)) {
+            return true;
+        }
 
         if (/[?&]asignar=1(?:&|$)/.test(hash) || /[?&]asignar=true(?:&|$)/.test(hash)) {
             return true;
@@ -86,10 +94,32 @@ define('custom:helpers/asignador-edit-mode', [
 
         activateAsignarMode(recordView.model.id);
 
-        recordView.getRouter().navigate(
-            '#' + recordView.entityType + '/edit/' + recordView.model.id + '?asignar=1',
-            {trigger: true}
-        );
+        const router = recordView.getRouter();
+        const options = {
+            id: recordView.model.id,
+            returnUrl: '#Case/view/' + recordView.model.id,
+            asignar: true,
+        };
+
+        if (router && typeof router.dispatch === 'function') {
+            router.dispatch('Case', 'asignar', options);
+
+            return;
+        }
+
+        if (router && typeof router.navigate === 'function') {
+            router.navigate(getCaseAsignarUrl(recordView), {trigger: true});
+        }
+    };
+
+    const getCaseAsignarUrl = function (recordView) {
+        if (!recordView || !recordView.model || !recordView.model.id) {
+            return '#Case';
+        }
+
+        const scope = recordView.scope || recordView.entityType || 'Case';
+
+        return '#' + scope + '/asignar/' + recordView.model.id;
     };
 
     const getEditableFields = function (recordView) {
@@ -196,6 +226,41 @@ define('custom:helpers/asignador-edit-mode', [
         return true;
     };
 
+    const ensureAssignedUserEditable = function (recordView) {
+        if (!recordView || !isAsignarMode(recordView)) {
+            return;
+        }
+
+        recordView.$el.find('[data-name="assignedUser"]').closest('.cell, .field').show();
+        recordView.findPanel(ASSIGNMENT_PANEL).show();
+
+        const editableFields = getEditableFields(recordView);
+
+        editableFields.forEach(function (field) {
+            const view = recordView.getFieldView(field);
+
+            if (!view) {
+                return;
+            }
+
+            view.readOnly = false;
+
+            if (typeof view.setNotReadOnly === 'function') {
+                view.setNotReadOnly();
+            }
+
+            if (!view.$el) {
+                return;
+            }
+
+            view.$el.removeClass('field-readonly');
+            view.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
+            view.$el.find(
+                '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+            ).closest('.btn, a, .input-group-btn, .link-container').show();
+        });
+    };
+
     const applyAsignarPageClass = function (recordView) {
         if (isAsignarMode(recordView)) {
             $('body').addClass(BODY_CLASS);
@@ -229,6 +294,7 @@ define('custom:helpers/asignador-edit-mode', [
         }
 
         lockAllFieldViewsExcept(recordView, getEditableFields(recordView));
+        ensureAssignedUserEditable(recordView);
     };
 
     const applyDetailReadOnly = function (recordView) {
@@ -261,6 +327,7 @@ define('custom:helpers/asignador-edit-mode', [
                 }
 
                 applyRestrictedEdit(recordView);
+                ensureAssignedUserEditable(recordView);
             }, delay);
         });
     };
@@ -276,6 +343,7 @@ define('custom:helpers/asignador-edit-mode', [
         isCasePostRadicado: isCasePostRadicado,
         shouldShowAsignarButton: shouldShowAsignarButton,
         openAsignadoEdit: openAsignadoEdit,
+        getCaseAsignarUrl: getCaseAsignarUrl,
         getEditableFields: getEditableFields,
         moveAssignmentPanelToTop: moveAssignmentPanelToTop,
         hideNonAssignmentPanels: hideNonAssignmentPanels,
@@ -283,6 +351,7 @@ define('custom:helpers/asignador-edit-mode', [
         applyRestrictedEdit: applyRestrictedEdit,
         applyDetailReadOnly: applyDetailReadOnly,
         scheduleRestrictedEdit: scheduleRestrictedEdit,
+        ensureAssignedUserEditable: ensureAssignedUserEditable,
         cleanupAsignarPage: cleanupAsignarPage,
     };
 });

@@ -182,7 +182,13 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-panel-
   display: block !important;
 }
 
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell:not([data-name="assignedUser"]):not([data-name="cMotivoReasignacion"]) {
-  pointer-events: none;
-  opacity: 0.65;
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="assignedUser"],
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="cMotivoReasignacion"] {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="assignedUser"] *,
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="cMotivoReasignacion"] * {
+  pointer-events: auto !important;
 }

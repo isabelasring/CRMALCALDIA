@@ -1,0 +1,21 @@
+[
+  {
+    "name": "gestionPosteriorRadicacion",
+    "rows": [
+      [
+        {
+          "name": "assignedUser"
+        },
+        false
+      ],
+      [
+        {
+          "name": "cMotivoReasignacion",
+          "fullWidth": true
+        }
+      ]
+    ],
+    "style": "default",
+    "label": "Asignación"
+  }
+]
