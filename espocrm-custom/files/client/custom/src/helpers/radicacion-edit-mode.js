@@ -177,6 +177,41 @@ define('custom:helpers/radicacion-edit-mode', [
         });
     };
 
+    const isRadicacionPanelElement = function ($el) {
+        if (!$el || !$el.length) {
+            return false;
+        }
+
+        return !!$el.closest(
+            '.radicado-assistant-panel-mount, ' +
+            '.radicado-assistant-panel, ' +
+            '.panel[data-name="radicacionCaso"], ' +
+            '.panel[data-panel-name="radicacionCaso"], ' +
+            '.record-panel[data-name="radicacionCaso"]'
+        ).length;
+    };
+
+    const unlockRadicacionAssistantPanel = function (recordView) {
+        if (!recordView || !recordView.$el) {
+            return;
+        }
+
+        const $assistant = recordView.$el.find('.radicado-assistant-panel-mount');
+
+        $assistant.removeClass('alcaldia-radicacion-readonly');
+        $assistant.closest('.cell, .panel, .record-panel').removeClass('alcaldia-radicacion-readonly');
+
+        $assistant.find('input, select, textarea, button')
+            .prop('disabled', false)
+            .removeAttr('readonly');
+
+        recordView.$el.find(
+            '.panel[data-name="radicacionCaso"], ' +
+            '.panel[data-panel-name="radicacionCaso"], ' +
+            '.record-panel[data-name="radicacionCaso"]'
+        ).show();
+    };
+
     const lockFormDomExceptAssistant = function (recordView) {
         if (!recordView || !recordView.$el) {
             return;
@@ -187,7 +222,9 @@ define('custom:helpers/radicacion-edit-mode', [
         $scope.find('.cell').each(function () {
             const $cell = $(this);
 
-            if ($cell.find('.radicado-assistant-panel-mount').length) {
+            if (isRadicacionPanelElement($cell)) {
+                $cell.removeClass('alcaldia-radicacion-readonly');
+
                 return;
             }
 
@@ -196,7 +233,7 @@ define('custom:helpers/radicacion-edit-mode', [
             $cell.find('input, select, textarea').each(function () {
                 const $input = $(this);
 
-                if ($input.closest('.radicado-assistant-panel-mount').length) {
+                if (isRadicacionPanelElement($input)) {
                     return;
                 }
 
@@ -215,7 +252,7 @@ define('custom:helpers/radicacion-edit-mode', [
         $scope.find('input, select, textarea').each(function () {
             const $input = $(this);
 
-            if ($input.closest('.radicado-assistant-panel-mount').length) {
+            if (isRadicacionPanelElement($input)) {
                 $input.prop('disabled', false).removeAttr('readonly');
 
                 return;
@@ -232,10 +269,7 @@ define('custom:helpers/radicacion-edit-mode', [
             $input.prop('disabled', true).attr('readonly', 'readonly');
         });
 
-        $scope.find('.radicado-assistant-panel-mount')
-            .find('input, select, textarea')
-            .prop('disabled', false)
-            .removeAttr('readonly');
+        unlockRadicacionAssistantPanel(recordView);
     };
 
     const applyFieldReadOnlyRestrictions = function (recordView) {
@@ -267,7 +301,7 @@ define('custom:helpers/radicacion-edit-mode', [
         recordView._alcaldiaRadicacionEdit = true;
 
         applyFieldReadOnlyRestrictions(recordView);
-        lockFormDomExceptAssistant(recordView);
+        unlockRadicacionAssistantPanel(recordView);
         prepareRadicacionEditView(recordView);
 
         if (recordView.$el && recordView.$el.closest) {
@@ -303,6 +337,8 @@ define('custom:helpers/radicacion-edit-mode', [
                 if (typeof recordView.ensureRadicacionAssistant === 'function') {
                     recordView.ensureRadicacionAssistant();
                 }
+
+                unlockRadicacionAssistantPanel(recordView);
             }, delay);
         });
     };
@@ -340,6 +376,7 @@ define('custom:helpers/radicacion-edit-mode', [
         isCasePostRadicado: isCasePostRadicado,
         getEditableFields: getEditableFields,
         unlockEditableRadicacionFields: unlockEditableRadicacionFields,
+        unlockRadicacionAssistantPanel: unlockRadicacionAssistantPanel,
         applyFieldReadOnlyRestrictions: applyFieldReadOnlyRestrictions,
         applyRestrictedEdit: applyRestrictedEdit,
         scheduleRestrictedEdit: scheduleRestrictedEdit,

@@ -88,14 +88,20 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         foreach ($caseFieldNames as $field) {
             $canEdit = in_array($field, $exclusiveFields, true);
             $canRead = $canEdit
-                || !in_array($field, $asignacionFields, true)
-                && $field !== $motivoReasignacionField
-                && !in_array($field, $actaVisitaPanelFields, true);
+                || (
+                    !in_array($field, $asignacionFields, true)
+                    && $field !== $motivoReasignacionField
+                    && !in_array($field, $actaVisitaPanelFields, true)
+                );
 
             $fieldData[$scope][$field] = [
                 'read' => $canRead ? 'yes' : 'no',
                 'edit' => $canEdit ? 'yes' : 'no',
             ];
+        }
+
+        foreach ($exclusiveFields as $field) {
+            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
         }
     } elseif ($roleName === 'Asignador') {
         foreach ($asignacionFields as $field) {

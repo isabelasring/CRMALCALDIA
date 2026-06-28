@@ -225,6 +225,7 @@ define('custom:views/case/record/edit', [
             });
 
             RadicacionEditMode.unlockEditableRadicacionFields(this);
+            RadicacionEditMode.unlockRadicacionAssistantPanel(this);
         },
 
         setupRadicacionEditUi: function () {
@@ -240,8 +241,9 @@ define('custom:views/case/record/edit', [
             this.toggleRegistroExcelPanel();
             RadicacionEditMode.hideNonRadicacionPanels(this);
             RadicacionEditMode.prepareRadicacionEditView(this);
-            RadicacionEditMode.applyRestrictedEdit(this);
             this.ensureRadicacionAssistant();
+            RadicacionEditMode.applyRestrictedEdit(this);
+            RadicacionEditMode.unlockRadicacionAssistantPanel(this);
             this.updateRadicarPageTitle();
             RadicacionEditMode.scheduleRestrictedEdit(this);
         },
@@ -952,6 +954,7 @@ define('custom:views/case/record/edit', [
             if (RadicacionEditMode.isRadicacionCaseEditor(this)
                 || RadicacionEditMode.isRadicacionEditSession(this)) {
                 RadicacionEditMode.applyFieldReadOnlyRestrictions(this);
+                RadicacionEditMode.unlockRadicacionAssistantPanel(this);
 
                 return;
             }
@@ -963,6 +966,7 @@ define('custom:views/case/record/edit', [
             if (RadicacionEditMode.isRadicacionCaseEditor(this)
                 || RadicacionEditMode.isRadicacionEditSession(this)) {
                 RadicacionEditMode.applyFieldReadOnlyRestrictions(this);
+                RadicacionEditMode.unlockRadicacionAssistantPanel(this);
 
                 return;
             }
