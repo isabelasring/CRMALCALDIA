@@ -133,6 +133,50 @@ define('custom:helpers/asignador-edit-mode', [
         return fields;
     };
 
+    const safeSetFieldReadOnly = function (view) {
+        if (!view) {
+            return;
+        }
+
+        view.readOnly = true;
+
+        if (!view.$el || !view.$el.length) {
+            return;
+        }
+
+        view.$el.addClass('field-readonly');
+        view.$el.find('input, select, textarea, button').prop('disabled', true);
+        view.$el.find(
+            '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+        ).closest('.btn, a, .input-group-btn, .link-container').hide();
+    };
+
+    const safeSetFieldNotReadOnly = function (view) {
+        if (!view) {
+            return;
+        }
+
+        view.readOnly = false;
+
+        if (typeof view.setNotReadOnly === 'function') {
+            try {
+                view.setNotReadOnly();
+            } catch (e) {
+                // Espo puede fallar si la vista aún no terminó de renderizar.
+            }
+        }
+
+        if (!view.$el || !view.$el.length) {
+            return;
+        }
+
+        view.$el.removeClass('field-readonly hidden');
+        view.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
+        view.$el.find(
+            '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+        ).closest('.btn, a, .input-group-btn, .link-container').show();
+    };
+
     const lockAllFieldViewsExcept = function (recordView, editableFields) {
         const editable = editableFields.slice();
         const fieldViews = typeof recordView.getFieldViews === 'function'
@@ -147,28 +191,12 @@ define('custom:helpers/asignador-edit-mode', [
             }
 
             if (editable.indexOf(field) !== -1) {
-                if (typeof view.setNotReadOnly === 'function') {
-                    view.setNotReadOnly();
-                }
-
-                if (view.$el) {
-                    view.$el.find(
-                        '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-                    ).closest('.btn, a, .input-group-btn').show();
-                }
+                safeSetFieldNotReadOnly(view);
 
                 return;
             }
 
-            if (typeof view.setReadOnly === 'function') {
-                view.setReadOnly();
-            }
-
-            if (view.$el) {
-                view.$el.find(
-                    '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-                ).closest('.btn, a, .input-group-btn').hide();
-            }
+            safeSetFieldReadOnly(view);
         });
     };
 
@@ -257,21 +285,17 @@ define('custom:helpers/asignador-edit-mode', [
         ) {
             fieldView._assignmentEditForced = true;
             fieldView.mode = 'edit';
-            fieldView.reRender();
+
+            try {
+                fieldView.reRender();
+            } catch (e) {
+                safeSetFieldNotReadOnly(fieldView);
+            }
 
             return;
         }
 
-        if (!fieldView.$el || !fieldView.$el.length) {
-            return;
-        }
-
-        fieldView.$el.removeClass('field-readonly hidden');
-        fieldView.$el.closest('.cell, .field').show().removeClass('hidden');
-        fieldView.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
-        fieldView.$el.find(
-            '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-        ).closest('.btn, a, .input-group-btn, .link-container').show();
+        safeSetFieldNotReadOnly(fieldView);
     };
 
     const ensureAssignedUserEditable = function (recordView) {
@@ -306,9 +330,7 @@ define('custom:helpers/asignador-edit-mode', [
         }
 
         if (!isAsignarMode(recordView)) {
-            if (typeof recordView.setReadOnly === 'function') {
-                recordView.setReadOnly();
-            }
+            lockAllFieldViewsExcept(recordView, []);
 
             $('body').removeClass(BODY_CLASS);
 
@@ -348,11 +370,10 @@ define('custom:helpers/asignador-edit-mode', [
             return;
         }
 
-        if (typeof recordView.setReadOnly === 'function') {
-            recordView.setReadOnly();
-        }
-
-        recordView.$el.find('[data-action="delete"], [data-action="remove"]').closest('.btn, .dropdown-item, li').hide();
+        lockAllFieldViewsExcept(recordView, []);
+        recordView.$el.find('[data-action="delete"], [data-action="remove"]')
+            .closest('.btn, .dropdown-item, li')
+            .hide();
     };
 
     const scheduleRestrictedEdit = function (recordView) {

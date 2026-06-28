@@ -524,36 +524,17 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
+            if (this.isAsignadorOperator()) {
+                AsignadorEditMode.lockAllFieldViewsExcept(this, []);
+
+                return;
+            }
+
             Dep.prototype.setReadOnly.apply(this, arguments);
         },
 
         setReadOnlyExcept: function (editableFields) {
-            const editable = (editableFields || []).slice();
-            const fieldViews = typeof this.getFieldViews === 'function'
-                ? this.getFieldViews()
-                : {};
-
-            Object.keys(fieldViews).forEach(function (field) {
-                const view = fieldViews[field];
-
-                if (!view || !view.$el || !view.$el.length) {
-                    return;
-                }
-
-                if (editable.indexOf(field) !== -1) {
-                    view.readOnly = false;
-
-                    if (typeof view.setNotReadOnly === 'function') {
-                        view.setNotReadOnly();
-                    }
-
-                    return;
-                }
-
-                if (typeof view.setReadOnly === 'function') {
-                    view.setReadOnly();
-                }
-            });
+            AsignadorEditMode.lockAllFieldViewsExcept(this, editableFields || []);
         },
 
         applyAsignacionFieldAccess: function () {
@@ -898,7 +879,11 @@ define('custom:views/case/record/detail', [
         },
 
         updatePatrulleroDetailActions: function () {
-            this.scheduleRoleAwareUi();
+            if (!PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
+                return;
+            }
+
+            PatrulleroEditMode.hideCaseEditActions(this);
         },
 
         getDetailActionElements: function () {
