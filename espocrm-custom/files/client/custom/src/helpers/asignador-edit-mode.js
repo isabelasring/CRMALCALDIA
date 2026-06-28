@@ -250,7 +250,11 @@ define('custom:helpers/asignador-edit-mode', [
             && !recordView.isEditMode()
             && fieldView.mode === 'detail';
 
-        if (isDetailRecord && typeof fieldView.reRender === 'function' && !fieldView._assignmentEditForced) {
+        if (
+            isDetailRecord
+            && typeof fieldView.reRender === 'function'
+            && !fieldView._assignmentEditForced
+        ) {
             fieldView._assignmentEditForced = true;
             fieldView.mode = 'edit';
             fieldView.reRender();
@@ -258,7 +262,7 @@ define('custom:helpers/asignador-edit-mode', [
             return;
         }
 
-        if (!fieldView.$el) {
+        if (!fieldView.$el || !fieldView.$el.length) {
             return;
         }
 

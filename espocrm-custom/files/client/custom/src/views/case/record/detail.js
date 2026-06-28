@@ -84,7 +84,10 @@ define('custom:views/case/record/detail', [
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
 
-                if (!this._asignacionEditMode) {
+                if (this._asignacionEditMode) {
+                    this.toggleAsignacionMotivoField();
+                    this.enableAsignacionFields();
+                } else {
                     this.scheduleRoleAwareUi();
                 }
 
@@ -487,15 +490,8 @@ define('custom:views/case/record/detail', [
 
         exitAsignacionEditMode: function () {
             this.clearAsignacionAccessTimers();
+            this.resetAsignacionFieldFlags();
             this._asignacionEditMode = false;
-
-            ['assignedUser', 'cMotivoReasignacion'].forEach((field) => {
-                const view = this.getFieldView(field);
-
-                if (view) {
-                    delete view._assignmentEditForced;
-                }
-            });
 
             if (this._cancelAsignacionAdded) {
                 this.safeRemoveMenuItem('cancelAsignacion');
@@ -540,7 +536,7 @@ define('custom:views/case/record/detail', [
             Object.keys(fieldViews).forEach(function (field) {
                 const view = fieldViews[field];
 
-                if (!view) {
+                if (!view || !view.$el || !view.$el.length) {
                     return;
                 }
 
@@ -561,11 +557,15 @@ define('custom:views/case/record/detail', [
         },
 
         applyAsignacionFieldAccess: function () {
-            if (!this._asignacionEditMode || !this.isAsignadorOperator() || this._applyingAsignacionAccess) {
+            if (!this._asignacionEditMode || !this.isAsignadorOperator()) {
                 return;
             }
 
-            this._applyingAsignacionAccess = true;
+            if (this._applyingAsignacionFieldAccess) {
+                return;
+            }
+
+            this._applyingAsignacionFieldAccess = true;
 
             try {
                 const editableFields = this.getAsignacionEditableFields();
@@ -585,7 +585,7 @@ define('custom:views/case/record/detail', [
                     AsignacionAssignmentPanel.mount(this, {force: true});
                 }
             } finally {
-                this._applyingAsignacionAccess = false;
+                this._applyingAsignacionFieldAccess = false;
             }
         },
 
@@ -638,6 +638,16 @@ define('custom:views/case/record/detail', [
             this.toggleAsignacionMotivoField();
         },
 
+        resetAsignacionFieldFlags: function () {
+            ['assignedUser', 'cMotivoReasignacion'].forEach((field) => {
+                const view = this.getFieldView(field);
+
+                if (view) {
+                    delete view._assignmentEditForced;
+                }
+            });
+        },
+
         toggleAsignacionMotivoField: function () {
             let showMotivo = PostRadicacionFields.shouldShowMotivoReasignacion(
                 this.getUser(),
@@ -654,6 +664,14 @@ define('custom:views/case/record/detail', [
 
             if ($motivoCell.length) {
                 $motivoCell.toggle(showMotivo).removeClass('hidden');
+            }
+
+            if (showMotivo && this._asignacionEditMode) {
+                const motivoView = this.getFieldView('cMotivoReasignacion');
+
+                if (motivoView) {
+                    AsignadorEditMode.forceAssignmentFieldEditable(motivoView, this);
+                }
             }
         },
 
