@@ -84,7 +84,9 @@ define('custom:views/case/record/detail', [
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
 
-                if (!this._asignacionEditMode) {
+                if (this._asignacionEditMode) {
+                    this.applyAsignacionFieldAccess();
+                } else {
                     this.scheduleRoleAwareUi();
                 }
 
@@ -573,6 +575,51 @@ define('custom:views/case/record/detail', [
             if (!this.getFieldView('assignedUser')) {
                 AsignacionAssignmentPanel.mount(this, {force: true});
             }
+
+            this.ensureMotivoReasignacionField();
+        },
+
+        ensureMotivoReasignacionField: function () {
+            if (!this._asignacionEditMode) {
+                return;
+            }
+
+            const editableFields = this.getAsignacionEditableFields();
+
+            if (editableFields.indexOf('cMotivoReasignacion') === -1) {
+                return;
+            }
+
+            this.toggleAsignacionMotivoField();
+
+            let motivoView = this.getFieldView('cMotivoReasignacion');
+
+            if (motivoView) {
+                AsignadorEditMode.forceAssignmentFieldEditable(motivoView, this);
+
+                return;
+            }
+
+            const $cell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell').first();
+
+            if (!$cell.length || typeof this.createFieldView !== 'function') {
+                return;
+            }
+
+            const self = this;
+
+            this.createFieldView('cMotivoReasignacion', null, {
+                el: $cell,
+                mode: 'edit',
+                readOnly: false,
+            }, function (view) {
+                if (!view) {
+                    return;
+                }
+
+                view.render();
+                AsignadorEditMode.forceAssignmentFieldEditable(view, self);
+            });
         },
 
         clearAsignacionAccessTimers: function () {
@@ -609,32 +656,20 @@ define('custom:views/case/record/detail', [
         },
 
         enableAsignacionFields: function () {
-            this.getAsignacionEditableFields().forEach((field) => {
-                const view = this.getFieldView(field);
+            const self = this;
+
+            this.getAsignacionEditableFields().forEach(function (field) {
+                const view = self.getFieldView(field);
 
                 if (!view) {
                     return;
                 }
 
-                view.readOnly = false;
-
-                if (typeof view.setNotReadOnly === 'function') {
-                    view.setNotReadOnly();
-                }
-
-                if (!view.$el) {
-                    return;
-                }
-
-                view.$el.removeClass('field-readonly hidden');
-                view.$el.closest('.cell, .field').show().removeClass('hidden');
-                view.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
-                view.$el.find(
-                    '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-                ).closest('.btn, a, .input-group-btn, .link-container').show();
+                AsignadorEditMode.forceAssignmentFieldEditable(view, self);
             });
 
             this.toggleAsignacionMotivoField();
+            this.ensureMotivoReasignacionField();
         },
 
         toggleAsignacionMotivoField: function () {
@@ -652,7 +687,15 @@ define('custom:views/case/record/detail', [
             const $motivoCell = this.$el.find('[data-name="cMotivoReasignacion"]').closest('.cell');
 
             if ($motivoCell.length) {
-                $motivoCell.toggle(showMotivo);
+                $motivoCell.toggle(showMotivo).removeClass('hidden');
+            }
+
+            if (showMotivo && this._asignacionEditMode) {
+                const motivoView = this.getFieldView('cMotivoReasignacion');
+
+                if (motivoView) {
+                    AsignadorEditMode.forceAssignmentFieldEditable(motivoView, this);
+                }
             }
         },
 

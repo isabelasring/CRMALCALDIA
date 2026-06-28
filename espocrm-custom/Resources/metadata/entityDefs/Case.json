@@ -590,6 +590,7 @@
         },
         "cMotivoReasignacion": {
             "type": "text",
+            "view": "custom:views/case/fields/c-motivo-reasignacion",
             "rows": 2,
             "maxLength": 500,
             "tooltip": true,

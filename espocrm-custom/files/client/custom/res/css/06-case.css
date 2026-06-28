@@ -207,6 +207,8 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="c
 }
 
 .detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="assignedUser"] .link-container,
-.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="assignedUser"] [data-action="selectLink"] {
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="assignedUser"] [data-action="selectLink"],
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"] textarea,
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"] input {
   pointer-events: auto !important;
 }

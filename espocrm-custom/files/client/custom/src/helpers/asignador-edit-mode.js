@@ -234,38 +234,56 @@ define('custom:helpers/asignador-edit-mode', [
         return isAsignarMode(recordView) || !!recordView._asignacionEditMode;
     };
 
+    const forceAssignmentFieldEditable = function (fieldView, recordView) {
+        if (!fieldView) {
+            return;
+        }
+
+        fieldView.readOnly = false;
+
+        if (typeof fieldView.setNotReadOnly === 'function') {
+            fieldView.setNotReadOnly();
+        }
+
+        const isDetailRecord = recordView
+            && typeof recordView.isEditMode === 'function'
+            && !recordView.isEditMode()
+            && fieldView.mode === 'detail';
+
+        if (isDetailRecord && typeof fieldView.reRender === 'function') {
+            fieldView.mode = 'edit';
+            fieldView.reRender();
+
+            return;
+        }
+
+        if (!fieldView.$el) {
+            return;
+        }
+
+        fieldView.$el.removeClass('field-readonly hidden');
+        fieldView.$el.closest('.cell, .field').show().removeClass('hidden');
+        fieldView.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
+        fieldView.$el.find(
+            '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+        ).closest('.btn, a, .input-group-btn, .link-container').show();
+    };
+
     const ensureAssignedUserEditable = function (recordView) {
         if (!recordView || !isAssignmentEditing(recordView)) {
             return;
         }
 
-        recordView.$el.find('[data-name="assignedUser"]').closest('.cell, .field').show();
+        recordView.$el.find('[data-name="assignedUser"], [data-name="cMotivoReasignacion"]')
+            .closest('.cell, .field')
+            .show()
+            .removeClass('hidden');
         recordView.findPanel(ASSIGNMENT_PANEL).show();
 
         const editableFields = getEditableFields(recordView);
 
         editableFields.forEach(function (field) {
-            const view = recordView.getFieldView(field);
-
-            if (!view) {
-                return;
-            }
-
-            view.readOnly = false;
-
-            if (typeof view.setNotReadOnly === 'function') {
-                view.setNotReadOnly();
-            }
-
-            if (!view.$el) {
-                return;
-            }
-
-            view.$el.removeClass('field-readonly');
-            view.$el.find('input, select, textarea, button').prop('disabled', false).removeAttr('readonly');
-            view.$el.find(
-                '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-            ).closest('.btn, a, .input-group-btn, .link-container').show();
+            forceAssignmentFieldEditable(recordView.getFieldView(field), recordView);
         });
     };
 
@@ -369,6 +387,7 @@ define('custom:helpers/asignador-edit-mode', [
         openAsignadoEdit: openAsignadoEdit,
         getCaseAsignarUrl: getCaseAsignarUrl,
         getEditableFields: getEditableFields,
+        forceAssignmentFieldEditable: forceAssignmentFieldEditable,
         lockAllFieldViewsExcept: lockAllFieldViewsExcept,
         moveAssignmentPanelToTop: moveAssignmentPanelToTop,
         hideNonAssignmentPanels: hideNonAssignmentPanels,
