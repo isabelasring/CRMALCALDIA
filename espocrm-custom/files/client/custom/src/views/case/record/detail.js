@@ -13,13 +13,14 @@ define('custom:views/case/record/detail', [
     'custom:helpers/radicado-generator',
     'custom:helpers/radicado-assistant-panel',
     'custom:helpers/inspeccion-registro-excel',
+    'custom:helpers/inspeccion-edit-mode',
     'custom:helpers/case-documentos',
     'custom:helpers/case-detail-panels',
     'custom:helpers/radicacion-edit-mode',
     'custom:helpers/asignador-edit-mode',
     'custom:helpers/patrullero-edit-mode',
     'custom:helpers/alcaldia-case-roles',
-], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus, InspeccionActuoArchivo, ActuoArchivoModal, ActuoArchivoCaseStatus, PersonaTipoFields, RadicadoGenerator, RadicadoAssistantPanel, InspeccionRegistroExcel, CaseDocumentos, CaseDetailPanels, RadicacionEditMode, AsignadorEditMode, PatrulleroEditMode, AlcaldiaCaseRoles) {
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus, InspeccionActuoArchivo, ActuoArchivoModal, ActuoArchivoCaseStatus, PersonaTipoFields, RadicadoGenerator, RadicadoAssistantPanel, InspeccionRegistroExcel, InspeccionEditMode, CaseDocumentos, CaseDetailPanels, RadicacionEditMode, AsignadorEditMode, PatrulleroEditMode, AlcaldiaCaseRoles) {
 
     return Dep.extend({
 
@@ -166,27 +167,16 @@ define('custom:views/case/record/detail', [
             this.toggleActuoArchivoPanels();
             AsignadorEditMode.applyDetailReadOnly(this);
             PatrulleroEditMode.applyDetailReadOnly(this);
-            this.applyInspeccionRegistroExcelAccess();
+            this.applyInspeccionCaseEditAccess();
             RadicacionEditMode.hideNonRadicacionPanels(this);
         },
 
-        applyInspeccionRegistroExcelAccess: function () {
-            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+        applyInspeccionCaseEditAccess: function () {
+            if (!InspeccionEditMode.canEditFullCase(this.getUser(), this)) {
                 return;
             }
 
-            const user = this.getUser();
-            const model = this.model;
-
-            if (
-                InspeccionActa.shouldShowActaRevision(user, model)
-                || InspeccionActa.shouldFinalizeCaseStatus(user, model)
-                || InspeccionActa.shouldShowActoCierre(user, model)
-            ) {
-                return;
-            }
-
-            InspeccionRegistroExcel.ensureEditable(this);
+            InspeccionEditMode.ensureFullCaseEditable(this);
         },
 
         configureRadicacionDetailMenu: function () {
@@ -912,11 +902,11 @@ define('custom:views/case/record/detail', [
         },
 
         scheduleInspeccionRegistroExcelAccess: function () {
-            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+            if (!InspeccionEditMode.canEditFullCase(this.getUser(), this)) {
                 return;
             }
 
-            this.applyInspeccionRegistroExcelAccess();
+            InspeccionEditMode.scheduleFullCaseEditable(this);
         },
 
         scheduleRefreshFormatoGeneradoDocs: function () {

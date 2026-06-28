@@ -11,11 +11,12 @@ define('custom:views/case/record/edit', [
     'custom:helpers/radicado-catalog',
     'custom:helpers/radicado-assistant-panel',
     'custom:helpers/inspeccion-registro-excel',
+    'custom:helpers/inspeccion-edit-mode',
     'custom:helpers/radicacion-edit-mode',
     'custom:helpers/asignador-edit-mode',
     'custom:helpers/alcaldia-case-roles',
     'custom:helpers/direccion-estructurada',
-], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, CaseCreateDefaults, PersonaTipoFields, PartyDocumentLookup, RadicadoGenerator, RadicadoCatalog, RadicadoAssistantPanel, InspeccionRegistroExcel, RadicacionEditMode, AsignadorEditMode, AlcaldiaCaseRoles, DireccionEstructurada) {
+], function (Dep, PatrulleroActa, InspeccionActa, RadicacionFields, PostRadicacionFields, CaseCreateDefaults, PersonaTipoFields, PartyDocumentLookup, RadicadoGenerator, RadicadoCatalog, RadicadoAssistantPanel, InspeccionRegistroExcel, InspeccionEditMode, RadicacionEditMode, AsignadorEditMode, AlcaldiaCaseRoles, DireccionEstructurada) {
 
     return Dep.extend({
 
@@ -580,25 +581,21 @@ define('custom:views/case/record/edit', [
                     'cCierreMedidasAdoptadas',
                     'cCierreObservaciones',
                 ]);
+
+                return;
+            }
+
+            if (InspeccionEditMode.canEditFullCase(user, this)) {
+                InspeccionEditMode.ensureFullCaseEditable(this);
             }
         },
 
         scheduleInspeccionEditAccess: function () {
-            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+            if (!InspeccionEditMode.canEditFullCase(this.getUser(), this)) {
                 return;
             }
 
-            const self = this;
-
-            [150, 450, 900].forEach(function (delay) {
-                window.setTimeout(function () {
-                    if (!self.isRendered || !self.isRendered()) {
-                        return;
-                    }
-
-                    self.ensureInspeccionEditAccess();
-                }, delay);
-            });
+            InspeccionEditMode.scheduleFullCaseEditable(this);
         },
 
         ensureInspeccionEditAccess: function () {
@@ -606,22 +603,11 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+            if (!InspeccionEditMode.canEditFullCase(this.getUser(), this)) {
                 return;
             }
 
-            const user = this.getUser();
-            const model = this.model;
-
-            if (
-                InspeccionActa.shouldShowActaRevision(user, model)
-                || InspeccionActa.shouldFinalizeCaseStatus(user, model)
-                || InspeccionActa.shouldShowActoCierre(user, model)
-            ) {
-                return;
-            }
-
-            InspeccionRegistroExcel.ensureEditable(this);
+            InspeccionEditMode.ensureFullCaseEditable(this);
         },
 
         toggleRadicacionFields: function () {
@@ -688,6 +674,16 @@ define('custom:views/case/record/edit', [
 
                 if (isPureRadicacion) {
                     this.mountRadicacionAssistant();
+
+                    return;
+                }
+
+                if (RadicacionFields.isInspeccionUser(user) && InspeccionEditMode.canEditFullCase(user, this)) {
+                    const inspeccionView = this.getFieldView(field);
+
+                    if (inspeccionView && typeof inspeccionView.setNotReadOnly === 'function') {
+                        inspeccionView.setNotReadOnly();
+                    }
 
                     return;
                 }

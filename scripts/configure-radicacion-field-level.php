@@ -69,20 +69,13 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     }
 
     if ($roleName === 'Inspección' || $roleName === 'Inspeccion') {
-        $fieldData[$scope][$recursoTemaField] = ['read' => 'yes', 'edit' => 'yes'];
+        foreach ($caseFieldNames as $field) {
+            if (in_array($field, $actaVisitaPanelFields, true)) {
+                $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
+                continue;
+            }
 
-        foreach ($registroExcelFields as $field) {
             $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'yes'];
-        }
-
-        foreach ($asignacionFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
-        }
-
-        $fieldData[$scope][$motivoReasignacionField] = ['read' => 'yes', 'edit' => 'no'];
-
-        foreach ($actaVisitaPanelFields as $field) {
-            $fieldData[$scope][$field] = ['read' => 'yes', 'edit' => 'no'];
         }
     } elseif ($roleName === $roleRadicacion || $roleName === 'Radicacion') {
         foreach ($caseFieldNames as $field) {
@@ -159,7 +152,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($roleName === $roleRadicacion) {
         echo "OK Radicación: solo radicado/expediente editables: {$roleName}\n";
     } elseif ($roleName === $roleInspeccion || $roleName === 'Inspeccion') {
-        echo "OK Inspección: registro Excel/fecha vencimiento editables: {$roleName}\n";
+        echo "OK Inspección: todos los campos del caso editables: {$roleName}\n";
     } else {
         echo "OK lectura, sin edición (radicado + expediente): {$roleName}\n";
     }
@@ -227,4 +220,4 @@ if ($roleInspeccionEntity) {
 }
 
 deploy_maybe_rebuild($app);
-echo 'Listo. Radicación: solo radicado y expediente editables; no puede crear casos. Inspección: Case create/edit all.' . PHP_EOL;
+echo 'Listo. Radicación: solo radicado y expediente editables; no puede crear casos. Inspección: todos los campos del caso editables.' . PHP_EOL;
