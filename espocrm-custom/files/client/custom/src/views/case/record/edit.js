@@ -893,7 +893,15 @@ define('custom:views/case/record/edit', [
 
         toggleRegistroExcelPanel: function () {
             if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                this.findPanel(InspeccionRegistroExcel.PANEL_NAME).hide();
+                const $panel = this.findPanel(InspeccionRegistroExcel.PANEL_NAME);
+
+                if (this.isRadicarMode()) {
+                    $panel.show();
+                } else {
+                    $panel.hide();
+                }
+
+                return;
             }
 
             InspeccionRegistroExcel.togglePanel(this);

@@ -30,7 +30,6 @@ define('custom:helpers/radicacion-edit-mode', [
         'actaVisita',
         'actaRevision',
         'actuoArchivoPanel',
-        'registroExcelAlcaldia',
         'gestionPosteriorRadicacion',
     ];
 
