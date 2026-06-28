@@ -206,8 +206,7 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            Espo.Ui.warning(this.translate('asignarUseButton', 'messages', 'Case'));
-            this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+            AsignadorEditMode.openAsignadoEdit(this);
         },
 
         enforcePatrulleroEntry: function () {

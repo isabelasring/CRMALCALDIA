@@ -64,7 +64,7 @@ define('custom:controllers/case', [
             AsignadorEditMode.activateAsignarMode(id);
 
             var open = function () {
-                if (!AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                if (!RadicacionFields.canAssignCase(self.getUser())) {
                     Espo.Ui.warning(self.translate('Access denied', 'messages'));
                     self.getRouter().navigate('#Case/view/' + id, {trigger: true});
 
@@ -173,7 +173,7 @@ define('custom:controllers/case', [
                     return;
                 }
 
-                if (AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                if (RadicacionFields.canAssignCase(self.getUser())) {
                     self.loadAsignarView(options.id, options);
 
                     return;

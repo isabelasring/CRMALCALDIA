@@ -63,6 +63,7 @@ class AlcaldiaUserProfile
 
         $flags['homeProfile'] = $this->resolveHomeProfile($user, $flags);
         $flags['canEditRadicado'] = $this->canEditRadicado($user);
+        $flags['canAssignCase'] = $this->canAssignCase($user);
 
         return $flags;
     }
@@ -151,6 +152,15 @@ class AlcaldiaUserProfile
     public function canEditRadicado(User $user): bool
     {
         return $this->isRadicacion($user);
+    }
+
+    public function canAssignCase(User $user): bool
+    {
+        if ($user->isAdmin()) {
+            return false;
+        }
+
+        return $this->resolveHomeProfile($user) === 'asignador';
     }
 
     /**

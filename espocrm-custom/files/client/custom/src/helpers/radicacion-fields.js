@@ -8,6 +8,7 @@ define('custom:helpers/radicacion-fields', [], function () {
     const ROLE_RADICACION = 'radicacion';
     const ROLE_INSPECCION = 'inspeccion';
     const ROLE_ASIGNADOR = 'asignador';
+    const ROLE_ASIGNACION = 'asignacion';
     const ROLE_PATRULLERO = 'patrullero';
     const PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCache';
     const RADICADO_FIELDS = ['cNumeroRadicado', 'cExpediente'];
@@ -300,6 +301,10 @@ define('custom:helpers/radicacion-fields', [], function () {
             return 'asignador';
         }
 
+        if (hasRole(user, ROLE_ASIGNACION)) {
+            return 'asignador';
+        }
+
         if (hasRole(user, ROLE_PATRULLERO)) {
             return 'patrullero';
         }
@@ -464,6 +469,63 @@ define('custom:helpers/radicacion-fields', [], function () {
         return false;
     };
 
+    const isOperationalAsignadorUser = function (user) {
+        if (!user || user.isAdmin()) {
+            return false;
+        }
+
+        if (isOperationalRadicacionUser(user)) {
+            return false;
+        }
+
+        if (isInspeccionUser(user) && !isAsignadorUser(user)) {
+            return false;
+        }
+
+        if (isAsignadorUser(user)) {
+            if (isRadicacionUser(user) || isInspeccionUser(user)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        const userId = getCurrentUserId(user);
+        const cached = readSessionProfileCache(userId);
+
+        if (cached && (cached.canAssignCase || cached.homeProfile === 'asignador')) {
+            if (cached.isRadicacion || cached.homeProfile === 'radicacion') {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (resolveHomeProfile(user) === 'asignador') {
+            return true;
+        }
+
+        const profile = getServerProfile();
+
+        if (profile && profile.canAssignCase) {
+            return true;
+        }
+
+        if (profile && profile.isAsignador && profile.homeProfile === 'asignador') {
+            return true;
+        }
+
+        return false;
+    };
+
+    const canAssignCase = function (user) {
+        if (!user || user.isAdmin()) {
+            return false;
+        }
+
+        return isOperationalAsignadorUser(user);
+    };
+
     const isAsignadorUser = function (user) {
         if (!user) {
             return false;
@@ -473,7 +535,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (hasRole(user, ROLE_ASIGNADOR)) {
+        if (hasRole(user, ROLE_ASIGNADOR) || hasRole(user, ROLE_ASIGNACION)) {
             return true;
         }
 
@@ -643,7 +705,9 @@ define('custom:helpers/radicacion-fields', [], function () {
         getAssignedRoleNames: getAssignedRoleNames,
         resolveHomeProfile: resolveHomeProfile,
         isOperationalRadicacionUser: isOperationalRadicacionUser,
+        isOperationalAsignadorUser: isOperationalAsignadorUser,
         canEditRadicadoCase: canEditRadicadoCase,
+        canAssignCase: canAssignCase,
         isRadicacionUser: isRadicacionUser,
         isInspeccionUser: isInspeccionUser,
         isAsignadorUser: isAsignadorUser,

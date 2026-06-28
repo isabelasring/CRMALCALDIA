@@ -8,23 +8,13 @@ define('custom:helpers/asignador-edit-mode', [
     const BODY_CLASS = 'alcaldia-asignador-asignar-page';
 
     const isPureAsignadorUser = function (user) {
-        if (!user || user.isAdmin()) {
-            return false;
-        }
+        return RadicacionFields.isOperationalAsignadorUser(user);
+    };
 
-        if (RadicacionFields.isInspeccionUser(user)) {
-            return false;
-        }
+    const hasAsignarSession = function (caseId) {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
 
-        if (!RadicacionFields.isAsignadorUser(user)) {
-            return false;
-        }
-
-        if (RadicacionFields.isRadicacionUser(user)) {
-            return false;
-        }
-
-        return true;
+        return !!(stored && stored === String(caseId || ''));
     };
 
     const activateAsignarMode = function (caseId) {
@@ -80,7 +70,7 @@ define('custom:helpers/asignador-edit-mode', [
             return true;
         }
 
-        return consumeAsignarMode(model.id);
+        return hasAsignarSession(model.id);
     };
 
     const shouldShowAsignarButton = function (user, model) {
@@ -333,6 +323,7 @@ define('custom:helpers/asignador-edit-mode', [
     };
 
     const cleanupAsignarPage = function () {
+        sessionStorage.removeItem(STORAGE_KEY);
         $('body').removeClass(BODY_CLASS);
     };
 

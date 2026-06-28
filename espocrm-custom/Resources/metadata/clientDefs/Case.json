@@ -176,28 +176,5 @@
         "cRemitidoA": {
             "primaryFilter": "radicacion"
         }
-    },
-    "dynamicLogic": {
-        "fields": {
-            "assignedUser": {
-                "visible": {
-                    "conditionGroup": [
-                        {
-                            "type": "and",
-                            "value": [
-                                {
-                                    "type": "isNotEmpty",
-                                    "attribute": "cNumeroRadicado"
-                                },
-                                {
-                                    "type": "isNotEmpty",
-                                    "attribute": "cExpediente"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            }
-        }
     }
 }

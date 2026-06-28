@@ -150,7 +150,7 @@ define('custom:views/case/record/detail', [
             const user = this.getUser();
             const model = this.model;
 
-            if (!AsignadorEditMode.isPureAsignadorUser(user)) {
+            if (!AsignadorEditMode.isPureAsignadorUser(user) && !RadicacionFields.canAssignCase(user)) {
                 if (this._asignarButtonAdded) {
                     this.safeRemoveMenuItem('asignarCaso');
                     this._asignarButtonAdded = false;
@@ -373,7 +373,7 @@ define('custom:views/case/record/detail', [
                     return;
                 }
 
-                if (AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                if (RadicacionFields.canAssignCase(self.getUser())) {
                     AsignadorEditMode.openAsignadoEdit(self);
 
                     return;
@@ -417,7 +417,7 @@ define('custom:views/case/record/detail', [
             }
 
             if (!$editBtn.length) {
-                if (AsignadorEditMode.isPureAsignadorUser(user)) {
+                if (AsignadorEditMode.isPureAsignadorUser(user) || RadicacionFields.canAssignCase(user)) {
                     this.configureAsignadorDetailMenu();
                 }
 
@@ -448,7 +448,7 @@ define('custom:views/case/record/detail', [
             $('body').removeClass('alcaldia-radicacion-detail-ui');
 
             // Julian: solo asignar.
-            if (AsignadorEditMode.isPureAsignadorUser(user)) {
+            if (AsignadorEditMode.isPureAsignadorUser(user) || RadicacionFields.canAssignCase(user)) {
                 if ($editBtn.length) {
                     $editBtn.show();
                     this.setPrimaryActionButtonLabel(
@@ -686,7 +686,7 @@ define('custom:views/case/record/detail', [
         },
 
         checkAccessAction: function (action) {
-            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+            if (RadicacionFields.canAssignCase(this.getUser())) {
                 if (action === 'edit' || action === 'asignarCaso') {
                     return PostRadicacionFields.isCasePostRadicado(this.model);
                 }

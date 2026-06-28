@@ -3,7 +3,8 @@ define('custom:views/case/record/asignar-edit', [
     'custom:helpers/asignador-edit-mode',
     'custom:helpers/post-radicacion-fields',
     'custom:helpers/radicacion-fields',
-], function (Dep, AsignadorEditMode, PostRadicacionFields, RadicacionFields) {
+    'custom:helpers/asignacion-assignment-panel',
+], function (Dep, AsignadorEditMode, PostRadicacionFields, RadicacionFields, AsignacionAssignmentPanel) {
 
     return Dep.extend({
 
@@ -31,13 +32,21 @@ define('custom:views/case/record/asignar-edit', [
             });
         },
 
+        findPanel: function (name) {
+            return this.$el.find(
+                '.panel[data-name="' + name + '"], ' +
+                '.record-panel[data-name="' + name + '"], ' +
+                '[data-name="' + name + '"].panel'
+            );
+        },
+
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
 
             $('body').addClass('alcaldia-asignador-asignar-page');
             this.applyAsignacionUi();
 
-            [100, 350, 800].forEach((delay) => {
+            [100, 350, 800, 1500].forEach((delay) => {
                 window.setTimeout(() => {
                     if (!this.isRendered || !this.isRendered()) {
                         return;
@@ -49,6 +58,12 @@ define('custom:views/case/record/asignar-edit', [
         },
 
         applyAsignacionUi: function () {
+            this.$el.find('[data-name="assignedUser"], [data-name="cMotivoReasignacion"]')
+                .closest('.cell, .field')
+                .show()
+                .removeClass('hidden');
+
+            AsignacionAssignmentPanel.mount(this, {force: true});
             this.toggleMotivoReasignacion();
             AsignadorEditMode.applyRestrictedEdit(this);
             AsignadorEditMode.ensureAssignedUserEditable(this);
@@ -91,6 +106,7 @@ define('custom:views/case/record/asignar-edit', [
             return Dep.prototype.save.call(this, options).then((result) => {
                 Espo.Ui.notify(false);
                 Espo.Ui.success(this.translate('caseEditedSuccess', 'labels', 'Case'));
+                AsignadorEditMode.cleanupAsignarPage();
 
                 return result;
             }).catch((error) => {
@@ -123,6 +139,7 @@ define('custom:views/case/record/asignar-edit', [
         },
 
         actionCancel: function () {
+            AsignadorEditMode.cleanupAsignarPage();
             this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
         },
 
