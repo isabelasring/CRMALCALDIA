@@ -19,8 +19,45 @@ define('custom:views/case/fields/assigned-user', [
             });
         },
 
+        isReadOnly: function () {
+            const recordView = this.getRecordView();
+
+            if (
+                recordView
+                && (
+                    recordView._asignarMode
+                    || recordView.layoutName === 'asignar'
+                    || (recordView.options && recordView.options.asignar)
+                )
+            ) {
+                return false;
+            }
+
+            return Dep.prototype.isReadOnly.call(this);
+        },
+
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
+
+            const recordView = this.getRecordView();
+
+            if (
+                recordView
+                && (
+                    recordView._asignarMode
+                    || recordView.layoutName === 'asignar'
+                )
+            ) {
+                this.readOnly = false;
+
+                if (typeof this.setNotReadOnly === 'function') {
+                    this.setNotReadOnly();
+                }
+
+                this.$el.find(
+                    '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+                ).closest('.btn, a, .input-group-btn, .link-container').show();
+            }
 
             if (this.isEditMode() && this.model.isNew()) {
                 this.clearAssignedUserIfHidden();

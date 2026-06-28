@@ -6,7 +6,9 @@ define('custom:helpers/asignacion-assignment-panel', [
 
     const buildHtml = function () {
         return ''
-            + '<div class="panel panel-default asignacion-assignment-panel ' + PANEL_CLASS + '" style="margin-bottom:15px;">'
+            + '<div class="panel panel-default asignacion-assignment-panel ' + PANEL_CLASS + '" '
+            + 'data-name="gestionPosteriorRadicacion" data-panel-name="gestionPosteriorRadicacion" '
+            + 'style="margin-bottom:15px;">'
             + '<div class="panel-heading"><strong>Asignación de patrullero</strong></div>'
             + '<div class="panel-body">'
             + '<div class="cell form-group" data-name="assignedUser"></div>'
@@ -23,6 +25,17 @@ define('custom:helpers/asignacion-assignment-panel', [
         }
 
         if (!recordView || !recordView.$el || !recordView.model) {
+            return;
+        }
+
+        const $layoutCell = recordView.$el
+            .find('.panel[data-name="gestionPosteriorRadicacion"] [data-name="assignedUser"]')
+            .first();
+
+        if ($layoutCell.length) {
+            recordView.$el.find('[data-name="assignedUser"]').closest('.cell, .field').show();
+            unlockField(recordView.getFieldView('assignedUser'));
+
             return;
         }
 
@@ -64,7 +77,7 @@ define('custom:helpers/asignacion-assignment-panel', [
                 }
             }
 
-            if (fieldView.isRendered && fieldView.isRendered()) {
+            if (fieldView.isRendered && fieldView.isRendered() && !$cell.find(fieldView.$el).length) {
                 fieldView.reRender();
             }
 

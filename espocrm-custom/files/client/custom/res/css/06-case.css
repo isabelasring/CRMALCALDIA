@@ -169,16 +169,17 @@ body.alcaldia-radicacion-detail-ui .detail[data-scope="Case"] .header-buttons .b
 }
 
 /* Asignador: pantalla de asignación — solo panel Asignación */
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .middle .panel:not([data-name="gestionPosteriorRadicacion"]):not([data-panel-name="gestionPosteriorRadicacion"]),
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .record-panel:not([data-name="gestionPosteriorRadicacion"]),
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel-group-accordion > .panel:not([data-name="gestionPosteriorRadicacion"]),
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .middle .panel:not([data-name="gestionPosteriorRadicacion"]):not([data-panel-name="gestionPosteriorRadicacion"]):not(.asignacion-assignment-panel),
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .record-panel:not([data-name="gestionPosteriorRadicacion"]):not(.asignacion-assignment-panel),
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel-group-accordion > .panel:not([data-name="gestionPosteriorRadicacion"]):not(.asignacion-assignment-panel),
 body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .bottom,
 body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .side {
   display: none !important;
 }
 
 body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"],
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"] {
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"],
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .asignacion-assignment-panel {
   display: block !important;
 }
 

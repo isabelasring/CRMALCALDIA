@@ -3,8 +3,7 @@ define('custom:controllers/case', [
     'custom:helpers/radicacion-edit-mode',
     'custom:helpers/radicacion-fields',
     'custom:helpers/asignador-edit-mode',
-    'custom:helpers/post-radicacion-fields',
-], function (Dep, RadicacionEditMode, RadicacionFields, AsignadorEditMode, PostRadicacionFields) {
+], function (Dep, RadicacionEditMode, RadicacionFields, AsignadorEditMode) {
 
     return Dep.extend({
 
@@ -37,6 +36,14 @@ define('custom:controllers/case', [
             this.getRouter().dispatch('Home', 'index', {trigger: true});
         },
 
+        translateText: function (label, category, scope) {
+            if (this.getLanguage && typeof this.getLanguage === 'function') {
+                return this.getLanguage().translate(label, category || 'messages', scope);
+            }
+
+            return label;
+        },
+
         getRadicarViewName: function () {
             return this.getMetadata().get(['clientDefs', this.name, 'views', 'radicar'])
                 || 'custom:views/case/radicar';
@@ -45,53 +52,6 @@ define('custom:controllers/case', [
         getAsignarViewName: function () {
             return this.getMetadata().get(['clientDefs', this.name, 'views', 'asignar'])
                 || 'custom:views/case/asignar';
-        },
-
-        fetchCaseModel: function (id) {
-            var self = this;
-
-            return new Promise(function (resolve, reject) {
-                var finish = function (model) {
-                    if (!model || !model.id) {
-                        reject(new Error('Case model unavailable'));
-
-                        return;
-                    }
-
-                    resolve(model);
-                };
-
-                if (self.modelFactory) {
-                    var model = self.modelFactory.create(self.name);
-
-                    model.id = id;
-
-                    model.fetch().then(function () {
-                        finish(model);
-                    }).catch(reject);
-
-                    return;
-                }
-
-                if (!window.Espo || !Espo.Ajax) {
-                    reject(new Error('Model factory unavailable'));
-
-                    return;
-                }
-
-                Espo.Ajax.getRequest(self.name + '/' + encodeURIComponent(id)).then(function (data) {
-                    if (!self.modelFactory) {
-                        reject(new Error('Model factory unavailable'));
-
-                        return;
-                    }
-
-                    var fetchedModel = self.modelFactory.create(self.name);
-
-                    fetchedModel.set(data || {});
-                    finish(fetchedModel);
-                }).catch(reject);
-            });
         },
 
         loadAsignarView: function (id, options) {
@@ -112,34 +72,30 @@ define('custom:controllers/case', [
 
             var open = function () {
                 if (!RadicacionFields.canAssignCase(self.getUser())) {
-                    Espo.Ui.warning(self.translate('Access denied', 'messages'));
+                    Espo.Ui.warning(self.translateText('Access denied', 'messages'));
                     self.getRouter().navigate('#Case/view/' + id, {trigger: true});
 
                     return;
                 }
 
-                var launch = function (model) {
+                try {
                     self.main(self.getAsignarViewName(), {
                         scope: self.name,
-                        entityType: self.name,
                         id: id,
-                        model: model,
+                        model: options.model || null,
                         returnUrl: options.returnUrl || ('#Case/view/' + id),
                         returnDispatchParams: options.returnDispatchParams,
                         isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
                         asignar: true,
                     });
-                };
-
-                if (options.model) {
-                    launch(options.model);
-
-                    return;
+                } catch (error) {
+                    Espo.Ui.error(self.translateText('Error', 'messages'));
+                    self.getRouter().navigate('#Case/view/' + id, {trigger: true});
                 }
+            };
 
-                self.fetchCaseModel(id).then(launch).catch(function () {
-                    Espo.Ui.error(self.translate('Error'));
-                });
+            var onProfileError = function () {
+                open();
             };
 
             if (RadicacionFields.isProfileLoaded()) {
@@ -148,7 +104,7 @@ define('custom:controllers/case', [
                 return;
             }
 
-            RadicacionFields.ensureProfile(this.getUser()).then(open);
+            RadicacionFields.ensureProfile(this.getUser()).then(open).catch(onProfileError);
         },
 
         loadRadicarView: function (id, options) {
@@ -169,33 +125,25 @@ define('custom:controllers/case', [
 
             var open = function () {
                 if (!RadicacionFields.canEditRadicadoCase(self.getUser())) {
-                    Espo.Ui.warning(self.translate('Access denied', 'messages'));
+                    Espo.Ui.warning(self.translateText('Access denied', 'messages'));
                     self.getRouter().navigate('#Case/view/' + id, {trigger: true});
 
                     return;
                 }
 
-                var launch = function (model) {
-                    self.main(self.getRadicarViewName(), {
-                        scope: self.name,
-                        entityType: self.name,
-                        id: id,
-                        model: model,
-                        returnUrl: options.returnUrl || ('#Case/view/' + id),
-                        returnDispatchParams: options.returnDispatchParams,
-                        isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
-                    });
+                var mainOptions = {
+                    scope: self.name,
+                    id: id,
+                    returnUrl: options.returnUrl || ('#Case/view/' + id),
+                    returnDispatchParams: options.returnDispatchParams,
+                    isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
                 };
 
                 if (options.model) {
-                    launch(options.model);
-
-                    return;
+                    mainOptions.model = options.model;
                 }
 
-                self.fetchCaseModel(id).then(launch).catch(function () {
-                    Espo.Ui.error(self.translate('Error'));
-                });
+                self.main(self.getRadicarViewName(), mainOptions);
             };
 
             if (RadicacionFields.isProfileLoaded()) {

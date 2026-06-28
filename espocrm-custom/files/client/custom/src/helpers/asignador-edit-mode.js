@@ -186,7 +186,10 @@ define('custom:helpers/asignador-edit-mode', [
                 $panel.attr('data-name') || $panel.attr('data-panel-name') || ''
             ).trim();
 
-            if (name === ASSIGNMENT_PANEL) {
+            if (
+                name === ASSIGNMENT_PANEL
+                || $panel.hasClass('asignacion-assignment-panel')
+            ) {
                 $panel.show();
 
                 return;
