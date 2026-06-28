@@ -58,7 +58,8 @@ define('custom:controllers/case', [
             options = options || {};
 
             if (options.id && RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                this.actionRadicar(options);
+                RadicacionEditMode.activateRadicarMode(options.id);
+                this.getRouter().navigate('#Case/edit/' + options.id + '?radicar=1', {trigger: true});
 
                 return;
             }
@@ -81,16 +82,8 @@ define('custom:controllers/case', [
                 return;
             }
 
-            var model = this.getModelFactory().create(this.name);
-
-            model.id = id;
-
-            this.main('custom:views/case/radicar', {
-                scope: this.name,
-                model: model,
-                returnUrl: options.returnUrl,
-                returnDispatchParams: options.returnDispatchParams,
-            });
+            RadicacionEditMode.activateRadicarMode(id);
+            this.getRouter().navigate('#Case/edit/' + id + '?radicar=1', {trigger: true});
         },
     });
 });

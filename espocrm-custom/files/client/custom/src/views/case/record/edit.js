@@ -20,6 +20,10 @@ define('custom:views/case/record/edit', [
     return Dep.extend({
 
         setup: function () {
+            if (!this.model.isNew() && RadicacionEditMode.hasRadicarUrlHint(this)) {
+                RadicacionEditMode.prepareRadicacionDedicatedLayout(this);
+            }
+
             Dep.prototype.setup.call(this);
 
             if (this.model.isNew()) {
@@ -133,7 +137,16 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            this.getRouter().navigate('#Case/radicar/' + this.model.id, {trigger: true, replace: true});
+            if (RadicacionEditMode.isRadicarUrlMode(this)) {
+                this._radicarMode = true;
+                this._alcaldiaRadicacionEdit = true;
+                this.updateRadicarPageTitle();
+
+                return;
+            }
+
+            Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
+            this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
         },
 
         enforceAsignadorEntry: function () {
@@ -234,6 +247,13 @@ define('custom:views/case/record/edit', [
 
             this._radicarMode = true;
             this._alcaldiaRadicacionEdit = true;
+            this.updateRadicarPageTitle();
+
+            if (this.layoutName === 'radicar') {
+                this.ensureRadicacionAssistant();
+
+                return;
+            }
 
             this.enforceRadicacionEntry();
             this.togglePostRadicacionFields();
@@ -243,7 +263,6 @@ define('custom:views/case/record/edit', [
             this.ensureRadicacionAssistant();
             RadicacionEditMode.applyRestrictedEdit(this);
             RadicacionEditMode.unlockRadicacionAssistantPanel(this);
-            this.updateRadicarPageTitle();
             RadicacionEditMode.scheduleRestrictedEdit(this);
         },
 
@@ -354,6 +373,20 @@ define('custom:views/case/record/edit', [
         },
 
         fetch: function () {
+            if (RadicacionEditMode.isRadicacionEditSession(this) && this.layoutName === 'radicar') {
+                if (this.$el.find('.radicado-assistant-panel-mount').length) {
+                    this.syncRadicadoAssistantToModel();
+                }
+
+                const radicadoData = {};
+
+                RadicacionFields.RADICADO_ALL_FIELDS.forEach((field) => {
+                    radicadoData[field] = this.model.get(field);
+                });
+
+                return radicadoData;
+            }
+
             const data = {};
             const skipInfractor = PersonaTipoFields.isInfractorDesconocido(
                 this.model.get('cTipoPersonaPerjudicante')

@@ -1,0 +1,9 @@
+{
+    "Case/radicar/:id": {
+        "params": {
+            "controller": "Case",
+            "action": "radicar"
+        },
+        "order": 5
+    }
+}

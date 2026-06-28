@@ -269,19 +269,23 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                RadicacionEditMode.openRadicadoEdit(this);
+            const self = this;
 
-                return;
-            }
+            RadicacionFields.ensureProfile(this.getUser()).then(function () {
+                if (RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
+                    RadicacionEditMode.openRadicadoEdit(self);
 
-            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
-                AsignadorEditMode.openAsignadoEdit(this);
+                    return;
+                }
 
-                return;
-            }
+                if (AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
+                    AsignadorEditMode.openAsignadoEdit(self);
 
-            Dep.prototype.actionEdit.call(this);
+                    return;
+                }
+
+                Dep.prototype.actionEdit.call(self);
+            });
         },
 
         actionRadicarCaso: function () {

@@ -2,6 +2,8 @@ define('custom:helpers/radicacion-edit-mode', [
     'custom:helpers/radicacion-fields',
 ], function (RadicacionFields) {
 
+    const STORAGE_KEY = 'crm-case-radicar-mode';
+
     const isPureRadicacionUser = function (user) {
         if (!user || user.isAdmin()) {
             return false;
@@ -14,16 +16,74 @@ define('custom:helpers/radicacion-edit-mode', [
         return RadicacionFields.isRadicacionUser(user);
     };
 
-    const isRadicacionCaseEditor = function (recordView) {
-        if (!recordView || !recordView.model || recordView.model.isNew()) {
+    const activateRadicarMode = function (caseId) {
+        sessionStorage.setItem(STORAGE_KEY, String(caseId || ''));
+    };
+
+    const consumeRadicarMode = function (caseId) {
+        const stored = sessionStorage.getItem(STORAGE_KEY);
+
+        if (stored && stored === String(caseId || '')) {
+            sessionStorage.removeItem(STORAGE_KEY);
+
+            return true;
+        }
+
+        return false;
+    };
+
+    const hasRadicarUrlHint = function (recordView) {
+        if (!recordView || !recordView.model || (recordView.model.isNew && recordView.model.isNew())) {
+            return false;
+        }
+
+        if (recordView._radicarMode) {
+            return true;
+        }
+
+        if (recordView.options && recordView.options.radicar) {
+            return true;
+        }
+
+        if (recordView.layoutName === 'radicar') {
+            return true;
+        }
+
+        const hash = String(window.location.hash || '');
+
+        if (/[?&]radicar=1(?:&|$)/.test(hash) || /[?&]radicar=true(?:&|$)/.test(hash)) {
+            return true;
+        }
+
+        return consumeRadicarMode(recordView.model.id);
+    };
+
+    const isRadicarUrlMode = function (recordView) {
+        if (!hasRadicarUrlHint(recordView)) {
             return false;
         }
 
         return isPureRadicacionUser(recordView.getUser());
     };
 
+    const isRadicacionCaseEditor = function (recordView) {
+        if (!recordView || !recordView.model || recordView.model.isNew()) {
+            return false;
+        }
+
+        if (!isPureRadicacionUser(recordView.getUser())) {
+            return false;
+        }
+
+        return isRadicarUrlMode(recordView);
+    };
+
     const shouldUseRadicacionRestrictedEdit = function (recordView) {
         return isRadicacionCaseEditor(recordView);
+    };
+
+    const shouldUseRadicacionDedicatedLayout = function (recordView) {
+        return isRadicarUrlMode(recordView);
     };
 
     const PANELS_HIDDEN_FOR_RADICACION = [
@@ -68,22 +128,40 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
+        if (recordView.layoutName === 'radicar') {
+            return true;
+        }
+
         if (recordView._alcaldiaRadicacionEdit) {
             return true;
         }
 
-        return shouldUseRadicacionRestrictedEdit(recordView);
+        return isRadicarUrlMode(recordView);
     };
 
     const isRadicarMode = function (recordView) {
-        return isRadicacionEditSession(recordView);
+        return isRadicarUrlMode(recordView);
     };
 
     const bootstrapRadicarMode = function (recordView) {
-        if (shouldUseRadicacionRestrictedEdit(recordView)) {
-            recordView._radicarMode = true;
-            recordView._alcaldiaRadicacionEdit = true;
+        if (!isRadicarUrlMode(recordView)) {
+            return;
         }
+
+        recordView._radicarMode = true;
+        recordView._alcaldiaRadicacionEdit = true;
+    };
+
+    const prepareRadicacionDedicatedLayout = function (recordView) {
+        if (!hasRadicarUrlHint(recordView)) {
+            return;
+        }
+
+        recordView.layoutName = 'radicar';
+        recordView.sideDisabled = true;
+        recordView.isWide = false;
+        recordView._radicarMode = true;
+        recordView._alcaldiaRadicacionEdit = true;
     };
 
     const isCasePostRadicado = function (model) {
@@ -350,7 +428,7 @@ define('custom:helpers/radicacion-edit-mode', [
 
         const scope = recordView.scope || recordView.entityType || 'Case';
 
-        return '#' + scope + '/radicar/' + recordView.model.id;
+        return '#' + scope + '/edit/' + recordView.model.id + '?radicar=1';
     };
 
     const openRadicadoEdit = function (recordView) {
@@ -358,6 +436,7 @@ define('custom:helpers/radicacion-edit-mode', [
             return;
         }
 
+        activateRadicarMode(recordView.model.id);
         recordView.getRouter().navigate(getCaseRadicarUrl(recordView), {trigger: true});
     };
 
@@ -366,14 +445,14 @@ define('custom:helpers/radicacion-edit-mode', [
             return Promise.resolve(false);
         }
 
-        if (isPureRadicacionUser(recordView.getUser())) {
+        if (isRadicarUrlMode(recordView)) {
             recordView._alcaldiaRadicacionEdit = true;
 
             return Promise.resolve(true);
         }
 
         return RadicacionFields.ensureProfile(recordView.getUser()).then(function () {
-            const isRadicacion = isPureRadicacionUser(recordView.getUser());
+            const isRadicacion = isRadicarUrlMode(recordView);
 
             if (isRadicacion) {
                 recordView._alcaldiaRadicacionEdit = true;
@@ -400,7 +479,12 @@ define('custom:helpers/radicacion-edit-mode', [
         scheduleRestrictedEdit: scheduleRestrictedEdit,
         hideNonRadicacionPanels: hideNonRadicacionPanels,
         prepareRadicacionEditView: prepareRadicacionEditView,
+        prepareRadicacionDedicatedLayout: prepareRadicacionDedicatedLayout,
         resolveRadicacionEditFlag: resolveRadicacionEditFlag,
+        activateRadicarMode: activateRadicarMode,
+        hasRadicarUrlHint: hasRadicarUrlHint,
+        isRadicarUrlMode: isRadicarUrlMode,
+        shouldUseRadicacionDedicatedLayout: shouldUseRadicacionDedicatedLayout,
         getCaseRadicarUrl: getCaseRadicarUrl,
         openRadicadoEdit: openRadicadoEdit,
     };
