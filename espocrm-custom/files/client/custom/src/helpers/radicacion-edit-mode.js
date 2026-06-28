@@ -2,28 +2,59 @@ define('custom:helpers/radicacion-edit-mode', [
     'custom:helpers/radicacion-fields',
 ], function (RadicacionFields) {
 
-    const STORAGE_KEY = 'crm-case-radicar-mode';
+    const normalize = function (value) {
+        return String(value)
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    };
+
+    const getUserRoleNames = function (user) {
+        const names = [];
+
+        Object.values(user.get('rolesNames') || {}).forEach(function (name) {
+            names.push(name);
+        });
+
+        Object.values(user.get('teamsNames') || {}).forEach(function (name) {
+            names.push(name);
+        });
+
+        const defaultTeam = user.get('defaultTeamName');
+
+        if (defaultTeam) {
+            names.push(defaultTeam);
+        }
+
+        return names;
+    };
+
+    const userHasRoleKey = function (user, roleKey) {
+        return getUserRoleNames(user).some(function (name) {
+            const normalized = normalize(name);
+
+            return normalized === roleKey || normalized.indexOf(roleKey) !== -1;
+        });
+    };
 
     const isPureRadicacionUser = function (user) {
         if (!user || user.isAdmin()) {
             return false;
         }
 
+        if (userHasRoleKey(user, 'radicacion')) {
+            return true;
+        }
+
         if (!RadicacionFields.isRadicacionUser(user)) {
             return false;
         }
 
-        if (RadicacionFields.isPatrulleroUser(user)) {
+        if (RadicacionFields.isPatrulleroUser(user) && !RadicacionFields.isRadicacionUser(user)) {
             return false;
         }
 
         return true;
-    };
-
-    const hasRadicarHash = function () {
-        const hash = String(window.location.hash || '');
-
-        return /[?&]radicar=1(?:&|$)/.test(hash) || /[?&]radicar=true(?:&|$)/.test(hash);
     };
 
     const PANELS_HIDDEN_FOR_RADICACION = [
@@ -59,65 +90,24 @@ define('custom:helpers/radicacion-edit-mode', [
         ];
     };
 
-    const prepareRadicacionEditView = function (recordView) {
-        if (!recordView || !isPureRadicacionUser(recordView.getUser()) || !isRadicarMode(recordView)) {
-            return;
+    const isRadicacionEditSession = function (recordView) {
+        if (!recordView || !recordView.model) {
+            return false;
         }
 
-        if (typeof recordView.findPanel !== 'function') {
-            return;
+        if (recordView.model.isNew && recordView.model.isNew()) {
+            return false;
         }
 
-        hideNonRadicacionPanels(recordView);
-        recordView.findPanel('radicacionCaso').show();
+        return isPureRadicacionUser(recordView.getUser());
     };
 
-    const activateRadicarMode = function (caseId) {
-        sessionStorage.setItem(STORAGE_KEY, String(caseId || ''));
-    };
-
-    const peekRadicarMode = function (caseId) {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
-
-        return !!(stored && stored === String(caseId || ''));
-    };
-
-    const clearRadicarMode = function (caseId) {
-        const stored = sessionStorage.getItem(STORAGE_KEY);
-
-        if (stored && stored === String(caseId || '')) {
-            sessionStorage.removeItem(STORAGE_KEY);
-        }
+    const isRadicarMode = function (recordView) {
+        return isRadicacionEditSession(recordView);
     };
 
     const bootstrapRadicarMode = function (recordView) {
-        if (!recordView || !recordView.model || (recordView.model.isNew && recordView.model.isNew())) {
-            return;
-        }
-
-        if (recordView._radicarMode) {
-            return;
-        }
-
-        if (isPureRadicacionUser(recordView.getUser())) {
-            recordView._radicarMode = true;
-
-            return;
-        }
-
-        if (recordView.options && recordView.options.radicar) {
-            recordView._radicarMode = true;
-
-            return;
-        }
-
-        if (hasRadicarHash()) {
-            recordView._radicarMode = true;
-
-            return;
-        }
-
-        if (peekRadicarMode(recordView.model.id)) {
+        if (isRadicacionEditSession(recordView)) {
             recordView._radicarMode = true;
         }
     };
@@ -130,41 +120,17 @@ define('custom:helpers/radicacion-edit-mode', [
         return !isCasePostRadicado(model);
     };
 
-    const isRadicarMode = function (recordView) {
-        if (!recordView) {
-            return false;
-        }
-
-        const model = recordView.model;
-
-        if (!model || (model.isNew && model.isNew())) {
-            return false;
-        }
-
-        bootstrapRadicarMode(recordView);
-
-        return !!recordView._radicarMode;
-    };
-
-    const shouldShowRadicarButton = function (user, model) {
-        return isPureRadicacionUser(user) && !!model && !!model.id && isCaseSinRadicar(model);
-    };
-
-    const shouldShowEditRadicadoButton = function (user, model) {
-        return isPureRadicacionUser(user) && !!model && !!model.id && isCasePostRadicado(model);
-    };
-
-    const openRadicadoEdit = function (recordView) {
-        if (!recordView || !recordView.model || !recordView.model.id) {
+    const prepareRadicacionEditView = function (recordView) {
+        if (!isRadicacionEditSession(recordView)) {
             return;
         }
 
-        activateRadicarMode(recordView.model.id);
+        if (typeof recordView.findPanel !== 'function') {
+            return;
+        }
 
-        recordView.getRouter().navigate(
-            '#' + recordView.entityType + '/edit/' + recordView.model.id + '?radicar=1',
-            {trigger: true}
-        );
+        hideNonRadicacionPanels(recordView);
+        recordView.findPanel('radicacionCaso').show();
     };
 
     const unlockEditableRadicacionFields = function (recordView) {
@@ -213,55 +179,41 @@ define('custom:helpers/radicacion-edit-mode', [
     };
 
     const applyRestrictedEdit = function (recordView) {
-        if (!isPureRadicacionUser(recordView.getUser())) {
+        if (!isRadicacionEditSession(recordView)) {
             return;
         }
 
-        if (isRadicarMode(recordView)) {
-            recordView._radicarMode = true;
+        recordView._radicarMode = true;
 
-            if (typeof recordView.setReadOnlyExcept === 'function') {
-                recordView.setReadOnlyExcept(getEditableFields());
-            }
-
-            lockAllFieldViewsExcept(recordView, getEditableFields());
-            unlockEditableRadicacionFields(recordView);
-            prepareRadicacionEditView(recordView);
-
-            recordView.$el.find(
-                '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
-            ).closest('.btn, a, .input-group-btn').hide();
-
-            recordView.$el.find('[data-action="save"], [data-action="saveAndContinueEditing"]').show();
-
-            return;
+        if (typeof recordView.setReadOnlyExcept === 'function') {
+            recordView.setReadOnlyExcept(getEditableFields());
         }
 
-        if (typeof recordView.setReadOnly === 'function') {
-            recordView.setReadOnly();
-        }
+        lockAllFieldViewsExcept(recordView, getEditableFields());
+        unlockEditableRadicacionFields(recordView);
+        prepareRadicacionEditView(recordView);
 
-        lockAllFieldViewsExcept(recordView, []);
+        recordView.$el.find(
+            '[data-action="editLink"], [data-action="selectLink"], [data-action="quickCreate"]'
+        ).closest('.btn, a, .input-group-btn').hide();
 
-        if (typeof recordView.hideRadicacionSaveActions === 'function') {
-            recordView.hideRadicacionSaveActions();
-        }
+        recordView.$el.find('[data-action="save"], [data-action="saveAndContinueEditing"]').show();
     };
 
     const scheduleRestrictedEdit = function (recordView) {
-        if (!isPureRadicacionUser(recordView.getUser()) || !isRadicarMode(recordView)) {
+        if (!isRadicacionEditSession(recordView)) {
             return;
         }
 
         applyRestrictedEdit(recordView);
 
-        [150, 400, 900, 1500].forEach(function (delay) {
+        [100, 300, 700, 1200, 2000].forEach(function (delay) {
             window.setTimeout(function () {
                 if (!recordView.isEditMode || !recordView.isEditMode()) {
                     return;
                 }
 
-                if (!isRadicarMode(recordView)) {
+                if (!isRadicacionEditSession(recordView)) {
                     return;
                 }
 
@@ -276,22 +228,16 @@ define('custom:helpers/radicacion-edit-mode', [
 
     return {
         isPureRadicacionUser: isPureRadicacionUser,
-        activateRadicarMode: activateRadicarMode,
         bootstrapRadicarMode: bootstrapRadicarMode,
-        clearRadicarMode: clearRadicarMode,
-        peekRadicarMode: peekRadicarMode,
         isRadicarMode: isRadicarMode,
+        isRadicacionEditSession: isRadicacionEditSession,
         isCaseSinRadicar: isCaseSinRadicar,
         isCasePostRadicado: isCasePostRadicado,
-        shouldShowRadicarButton: shouldShowRadicarButton,
-        shouldShowEditRadicadoButton: shouldShowEditRadicadoButton,
-        openRadicadoEdit: openRadicadoEdit,
         getEditableFields: getEditableFields,
         unlockEditableRadicacionFields: unlockEditableRadicacionFields,
         applyRestrictedEdit: applyRestrictedEdit,
         scheduleRestrictedEdit: scheduleRestrictedEdit,
         hideNonRadicacionPanels: hideNonRadicacionPanels,
         prepareRadicacionEditView: prepareRadicacionEditView,
-        hasRadicarHash: hasRadicarHash,
     };
 });

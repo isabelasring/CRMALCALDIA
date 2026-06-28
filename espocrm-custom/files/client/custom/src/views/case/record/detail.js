@@ -126,7 +126,6 @@ define('custom:views/case/record/detail', [
             this.togglePostRadicacionFields();
             this.toggleRegistroExcelPanel();
             this.updateDetailActionLabels();
-            this.updateRadicarButton();
             this.updateActaVisitaButton();
             this.updateActuoArchivoButton();
             this.updatePatrulleroDetailActions();
@@ -198,70 +197,6 @@ define('custom:views/case/record/detail', [
             });
         },
 
-        updateRadicarButton: function () {
-            if (!this.model.id) {
-                if (this._radicarButtonAdded) {
-                    this.safeRemoveMenuItem('radicarCaso');
-                    this._radicarButtonAdded = false;
-                }
-
-                return;
-            }
-
-            const user = this.getUser();
-            const model = this.model;
-
-            if (!RadicacionEditMode.isPureRadicacionUser(user)) {
-                if (this._radicarButtonAdded) {
-                    this.safeRemoveMenuItem('radicarCaso');
-                    this._radicarButtonAdded = false;
-                }
-
-                return;
-            }
-
-            const showRadicar = RadicacionEditMode.shouldShowRadicarButton(user, model);
-            const showEditRadicado = RadicacionEditMode.shouldShowEditRadicadoButton(user, model);
-
-            if (!showRadicar && !showEditRadicado) {
-                if (this._radicarButtonAdded) {
-                    this.safeRemoveMenuItem('radicarCaso');
-                    this._radicarButtonAdded = false;
-                }
-
-                return;
-            }
-
-            const $editBtn = this.findPrimaryActionButton('edit');
-
-            if ($editBtn.length) {
-                if (this._radicarButtonAdded) {
-                    this.safeRemoveMenuItem('radicarCaso');
-                    this._radicarButtonAdded = false;
-                }
-
-                return;
-            }
-
-            const label = showRadicar
-                ? this.translate('radicarCaso', 'labels', 'Case')
-                : this.translate('Edit', 'labels', 'Global');
-
-            if (this._radicarButtonAdded) {
-                this.safeRemoveMenuItem('radicarCaso');
-                this._radicarButtonAdded = false;
-            }
-
-            if (this.safeAddMenuItem({
-                label: label,
-                name: 'radicarCaso',
-                action: 'radicarCaso',
-                style: 'primary',
-            })) {
-                this._radicarButtonAdded = true;
-            }
-        },
-
         actionLlenarActaVisita: function () {
             ActaVisitaModal.open(this, this.model, this.getUser(), {
                 onAfterSave: () => {
@@ -328,33 +263,23 @@ define('custom:views/case/record/detail', [
         },
 
         actionEdit: function () {
-            const self = this;
-
             if (PatrulleroActa.isPurePatrulleroUser(this.getUser())) {
                 Espo.Ui.warning(this.translate('patrulleroReadOnlyCase', 'messages', 'Case'));
 
                 return;
             }
 
-            RadicacionFields.ensureProfile().then(function () {
-                if (RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
-                    RadicacionEditMode.openRadicadoEdit(self);
+            if (AsignadorEditMode.isPureAsignadorUser(this.getUser())) {
+                AsignadorEditMode.openAsignadoEdit(this);
 
-                    return;
-                }
+                return;
+            }
 
-                if (AsignadorEditMode.isPureAsignadorUser(self.getUser())) {
-                    AsignadorEditMode.openAsignadoEdit(self);
-
-                    return;
-                }
-
-                Dep.prototype.actionEdit.call(self);
-            });
+            Dep.prototype.actionEdit.call(this);
         },
 
         actionRadicarCaso: function () {
-            RadicacionEditMode.openRadicadoEdit(this);
+            this.actionEdit();
         },
 
         actionAsignarCaso: function () {
@@ -362,6 +287,8 @@ define('custom:views/case/record/detail', [
         },
 
         updateDetailActionLabels: function () {
+            this.applyDetailActionLabels();
+
             const self = this;
 
             RadicacionFields.ensureProfile().then(function () {
@@ -378,49 +305,16 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            // Edwin: solo radicar / editar radicado (prioridad sobre asignador e inspección).
+            // Edwin: el botón Editar se muestra como Radicar y abre el formulario restringido.
             if (RadicacionEditMode.isPureRadicacionUser(user)) {
-                if (RadicacionEditMode.shouldShowRadicarButton(user, model)) {
-                    if ($editBtn.length) {
-                        $editBtn.show();
-                        this.setPrimaryActionButtonLabel(
-                            $editBtn,
-                            this.translate('radicarCaso', 'labels', 'Case')
-                        );
-                        this.setPrimaryActionButtonHref(
-                            $editBtn,
-                            this.getCaseEditUrl() + '?radicar=1'
-                        );
-                    }
-
-                    this.updateRadicarButton();
-
-                    return;
-                }
-
-                if (RadicacionEditMode.shouldShowEditRadicadoButton(user, model)) {
-                    if ($editBtn.length) {
-                        $editBtn.show();
-                        this.setPrimaryActionButtonLabel(
-                            $editBtn,
-                            this.translate('Edit', 'labels', 'Global')
-                        );
-                        this.setPrimaryActionButtonHref(
-                            $editBtn,
-                            this.getCaseEditUrl() + '?radicar=1'
-                        );
-                    }
-
-                    this.updateRadicarButton();
-
-                    return;
-                }
-
                 if ($editBtn.length) {
-                    $editBtn.hide();
+                    $editBtn.show();
+                    this.setPrimaryActionButtonLabel(
+                        $editBtn,
+                        this.translate('radicarCaso', 'labels', 'Case')
+                    );
+                    this.setPrimaryActionButtonHref($editBtn, this.getCaseEditUrl());
                 }
-
-                this.updateRadicarButton();
 
                 return;
             }

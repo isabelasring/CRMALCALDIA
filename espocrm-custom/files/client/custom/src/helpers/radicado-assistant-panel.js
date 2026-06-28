@@ -8,10 +8,7 @@ define('custom:helpers/radicado-assistant-panel', [
     let fetchRequest = null;
 
     const canShow = function (recordView) {
-        if (
-            RadicacionEditMode.isPureRadicacionUser(recordView.getUser())
-            && RadicacionEditMode.isRadicarMode(recordView)
-        ) {
+        if (RadicacionEditMode.isRadicacionEditSession(recordView)) {
             return true;
         }
 

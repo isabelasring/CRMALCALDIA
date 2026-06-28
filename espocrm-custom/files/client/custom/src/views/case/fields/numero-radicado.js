@@ -52,13 +52,9 @@ define('custom:views/case/fields/numero-radicado', [
                 return false;
             }
 
-            if (RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
-                const recordView = this.getRecordView();
+            const recordView = this.getRecordView();
 
-                if (!recordView || typeof recordView.isRadicarMode !== 'function' || !recordView.isRadicarMode()) {
-                    return false;
-                }
-
+            if (recordView && RadicacionEditMode.isRadicacionEditSession(recordView)) {
                 return true;
             }
 
