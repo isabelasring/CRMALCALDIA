@@ -349,6 +349,11 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
+        // Primera radicación: permitir generar vista previa aunque modo/siglas/año no hayan cambiado.
+        if (!isCasePostRadicado(model)) {
+            return true;
+        }
+
         return hasRadicadoMetadataChanged(model, recordView._lockedRadicadoValues);
     };
 

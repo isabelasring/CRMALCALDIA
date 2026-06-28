@@ -384,7 +384,8 @@ define('custom:views/case/record/edit', [
                 }
 
                 if (
-                    !this.model.isNew()
+                    !RadicacionEditMode.isRadicacionEditSession(this)
+                    && !this.model.isNew()
                     && this._lockedRadicadoValues
                     && !RadicacionFields.hasRadicadoMetadataChanged(this.model, this._lockedRadicadoValues)
                 ) {
@@ -742,7 +743,8 @@ define('custom:views/case/record/edit', [
             }
 
             if (
-                !this.model.isNew()
+                !RadicacionEditMode.isRadicacionEditSession(this)
+                && !this.model.isNew()
                 && this._lockedRadicadoValues
                 && String(this._lockedRadicadoValues.cNumeroRadicado || '').trim() !== ''
                 && !RadicacionFields.hasRadicadoMetadataChanged(this.model, this._lockedRadicadoValues)
