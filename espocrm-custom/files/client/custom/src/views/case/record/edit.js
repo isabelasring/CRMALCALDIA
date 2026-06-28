@@ -98,12 +98,6 @@ define('custom:views/case/record/edit', [
         },
 
         enforceRadicacionEntry: function () {
-            if (RadicacionEditMode.hasRadicarHash()) {
-                this._radicarMode = true;
-
-                return;
-            }
-
             if (!RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 return;
             }
@@ -115,15 +109,9 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            if (this.isRadicarMode()) {
-                this._radicarMode = true;
-                this.updateRadicarPageTitle();
-
-                return;
-            }
-
-            Espo.Ui.warning(this.translate('radicarUseButton', 'messages', 'Case'));
-            this.getRouter().navigate('#Case/view/' + this.model.id, {trigger: true});
+            RadicacionEditMode.bootstrapRadicarMode(this);
+            this._radicarMode = true;
+            this.updateRadicarPageTitle();
         },
 
         enforceAsignadorEntry: function () {
@@ -201,14 +189,34 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
-            RadicacionEditMode.applyRestrictedEdit(this);
+            RadicacionEditMode.bootstrapRadicarMode(this);
 
             if (!this.isRadicarMode()) {
                 return;
             }
 
+            RadicacionEditMode.applyRestrictedEdit(this);
             RadicacionEditMode.prepareRadicacionEditView(this);
+            this.ensureRadicacionAssistant();
             RadicacionEditMode.scheduleRestrictedEdit(this);
+        },
+
+        ensureRadicacionAssistant: function () {
+            if (!RadicacionEditMode.isPureRadicacionUser(this.getUser()) || !this.isRadicarMode()) {
+                return;
+            }
+
+            if (!RadicadoAssistantPanel.canShow(this)) {
+                return;
+            }
+
+            RadicadoAssistantPanel.mount(this);
+
+            RadicacionFields.RADICADO_ALL_FIELDS.forEach((field) => {
+                this.$el.find('[data-name="' + field + '"]').closest('.cell').hide();
+            });
+
+            RadicacionEditMode.unlockEditableRadicacionFields(this);
         },
 
         ensureCasePanelsVisible: function () {
@@ -416,11 +424,13 @@ define('custom:views/case/record/edit', [
                 self.togglePostRadicacionFields();
                 self.toggleRegistroExcelPanel();
 
-                if (RadicadoAssistantPanel.canShow(self) && self.isRadicarMode()) {
-                    RadicadoAssistantPanel.mount(self);
-                } else {
-                    RadicadoAssistantPanel.unmount(self);
-                    if (!RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
+                self.ensureRadicacionAssistant();
+
+                if (!RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
+                    if (RadicadoAssistantPanel.canShow(self) && self.isRadicarMode()) {
+                        RadicadoAssistantPanel.mount(self);
+                    } else {
+                        RadicadoAssistantPanel.unmount(self);
                         RadicadoGenerator.toggle(self);
                     }
                 }
@@ -434,19 +444,19 @@ define('custom:views/case/record/edit', [
             };
 
             const scheduleRoleUiRetry = function () {
-                [300, 800].forEach(function (delay) {
+                [150, 400, 900, 1500, 2500].forEach(function (delay) {
                     window.setTimeout(function () {
                         if (!self.isEditMode || !self.isEditMode()) {
                             return;
                         }
 
-                        if (
-                            !self.isRadicarMode()
-                            || (
-                                !RadicacionFields.isRadicacionUser(self.getUser())
-                                && !RadicacionEditMode.isPureRadicacionUser(self.getUser())
-                            )
-                        ) {
+                        if (!RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
+                            return;
+                        }
+
+                        RadicacionEditMode.bootstrapRadicarMode(self);
+
+                        if (!self.isRadicarMode()) {
                             return;
                         }
 
@@ -624,8 +634,8 @@ define('custom:views/case/record/edit', [
             const model = this.model;
             const isRadicacion = RadicacionFields.isRadicacionUser(user);
             const isPureRadicacion = RadicacionEditMode.isPureRadicacionUser(user);
-            const show = RadicacionEditMode.isPureRadicacionUser(user)
-                ? this.isRadicarMode()
+            const show = isPureRadicacion
+                ? !model.isNew()
                 : RadicacionFields.shouldShowRadicacionFields(user, model);
             const $layoutPanel = this.findPanel('radicacionCaso');
 
@@ -633,9 +643,11 @@ define('custom:views/case/record/edit', [
                 $layoutPanel.toggle(show);
             }
 
-            if (isPureRadicacion && !this.isRadicarMode()) {
-                RadicadoAssistantPanel.unmount(this);
+            if (isPureRadicacion) {
+                RadicacionEditMode.bootstrapRadicarMode(this);
+            }
 
+            if (isPureRadicacion && !this.isRadicarMode()) {
                 return;
             }
 

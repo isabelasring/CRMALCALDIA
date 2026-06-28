@@ -99,6 +99,12 @@ define('custom:helpers/radicacion-edit-mode', [
             return;
         }
 
+        if (isPureRadicacionUser(recordView.getUser())) {
+            recordView._radicarMode = true;
+
+            return;
+        }
+
         if (recordView.options && recordView.options.radicar) {
             recordView._radicarMode = true;
 
@@ -249,7 +255,7 @@ define('custom:helpers/radicacion-edit-mode', [
 
         applyRestrictedEdit(recordView);
 
-        [150, 400, 900].forEach(function (delay) {
+        [150, 400, 900, 1500].forEach(function (delay) {
             window.setTimeout(function () {
                 if (!recordView.isEditMode || !recordView.isEditMode()) {
                     return;
@@ -260,6 +266,10 @@ define('custom:helpers/radicacion-edit-mode', [
                 }
 
                 applyRestrictedEdit(recordView);
+
+                if (typeof recordView.ensureRadicacionAssistant === 'function') {
+                    recordView.ensureRadicacionAssistant();
+                }
             }, delay);
         });
     };
