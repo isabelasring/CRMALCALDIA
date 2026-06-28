@@ -41,6 +41,10 @@ define('custom:helpers/patrullero-acta', [
         return !!String(model.get('assignedUserId') || '').trim();
     };
 
+    const isSameUserId = function (left, right) {
+        return String(left || '').trim() === String(right || '').trim();
+    };
+
     const resolveActaId = function (acta) {
         if (!acta) {
             return null;
@@ -66,15 +70,21 @@ define('custom:helpers/patrullero-acta', [
             return true;
         }
 
-        if (!isPatrulleroUser(user)) {
-            return false;
-        }
-
         if (!isCaseReadyForActa(model)) {
             return false;
         }
 
-        return model.get('assignedUserId') === user.id;
+        if (!isSameUserId(model.get('assignedUserId'), user.id)) {
+            return false;
+        }
+
+        if (isPatrulleroUser(user)) {
+            return true;
+        }
+
+        // Usuario asignado al caso: en Alcaldía es el patrullero aunque el perfil tarde en cargar.
+        return !RadicacionFields.isRadicacionUser(user)
+            && !RadicacionFields.isAsignadorUser(user);
     };
 
     const shouldShowActaVisitaButton = function (user, model, acta) {
@@ -102,7 +112,7 @@ define('custom:helpers/patrullero-acta', [
             return 'Disponible para Inspección y el patrullero asignado al caso.';
         }
 
-        if (isPatrulleroUser(user) && !isInspeccionUser(user) && model.get('assignedUserId') !== user.id) {
+        if (isPatrulleroUser(user) && !isInspeccionUser(user) && !isSameUserId(model.get('assignedUserId'), user.id)) {
             return 'El caso no está asignado a usted.';
         }
 

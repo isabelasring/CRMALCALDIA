@@ -54,6 +54,23 @@ define('custom:views/case/fields/acta-visita-action', [
             this.bindButtons();
         },
 
+        setReadOnly: function () {
+            this.readOnly = false;
+
+            if (this.isRendered && this.isRendered()) {
+                this.$el.find('.case-acta-visita-actions, .case-acta-visita-btn').show();
+                this.bindButtons();
+            }
+        },
+
+        setNotReadOnly: function () {
+            this.readOnly = false;
+
+            if (this.isRendered && this.isRendered()) {
+                this.bindButtons();
+            }
+        },
+
         loadActaState: function () {
             const user = this.getUser();
             const self = this;

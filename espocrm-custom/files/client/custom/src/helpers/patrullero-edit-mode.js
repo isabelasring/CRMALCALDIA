@@ -1,28 +1,54 @@
 define('custom:helpers/patrullero-edit-mode', [
     'custom:helpers/patrullero-acta',
-    'custom:helpers/acta-visita-case-status',
-], function (PatrulleroActa, ActaVisitaCaseStatus) {
+], function (PatrulleroActa) {
 
+    const ACTA_PANEL_FIELD = 'cPanelActaVisita';
     const isPurePatrulleroUser = PatrulleroActa.isPurePatrulleroUser;
 
-    const findPrimaryButton = function (recordView) {
-        let $btn = recordView.findPrimaryActionButton('edit');
-
-        if (!$btn.length) {
-            $btn = recordView.findPrimaryActionButton('llenarActaVisita');
+    const hideCaseEditActions = function (recordView) {
+        if (!recordView || !recordView.$el) {
+            return;
         }
 
-        if (!$btn.length) {
-            $btn = recordView.findPrimaryActionButton('imprimirActaManual');
-        }
+        const $root = recordView.getDetailActionElements
+            ? recordView.getDetailActionElements()
+            : recordView.$el;
 
-        if (!$btn.length && recordView.getDetailActionElements) {
-            $btn = recordView.getDetailActionElements()
-                .find('.detail-button-container .btn-primary, .header-buttons .btn-primary')
-                .first();
-        }
+        $root.find('[data-action="edit"], [data-action="delete"], [data-action="remove"]')
+            .closest('.btn, .dropdown-item, li')
+            .hide();
+    };
 
-        return $btn;
+    const lockCaseFieldsExceptActa = function (recordView) {
+        const fieldViews = typeof recordView.getFieldViews === 'function'
+            ? recordView.getFieldViews()
+            : {};
+
+        Object.keys(fieldViews).forEach(function (field) {
+            const view = fieldViews[field];
+
+            if (!view) {
+                return;
+            }
+
+            if (field === ACTA_PANEL_FIELD) {
+                view.readOnly = false;
+
+                if (typeof view.setNotReadOnly === 'function') {
+                    view.setNotReadOnly();
+                }
+
+                return;
+            }
+
+            if (typeof view.setReadOnly === 'function') {
+                view.setReadOnly();
+            }
+        });
+
+        if (typeof recordView.findPanel === 'function') {
+            recordView.findPanel('actaVisita').show();
+        }
     };
 
     const applyDetailReadOnly = function (recordView) {
@@ -30,82 +56,14 @@ define('custom:helpers/patrullero-edit-mode', [
             return;
         }
 
-        if (typeof recordView.setReadOnly === 'function') {
-            recordView.setReadOnly();
+        lockCaseFieldsExceptActa(recordView);
+        hideCaseEditActions(recordView);
+
+        const actaField = recordView.getFieldView(ACTA_PANEL_FIELD);
+
+        if (actaField && typeof actaField.loadActaState === 'function') {
+            actaField.loadActaState();
         }
-
-        recordView.$el.find('[data-action="delete"], [data-action="remove"]')
-            .closest('.btn, .dropdown-item, li')
-            .hide();
-    };
-
-    const updateDetailActionButtons = function (recordView) {
-        if (!recordView || !isPurePatrulleroUser(recordView.getUser())) {
-            return;
-        }
-
-        if (!recordView.model || !recordView.model.id) {
-            return;
-        }
-
-        const user = recordView.getUser();
-        const model = recordView.model;
-
-        recordView.$el.find('[data-action="delete"], [data-action="remove"]')
-            .closest('.btn, .dropdown-item, li')
-            .hide();
-
-        const $editBtn = findPrimaryButton(recordView);
-
-        if (!$editBtn.length) {
-            return;
-        }
-
-        ActaVisitaCaseStatus.fetchActaForCase(model.id, user, model, { bypassCache: true }).then(function (acta) {
-            const canActa = PatrulleroActa.shouldShowActaVisitaButton(user, model, acta);
-            const canPrint = PatrulleroActa.canPrintManualActa(user, model);
-
-            if (recordView._imprimirActaButtonAdded) {
-                recordView.safeRemoveMenuItem('imprimirActaManual');
-                recordView._imprimirActaButtonAdded = false;
-            }
-
-            if (!canActa && !canPrint) {
-                $editBtn.hide();
-
-                return;
-            }
-
-            $editBtn.show();
-
-            if (canActa) {
-                const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                const label = isEdit
-                    ? recordView.translate('editarActaVisita', 'Case')
-                    : recordView.translate('llenarActaVisita', 'Case');
-
-                recordView.setPrimaryActionButtonLabel($editBtn, label);
-                recordView.setPrimaryActionButtonAction($editBtn, 'llenarActaVisita');
-                recordView.setPrimaryActionButtonHref($editBtn, null);
-            } else {
-                recordView.setPrimaryActionButtonLabel(
-                    $editBtn,
-                    recordView.translate('imprimirActaVisitaManual', 'Case')
-                );
-                recordView.setPrimaryActionButtonAction($editBtn, 'imprimirActaManual');
-                recordView.setPrimaryActionButtonHref($editBtn, null);
-            }
-
-            if (canPrint && canActa) {
-                if (recordView.safeAddMenuItem({
-                    label: recordView.translate('imprimirActaVisitaManual', 'Case'),
-                    name: 'imprimirActaManual',
-                    action: 'imprimirActaManual',
-                })) {
-                    recordView._imprimirActaButtonAdded = true;
-                }
-            }
-        });
     };
 
     const actionImprimirActaManual = function (recordView) {
@@ -146,7 +104,7 @@ define('custom:helpers/patrullero-edit-mode', [
     return {
         isPurePatrulleroUser: isPurePatrulleroUser,
         applyDetailReadOnly: applyDetailReadOnly,
-        updateDetailActionButtons: updateDetailActionButtons,
+        hideCaseEditActions: hideCaseEditActions,
         actionImprimirActaManual: actionImprimirActaManual,
     };
 });

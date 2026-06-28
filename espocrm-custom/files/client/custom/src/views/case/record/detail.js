@@ -138,7 +138,6 @@ define('custom:views/case/record/detail', [
             this.toggleActuoArchivoPanels();
             AsignadorEditMode.applyDetailReadOnly(this);
             PatrulleroEditMode.applyDetailReadOnly(this);
-            PatrulleroEditMode.updateDetailActionButtons(this);
             RadicacionEditMode.hideNonRadicacionPanels(this);
         },
 
@@ -205,12 +204,21 @@ define('custom:views/case/record/detail', [
             });
         },
 
+        clearActaVisitaMenuItems: function () {
+            if (this._actaVisitaButtonAdded) {
+                this.safeRemoveMenuItem('llenarActaVisita');
+                this._actaVisitaButtonAdded = false;
+            }
+
+            if (this._imprimirActaButtonAdded) {
+                this.safeRemoveMenuItem('imprimirActaManual');
+                this._imprimirActaButtonAdded = false;
+            }
+        },
+
         updateActaVisitaButton: function () {
             if (!this.model.id) {
-                if (this._actaVisitaButtonAdded) {
-                    this.safeRemoveMenuItem('llenarActaVisita');
-                    this._actaVisitaButtonAdded = false;
-                }
+                this.clearActaVisitaMenuItems();
 
                 return;
             }
@@ -222,41 +230,46 @@ define('custom:views/case/record/detail', [
                     return;
                 }
 
-                if (PatrulleroActa.isPurePatrulleroUser(self.getUser())) {
-                    PatrulleroEditMode.updateDetailActionButtons(self);
+                ActaVisitaCaseStatus.fetchActaForCase(
+                    self.model.id,
+                    self.getUser(),
+                    self.model,
+                    { bypassCache: true }
+                ).then((acta) => {
+                    const user = self.getUser();
+                    const showLlenar = PatrulleroActa.shouldShowActaVisitaButton(user, self.model, acta);
+                    const showPrint = PatrulleroActa.canPrintManualActa(user, self.model);
 
-                    return;
-                }
+                    self.clearActaVisitaMenuItems();
 
-                ActaVisitaCaseStatus.fetchActaForCase(self.model.id, self.getUser(), self.model, { bypassCache: true }).then((acta) => {
-                    const show = PatrulleroActa.shouldShowActaVisitaButton(self.getUser(), self.model, acta);
+                    if (showLlenar) {
+                        const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                        const label = isEdit
+                            ? self.translate('editarActaVisita', 'Case')
+                            : self.translate('llenarActaVisita', 'Case');
 
-                    if (!show) {
-                        if (self._actaVisitaButtonAdded) {
-                            self.safeRemoveMenuItem('llenarActaVisita');
-                            self._actaVisitaButtonAdded = false;
+                        if (self.safeAddMenuItem({
+                            label: label,
+                            name: 'llenarActaVisita',
+                            action: 'llenarActaVisita',
+                            style: 'primary',
+                        })) {
+                            self._actaVisitaButtonAdded = true;
                         }
-
-                        return;
                     }
 
-                    const isEdit = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                    const label = isEdit
-                        ? self.translate('editarActaVisita', 'Case')
-                        : self.translate('llenarActaVisita', 'Case');
-
-                    if (self._actaVisitaButtonAdded) {
-                        self.safeRemoveMenuItem('llenarActaVisita');
-                        self._actaVisitaButtonAdded = false;
+                    if (showPrint) {
+                        if (self.safeAddMenuItem({
+                            label: self.translate('imprimirActaVisitaManual', 'Case'),
+                            name: 'imprimirActaManual',
+                            action: 'imprimirActaManual',
+                        })) {
+                            self._imprimirActaButtonAdded = true;
+                        }
                     }
 
-                    if (self.safeAddMenuItem({
-                        label: label,
-                        name: 'llenarActaVisita',
-                        action: 'llenarActaVisita',
-                        style: 'primary',
-                    })) {
-                        self._actaVisitaButtonAdded = true;
+                    if (PatrulleroActa.isPurePatrulleroUser(user)) {
+                        PatrulleroEditMode.hideCaseEditActions(self);
                     }
                 });
             });
@@ -270,7 +283,6 @@ define('custom:views/case/record/detail', [
                     }
 
                     this.updateActaVisitaButton();
-                    PatrulleroEditMode.updateDetailActionButtons(this);
                     this.refreshActaVisitaPanel();
                     this.refreshFormatoGeneradoDocs();
                 },
@@ -631,7 +643,8 @@ define('custom:views/case/record/detail', [
             }
 
             if (PatrulleroActa.isPurePatrulleroUser(user)) {
-                PatrulleroEditMode.updateDetailActionButtons(this);
+                this.updateActaVisitaButton();
+                PatrulleroEditMode.applyDetailReadOnly(this);
 
                 return;
             }
@@ -693,7 +706,8 @@ define('custom:views/case/record/detail', [
                 }
 
                 PatrulleroEditMode.applyDetailReadOnly(self);
-                PatrulleroEditMode.updateDetailActionButtons(self);
+                self.updateActaVisitaButton();
+                self.refreshActaVisitaPanel();
             });
         },
 
@@ -861,6 +875,7 @@ define('custom:views/case/record/detail', [
             }
 
             AsignadorEditMode.applyDetailReadOnly(this);
+            PatrulleroEditMode.applyDetailReadOnly(this);
 
             if (this._pendingRoleUiRefresh) {
                 this._pendingRoleUiRefresh = false;
@@ -921,6 +936,14 @@ define('custom:views/case/record/detail', [
                 if (action === 'imprimirActaManual') {
                     return PatrulleroActa.canPrintManualActa(user, this.model);
                 }
+            }
+
+            if (action === 'llenarActaVisita') {
+                return PatrulleroActa.shouldShowActaVisitaButton(user, this.model);
+            }
+
+            if (action === 'imprimirActaManual') {
+                return PatrulleroActa.canPrintManualActa(user, this.model);
             }
 
             return Dep.prototype.checkAccessAction
