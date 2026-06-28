@@ -31,9 +31,7 @@ define('custom:helpers/radicacion-edit-mode', [
 
     const userHasRoleKey = function (user, roleKey) {
         return getUserRoleNames(user).some(function (name) {
-            const normalized = normalize(name);
-
-            return normalized === roleKey || normalized.indexOf(roleKey) !== -1;
+            return normalize(name) === roleKey;
         });
     };
 
@@ -42,7 +40,7 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
-        if (userHasRoleKey(user, 'inspeccion') && !userHasRoleKey(user, 'radicacion')) {
+        if (userHasRoleKey(user, 'inspeccion') || RadicacionFields.isInspeccionUser(user)) {
             return false;
         }
 
@@ -50,12 +48,10 @@ define('custom:helpers/radicacion-edit-mode', [
             return true;
         }
 
-        if (RadicacionFields.isProfileLoaded()) {
-            const profile = RadicacionFields.getServerProfile();
+        const profile = RadicacionFields.getProfileForUser(user);
 
-            if (profile.isRadicacion && !profile.isInspeccion) {
-                return true;
-            }
+        if (profile && profile.isRadicacion && !profile.isInspeccion) {
+            return true;
         }
 
         return false;
@@ -286,7 +282,7 @@ define('custom:helpers/radicacion-edit-mode', [
             return Promise.resolve(true);
         }
 
-        return RadicacionFields.ensureProfile().then(function (profile) {
+        return RadicacionFields.ensureProfile(recordView.getUser()).then(function (profile) {
             const isRadicacion = !!(profile && profile.isRadicacion && !profile.isInspeccion);
 
             if (isRadicacion) {

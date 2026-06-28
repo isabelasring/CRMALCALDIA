@@ -10,6 +10,7 @@ define('custom:helpers/radicacion-fields', [], function () {
     let serverProfile = null;
     let profilePromise = null;
     let profileLoaded = false;
+    let profileUserId = null;
     const profileListeners = [];
 
     const normalize = function (value) {
@@ -37,12 +38,47 @@ define('custom:helpers/radicacion-fields', [], function () {
         }
     };
 
-    const refreshProfile = function () {
+    const getCurrentUserId = function (user) {
+        if (user && user.id) {
+            return user.id;
+        }
+
+        if (typeof Espo !== 'undefined' && Espo.App && Espo.App.instance && Espo.App.instance.getUser) {
+            const currentUser = Espo.App.instance.getUser();
+
+            if (currentUser && currentUser.id) {
+                return currentUser.id;
+            }
+        }
+
+        return null;
+    };
+
+    const resetProfileCache = function () {
         serverProfile = null;
         profileLoaded = false;
         profilePromise = null;
+        profileUserId = null;
+    };
 
-        return ensureProfile();
+    const refreshProfile = function (user) {
+        resetProfileCache();
+
+        return ensureProfile(user);
+    };
+
+    const syncProfileForUser = function (user) {
+        const userId = getCurrentUserId(user);
+
+        if (!userId) {
+            return Promise.resolve({});
+        }
+
+        if (profileLoaded && profileUserId === userId) {
+            return Promise.resolve(serverProfile || {});
+        }
+
+        return refreshProfile(user);
     };
 
     const isProfileLoaded = function () {
@@ -53,7 +89,13 @@ define('custom:helpers/radicacion-fields', [], function () {
         return serverProfile || {};
     };
 
-    const ensureProfile = function () {
+    const ensureProfile = function (user) {
+        const userId = getCurrentUserId(user);
+
+        if (profileLoaded && profileUserId && userId && profileUserId !== userId) {
+            resetProfileCache();
+        }
+
         if (profileLoaded) {
             return Promise.resolve(serverProfile || {});
         }
@@ -72,6 +114,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             .then(function (data) {
                 serverProfile = data || {};
                 profileLoaded = true;
+                profileUserId = getCurrentUserId(user);
                 notifyProfileReady();
 
                 return serverProfile;
@@ -80,6 +123,7 @@ define('custom:helpers/radicacion-fields', [], function () {
                 serverProfile = null;
                 profileLoaded = true;
                 profilePromise = null;
+                profileUserId = getCurrentUserId(user);
                 notifyProfileReady();
 
                 return {};
@@ -115,13 +159,21 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const matchesRoleKey = function (name, roleKey) {
-        const normalized = normalize(name);
-
-        return normalized === roleKey || normalized.indexOf(roleKey) !== -1;
+        return normalize(name) === roleKey;
     };
 
     const hasRole = function (user, roleKey) {
         return getProfileNames(user).some((name) => matchesRoleKey(name, roleKey));
+    };
+
+    const getProfileForUser = function (user) {
+        const userId = getCurrentUserId(user);
+
+        if (!profileLoaded || !serverProfile || !userId || profileUserId !== userId) {
+            return null;
+        }
+
+        return serverProfile;
     };
 
     const isRadicacionUser = function (user) {
@@ -133,16 +185,18 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (profileLoaded && serverProfile && serverProfile.isRadicacion) {
-            return true;
-        }
-
         if (hasRole(user, ROLE_RADICACION)) {
             return true;
         }
 
+        const profile = getProfileForUser(user);
+
+        if (profile && profile.isRadicacion) {
+            return true;
+        }
+
         if (!profileLoaded) {
-            ensureProfile();
+            ensureProfile(user);
         }
 
         return false;
@@ -157,16 +211,18 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (profileLoaded && serverProfile && serverProfile.isInspeccion) {
-            return true;
-        }
-
         if (hasRole(user, ROLE_INSPECCION)) {
             return true;
         }
 
+        const profile = getProfileForUser(user);
+
+        if (profile && profile.isInspeccion) {
+            return true;
+        }
+
         if (!profileLoaded) {
-            ensureProfile();
+            ensureProfile(user);
         }
 
         return false;
@@ -181,16 +237,18 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        if (profileLoaded && serverProfile && serverProfile.isAsignador) {
-            return true;
-        }
-
         if (hasRole(user, ROLE_ASIGNADOR)) {
             return true;
         }
 
+        const profile = getProfileForUser(user);
+
+        if (profile && profile.isAsignador) {
+            return true;
+        }
+
         if (!profileLoaded) {
-            ensureProfile();
+            ensureProfile(user);
         }
 
         return false;
@@ -205,16 +263,18 @@ define('custom:helpers/radicacion-fields', [], function () {
             return false;
         }
 
-        if (profileLoaded && serverProfile && serverProfile.isPatrullero) {
-            return true;
-        }
-
         if (hasRole(user, ROLE_PATRULLERO)) {
             return true;
         }
 
+        const profile = getProfileForUser(user);
+
+        if (profile && profile.isPatrullero) {
+            return true;
+        }
+
         if (!profileLoaded) {
-            ensureProfile();
+            ensureProfile(user);
         }
 
         return false;
@@ -316,16 +376,19 @@ define('custom:helpers/radicacion-fields', [], function () {
         });
     };
 
-    ensureProfile();
-
     return {
         RADICADO_FIELDS: RADICADO_FIELDS,
         RADICADO_ALL_FIELDS: RADICADO_ALL_FIELDS,
         FECHA_VENCIMIENTO_FIELD: FECHA_VENCIMIENTO_FIELD,
         ensureProfile: ensureProfile,
         refreshProfile: refreshProfile,
+        syncProfileForUser: syncProfileForUser,
         isProfileLoaded: isProfileLoaded,
         getServerProfile: getServerProfile,
+        getProfileForUser: getProfileForUser,
+        getProfileUserId: function () {
+            return profileUserId;
+        },
         onProfileReady: onProfileReady,
         isRadicacionUser: isRadicacionUser,
         isInspeccionUser: isInspeccionUser,

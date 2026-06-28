@@ -107,14 +107,16 @@ define('custom:views/case/record/edit', [
         },
 
         enforceRadicacionEntry: function () {
-            if (!RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
+            if (this.model.isNew()) {
+                if (!this.getAcl().check('Case', 'create')) {
+                    Espo.Ui.warning(this.translate('caseCreateNotAllowed', 'messages', 'Case'));
+                    this.getRouter().navigate('#Home', {trigger: true});
+                }
+
                 return;
             }
 
-            if (this.model.isNew()) {
-                Espo.Ui.warning(this.translate('radicacionCannotCreateCase', 'messages', 'Case'));
-                this.getRouter().navigate('#Home', {trigger: true});
-
+            if (!RadicacionEditMode.isPureRadicacionUser(this.getUser())) {
                 return;
             }
 
