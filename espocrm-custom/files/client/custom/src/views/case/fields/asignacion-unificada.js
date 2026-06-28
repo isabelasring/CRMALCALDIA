@@ -93,6 +93,86 @@ define('custom:views/case/fields/asignacion-unificada', [
             }
         },
 
+        enableAssignmentSelect: function () {
+            if (!this.isBatchEditMode()) {
+                const recordView = this.getRecordView();
+
+                if (recordView && typeof recordView.enterAsignacionEditMode === 'function') {
+                    recordView.enterAsignacionEditMode();
+                }
+
+                return;
+            }
+
+            Dep.prototype.enableAssignmentSelect.call(this);
+        },
+
+        isReadOnly: function () {
+            if (this.isBatchEditMode()) {
+                return false;
+            }
+
+            return Dep.prototype.isReadOnly.call(this);
+        },
+
+        onBatchEditModeChanged: function () {
+            if (!this.isRendered || !this.isRendered()) {
+                return;
+            }
+
+            if (this.isBatchEditMode()) {
+                this.mode = 'edit';
+                this.readOnly = false;
+
+                if (typeof this.setNotReadOnly === 'function') {
+                    this.setNotReadOnly();
+                }
+
+                this.reRender();
+
+                return;
+            }
+
+            this.mode = 'detail';
+            this.readOnly = true;
+            this.reRender();
+        },
+
+        renderEditTrigger: function () {
+            if (this.isBatchEditMode() || !isAsignadorDetailContext(this)) {
+                this.$el.find('.alcaldia-asignacion-edit-trigger').remove();
+
+                return;
+            }
+
+            const recordView = this.getRecordView();
+            let $wrap = this.$el.find('.alcaldia-asignacion-edit-actions').first();
+
+            if (!$wrap.length) {
+                $wrap = $('<div class="alcaldia-asignacion-edit-actions"></div>');
+                this.$el.prepend($wrap);
+            }
+
+            let $btn = $wrap.find('.alcaldia-asignacion-edit-trigger');
+
+            if (!$btn.length) {
+                $btn = $('<button type="button" class="btn btn-link btn-sm alcaldia-asignacion-edit-trigger"></button>');
+                $wrap.append($btn);
+            }
+
+            const label = this.translate('editarAsignacion', 'labels', 'Case')
+                || this.translate('Edit', 'labels', 'Global');
+
+            $btn.text(label).show().off('click').on('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (recordView && typeof recordView.enterAsignacionEditMode === 'function') {
+                    recordView.enterAsignacionEditMode();
+                }
+            });
+        },
+
         getMotivoContainer: function () {
             let $container = this.$el.find('.alcaldia-asignacion-motivo-block').first();
 
@@ -167,21 +247,24 @@ define('custom:views/case/fields/asignacion-unificada', [
             this.hideInlineControls();
 
             if (this.isBatchEditMode()) {
+                this.mode = 'edit';
                 this.readOnly = false;
+                this.$el.find('.alcaldia-asignacion-edit-actions').remove();
                 this.showSelectControls();
                 this.hideInlineControls();
-            } else if (isAsignadorDetailContext(this)) {
-                this.readOnly = true;
-
-                if (typeof this.setReadOnly === 'function') {
-                    this.setReadOnly();
-                }
+            } else {
+                this.renderEditTrigger();
             }
 
             this.renderMotivoSection();
 
             window.setTimeout(() => {
                 this.hideInlineControls();
+
+                if (this.isBatchEditMode()) {
+                    this.showSelectControls();
+                    this.renderMotivoSection();
+                }
             }, 0);
         },
 

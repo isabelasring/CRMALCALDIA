@@ -224,9 +224,21 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="c
 }
 
 .detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-save-link,
-.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-cancel-link,
-.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-edit-link {
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .inline-cancel-link {
   display: none !important;
+}
+
+.detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"]:not(.alcaldia-asignacion-batch-edit) .inline-edit-link {
+  display: none !important;
+}
+
+.detail[data-scope="Case"] .alcaldia-asignacion-edit-actions {
+  margin-bottom: 8px;
+  text-align: right;
+}
+
+.detail[data-scope="Case"] .alcaldia-asignacion-edit-trigger {
+  padding: 0;
 }
 
 .detail[data-scope="Case"] .alcaldia-asignacion-unificada-cell {

@@ -481,6 +481,8 @@ define('custom:views/case/record/detail', [
             this.scheduleAsignacionFieldAccess();
             this.updateAsignacionActionButtons();
 
+            this.refreshUnifiedAsignacionField();
+
             window.setTimeout(function () {
                 const $panel = self.findPanel('gestionPosteriorRadicacion');
                 const top = $panel.offset() ? $panel.offset().top - 90 : 0;
@@ -506,13 +508,29 @@ define('custom:views/case/record/detail', [
 
             const assignedView = this.getFieldView('assignedUser');
 
-            if (assignedView && typeof assignedView.reRender === 'function') {
+            if (assignedView && typeof assignedView.onBatchEditModeChanged === 'function') {
+                assignedView.onBatchEditModeChanged();
+            } else if (assignedView && typeof assignedView.reRender === 'function') {
                 assignedView.reRender();
             }
         },
 
         getAsignacionEditableFields: function () {
             return ['assignedUser'];
+        },
+
+        refreshUnifiedAsignacionField: function () {
+            const assignedView = this.getFieldView('assignedUser');
+
+            if (assignedView && typeof assignedView.onBatchEditModeChanged === 'function') {
+                assignedView.onBatchEditModeChanged();
+
+                return;
+            }
+
+            if (this._asignacionEditMode) {
+                this.remountAssignedUserForEdit();
+            }
         },
 
         markAsignacionBatchEdit: function (active) {
@@ -590,23 +608,6 @@ define('custom:views/case/record/detail', [
 
             $cell.closest('.cell, .field').show().removeClass('hidden');
 
-            const existing = this.getFieldView('assignedUser');
-
-            if (
-                existing
-                && existing.mode === 'edit'
-                && existing.$el
-                && existing.$el.find('[data-action="selectLink"], [data-action="editLink"]').length
-            ) {
-                existing.readOnly = false;
-
-                if (typeof existing.showSelectControls === 'function') {
-                    existing.showSelectControls();
-                }
-
-                return;
-            }
-
             if (this._remountingAssignedUser) {
                 return;
             }
@@ -616,6 +617,8 @@ define('custom:views/case/record/detail', [
             }
 
             this._remountingAssignedUser = true;
+
+            const existing = this.getFieldView('assignedUser');
 
             if (existing) {
                 if (typeof existing.remove === 'function') {
