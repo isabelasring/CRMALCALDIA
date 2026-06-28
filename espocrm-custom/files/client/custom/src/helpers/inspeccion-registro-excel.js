@@ -111,7 +111,7 @@ define('custom:helpers/inspeccion-registro-excel', [
             return;
         }
 
-        [0, 120, 350, 900].forEach(function (delay) {
+        [0, 350].forEach(function (delay) {
             window.setTimeout(function () {
                 if (!recordView.isRendered || !recordView.isRendered()) {
                     return;
@@ -137,8 +137,11 @@ define('custom:helpers/inspeccion-registro-excel', [
         }
 
         applyFieldVisibility(recordView, showFields);
-        applyEditAccess(recordView, editFields);
-        scheduleEditable(recordView, editFields);
+
+        if (editFields) {
+            applyEditAccess(recordView, true);
+            scheduleEditable(recordView, true);
+        }
     };
 
     const ensureEditable = function (recordView) {

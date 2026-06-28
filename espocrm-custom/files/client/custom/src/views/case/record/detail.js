@@ -81,8 +81,7 @@ define('custom:views/case/record/detail', [
             this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:assignedUserId change:cFormatoSolicitudPdfId change:status', function () {
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
-                this.updateDetailActionLabels();
-                this.updatePatrulleroDetailActions();
+                this.scheduleRoleAwareUi();
                 this.scheduleRefreshActaVisitaPanel();
                 this.scheduleRefreshFormatoGeneradoDocs();
             });
@@ -110,7 +109,7 @@ define('custom:views/case/record/detail', [
                 }
 
                 if (this.isRendered()) {
-                    this.refreshRoleAwareUi();
+                    this.scheduleRoleAwareUi();
                 }
             });
 
@@ -118,14 +117,43 @@ define('custom:views/case/record/detail', [
 
             RadicacionFields.onProfileReady(() => {
                 if (this.isRendered()) {
-                    this.refreshRoleAwareUi();
+                    this.scheduleRoleAwareUi();
                 } else {
                     this._pendingRoleUiRefresh = true;
                 }
             });
         },
 
+        scheduleRoleAwareUi: function () {
+            const self = this;
+
+            if (this._roleUiTimer) {
+                clearTimeout(this._roleUiTimer);
+            }
+
+            this._roleUiTimer = setTimeout(function () {
+                self._roleUiTimer = null;
+
+                RadicacionFields.ensureProfile(self.getUser()).then(function () {
+                    if (!self.isRendered || !self.isRendered()) {
+                        return;
+                    }
+
+                    if (!RadicacionFields.isProfileLoaded()) {
+                        return;
+                    }
+
+                    self.refreshRoleAwareUi();
+                });
+            }, 80);
+        },
+
         refreshRoleAwareUi: function () {
+            if (!RadicacionFields.isProfileLoaded()) {
+                this.scheduleRoleAwareUi();
+
+                return;
+            }
             this.toggleRadicacionFields();
             this.togglePostRadicacionFields();
             this.toggleRegistroExcelPanel();
@@ -212,18 +240,6 @@ define('custom:views/case/record/detail', [
             });
         },
 
-        scheduleRoleAwareUi: function () {
-            const self = this;
-
-            RadicacionFields.ensureProfile().then(function () {
-                if (!self.isRendered || !self.isRendered()) {
-                    return;
-                }
-
-                self.refreshRoleAwareUi();
-            });
-        },
-
         clearActaVisitaMenuItems: function () {
             if (this._actaVisitaButtonAdded) {
                 this.safeRemoveMenuItem('llenarActaVisita');
@@ -237,6 +253,19 @@ define('custom:views/case/record/detail', [
         },
 
         updateActaVisitaButton: function () {
+            if (this._actaButtonTimer) {
+                clearTimeout(this._actaButtonTimer);
+            }
+
+            const self = this;
+
+            this._actaButtonTimer = setTimeout(function () {
+                self._actaButtonTimer = null;
+                self.runUpdateActaVisitaButton();
+            }, 100);
+        },
+
+        runUpdateActaVisitaButton: function () {
             if (!this.model.id) {
                 this.clearActaVisitaMenuItems();
 
@@ -638,13 +667,13 @@ define('custom:views/case/record/detail', [
         },
 
         updateDetailActionLabels: function () {
+            if (!RadicacionFields.isProfileLoaded()) {
+                this.scheduleRoleAwareUi();
+
+                return;
+            }
+
             this.applyDetailActionLabels();
-
-            const self = this;
-
-            RadicacionFields.ensureProfile().then(function () {
-                self.applyDetailActionLabels();
-            });
         },
 
         applyDetailActionLabels: function () {
@@ -663,8 +692,7 @@ define('custom:views/case/record/detail', [
             }
 
             if (PatrulleroActa.isPurePatrulleroUser(user)) {
-                this.updateActaVisitaButton();
-                PatrulleroEditMode.applyDetailReadOnly(this);
+                PatrulleroEditMode.hideCaseEditActions(this);
 
                 return;
             }
@@ -718,17 +746,7 @@ define('custom:views/case/record/detail', [
         },
 
         updatePatrulleroDetailActions: function () {
-            const self = this;
-
-            RadicacionFields.ensureProfile().then(function () {
-                if (!PatrulleroActa.isPurePatrulleroUser(self.getUser())) {
-                    return;
-                }
-
-                PatrulleroEditMode.applyDetailReadOnly(self);
-                self.updateActaVisitaButton();
-                self.refreshActaVisitaPanel();
-            });
+            this.scheduleRoleAwareUi();
         },
 
         getDetailActionElements: function () {
@@ -824,17 +842,7 @@ define('custom:views/case/record/detail', [
         },
 
         scheduleDetailActionLabels: function () {
-            const self = this;
-
-            [0, 120, 400, 800, 1500].forEach(function (delay) {
-                window.setTimeout(function () {
-                    if (!self.isRendered || !self.isRendered()) {
-                        return;
-                    }
-
-                    self.scheduleRoleAwareUi();
-                }, delay);
-            });
+            this.scheduleRoleAwareUi();
         },
 
         updateRadicacionDetailActions: function () {
@@ -894,9 +902,6 @@ define('custom:views/case/record/detail', [
                 $('body').removeClass('alcaldia-radicacion-detail-ui');
             }
 
-            AsignadorEditMode.applyDetailReadOnly(this);
-            PatrulleroEditMode.applyDetailReadOnly(this);
-
             if (this._pendingRoleUiRefresh) {
                 this._pendingRoleUiRefresh = false;
                 this.scheduleRoleAwareUi();
@@ -904,19 +909,12 @@ define('custom:views/case/record/detail', [
 
             this.scheduleRefreshActaVisitaPanel();
             this.scheduleRefreshFormatoGeneradoDocs();
-            this.scheduleInspeccionRegistroExcelAccess();
         },
 
         scheduleInspeccionRegistroExcelAccess: function () {
-            const self = this;
-
-            RadicacionFields.onProfileReady(function () {
-                if (!self.isRendered || !self.isRendered()) {
-                    return;
-                }
-
-                self.applyInspeccionRegistroExcelAccess();
-            });
+            if (!RadicacionFields.isInspeccionUser(this.getUser())) {
+                return;
+            }
 
             this.applyInspeccionRegistroExcelAccess();
         },
