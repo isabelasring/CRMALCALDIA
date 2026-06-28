@@ -1,9 +1,9 @@
 /**
- * Flujo Asignador: redirige Case/edit → Case/asignar y asegura campo Asignado a.
+ * Flujo Asignador — respaldo: clic en Asignar/Editar y ruta Case/asignar.
  */
 (function () {
 
-    var FLOW_VERSION = 'v1';
+    var FLOW_VERSION = 'v2';
     var PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCache';
 
     function getApp() {
@@ -19,6 +19,10 @@
         var match = getHash().match(re);
 
         return match ? match[1] : null;
+    }
+
+    function isCaseDetailRoute() {
+        return /^#Case\/view\//i.test(getHash());
     }
 
     function isCaseEditRoute() {
@@ -139,34 +143,94 @@
         return false;
     }
 
-    function enforceAsignarRoute(app, caseId) {
+    function getCaseIdFromDetailPage() {
+        var match = getHash().match(/^#Case\/view\/([^/?&#]+)/i);
+
+        if (match) {
+            return match[1];
+        }
+
+        var el = document.querySelector('.detail[data-scope="Case"][data-id]');
+
+        if (el) {
+            return el.getAttribute('data-id');
+        }
+
+        return null;
+    }
+
+    function openAsignarForCaseId(caseId) {
         if (!caseId) {
             return;
         }
 
-        if (isCaseAsignarRoute()) {
-            document.body.classList.add('alcaldia-asignador-asignar-page');
+        try {
+            sessionStorage.setItem('crm-case-asignar-mode', String(caseId));
+        } catch (error) {}
 
-            return;
-        }
-
-        if (!isCaseEditRoute()) {
-            return;
-        }
-
+        var app = getApp();
         var router = app && app.getRouter && app.getRouter();
+        var url = getCaseAsignarUrl(caseId);
 
-        if (router && typeof router.dispatch === 'function') {
-            router.dispatch('Case', 'asignar', {
-                id: caseId,
-                returnUrl: '#Case/view/' + caseId,
-                asignar: true,
-            });
+        if (router && typeof router.navigate === 'function') {
+            router.navigate(url, {trigger: true});
 
             return;
         }
 
-        window.location.hash = getCaseAsignarUrl(caseId);
+        window.location.hash = url;
+    }
+
+    function bindAsignarClickFallback() {
+        if (document.body && document.body.__caseAsignacionClickBound) {
+            return;
+        }
+
+        if (document.body) {
+            document.body.__caseAsignacionClickBound = true;
+        }
+
+        document.addEventListener('click', function (event) {
+            if (!isCaseDetailRoute()) {
+                return;
+            }
+
+            var app = getApp();
+
+            if (!app || !app.getUser) {
+                return;
+            }
+
+            var profile = readCachedProfile(app.getUser().id);
+
+            if (!isAsignadorOperator(profile, app)) {
+                return;
+            }
+
+            var target = event.target;
+            var actionEl = target && target.closest
+                ? target.closest('[data-action="asignarCaso"], [data-action="edit"]')
+                : null;
+
+            if (!actionEl || actionEl.closest('.dropdown-menu')) {
+                return;
+            }
+
+            if (!actionEl.closest('.detail[data-scope="Case"], .page-header, .header-page')) {
+                return;
+            }
+
+            var caseId = getCaseIdFromDetailPage();
+
+            if (!caseId) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            openAsignarForCaseId(caseId);
+        }, true);
     }
 
     function mountAssignmentFallback() {
@@ -213,16 +277,21 @@
                 return;
             }
 
-            if (isCaseEditRoute() || isCaseAsignarRoute()) {
-                enforceAsignarRoute(
-                    app,
-                    getCaseIdFromHash('Case/edit') || getCaseIdFromHash('Case/asignar')
-                );
-            }
+            bindAsignarClickFallback();
 
             if (isCaseAsignarRoute()) {
                 document.body.classList.add('alcaldia-asignador-asignar-page');
                 mountAssignmentFallback();
+
+                return;
+            }
+
+            if (isCaseEditRoute()) {
+                var caseId = getCaseIdFromHash('Case/edit');
+
+                if (caseId) {
+                    openAsignarForCaseId(caseId);
+                }
             }
         });
     }
@@ -237,44 +306,41 @@
 
         handleRoute(app);
 
-        if (app.getRouter && app.getRouter()) {
-            app.getRouter().on('route', function () {
+        if (app.on) {
+            app.on('route', function () {
                 window.setTimeout(function () {
                     handleRoute(app);
                     mountAssignmentFallback();
                 }, 120);
             });
         }
-
-        window.setInterval(function () {
-            if (isCaseAsignarRoute()) {
-                mountAssignmentFallback();
-            }
-        }, 900);
     }
 
-    function bootstrap() {
+    function waitForApp() {
         var app = getApp();
 
-        if (app && app.isReady && app.isReady()) {
+        if (app && app.getUser) {
             bindApp(app);
 
             return;
         }
 
-        if (window.Espo && Espo.loader) {
-            Espo.loader.require('app', function (App) {
-                if (App && App.instance) {
-                    bindApp(App.instance);
-                }
-            });
-        }
+        window.setTimeout(waitForApp, 150);
     }
 
-    bootstrap();
-    document.addEventListener('DOMContentLoaded', bootstrap);
+    window.__alcaldiaAsignacionFlowVersion = FLOW_VERSION;
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForApp);
+    } else {
+        waitForApp();
+    }
+
     window.addEventListener('hashchange', function () {
-        window.setTimeout(bootstrap, 50);
-    });
+        window.setTimeout(function () {
+            handleRoute(getApp());
+            mountAssignmentFallback();
+        }, 50);
+    }, true);
 
 })();

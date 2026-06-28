@@ -84,22 +84,16 @@ define('custom:helpers/asignador-edit-mode', [
 
         activateAsignarMode(recordView.model.id);
 
+        const url = getCaseAsignarUrl(recordView);
         const router = recordView.getRouter();
-        const options = {
-            id: recordView.model.id,
-            returnUrl: '#Case/view/' + recordView.model.id,
-            asignar: true,
-        };
 
-        if (router && typeof router.dispatch === 'function') {
-            router.dispatch('Case', 'asignar', options);
+        if (router && typeof router.navigate === 'function') {
+            router.navigate(url, {trigger: true});
 
             return;
         }
 
-        if (router && typeof router.navigate === 'function') {
-            router.navigate(getCaseAsignarUrl(recordView), {trigger: true});
-        }
+        window.location.hash = url;
     };
 
     const getCaseAsignarUrl = function (recordView) {

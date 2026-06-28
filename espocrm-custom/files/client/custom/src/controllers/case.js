@@ -51,18 +51,45 @@ define('custom:controllers/case', [
             var self = this;
 
             return new Promise(function (resolve, reject) {
-                if (!self.modelFactory) {
+                var finish = function (model) {
+                    if (!model || !model.id) {
+                        reject(new Error('Case model unavailable'));
+
+                        return;
+                    }
+
+                    resolve(model);
+                };
+
+                if (self.modelFactory) {
+                    var model = self.modelFactory.create(self.name);
+
+                    model.id = id;
+
+                    model.fetch().then(function () {
+                        finish(model);
+                    }).catch(reject);
+
+                    return;
+                }
+
+                if (!window.Espo || !Espo.Ajax) {
                     reject(new Error('Model factory unavailable'));
 
                     return;
                 }
 
-                var model = self.modelFactory.create(self.name);
+                Espo.Ajax.getRequest(self.name + '/' + encodeURIComponent(id)).then(function (data) {
+                    if (!self.modelFactory) {
+                        reject(new Error('Model factory unavailable'));
 
-                model.id = id;
+                        return;
+                    }
 
-                model.fetch().then(function () {
-                    resolve(model);
+                    var fetchedModel = self.modelFactory.create(self.name);
+
+                    fetchedModel.set(data || {});
+                    finish(fetchedModel);
                 }).catch(reject);
             });
         },

@@ -175,7 +175,7 @@ define('custom:views/case/record/detail', [
                     $editBtn,
                     this.translate('asignarCaso', 'labels', 'Case')
                 );
-                this.setPrimaryActionButtonAction($editBtn, 'asignarCaso');
+                this.setPrimaryActionButtonAction($editBtn, 'edit');
                 this.setPrimaryActionButtonHref($editBtn, AsignadorEditMode.getCaseAsignarUrl(this));
             }
 
@@ -388,6 +388,16 @@ define('custom:views/case/record/detail', [
         },
 
         actionAsignarCaso: function () {
+            this.dispatchAsignarCase();
+        },
+
+        dispatchAsignarCase: function () {
+            const id = this.model && this.model.id;
+
+            if (!id) {
+                return;
+            }
+
             AsignadorEditMode.openAsignadoEdit(this);
         },
 
@@ -455,7 +465,7 @@ define('custom:views/case/record/detail', [
                         $editBtn,
                         this.translate('asignarCaso', 'labels', 'Case')
                     );
-                    this.setPrimaryActionButtonAction($editBtn, 'asignarCaso');
+                    this.setPrimaryActionButtonAction($editBtn, 'edit');
                     this.setPrimaryActionButtonHref(
                         $editBtn,
                         AsignadorEditMode.getCaseAsignarUrl(this)

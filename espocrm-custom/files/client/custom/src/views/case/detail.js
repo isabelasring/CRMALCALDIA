@@ -35,6 +35,32 @@ define('custom:views/case/detail', [
             }
         },
 
+        actionAsignarCaso: function () {
+            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
+
+            if (record && typeof record.actionAsignarCaso === 'function') {
+                record.actionAsignarCaso();
+
+                return;
+            }
+
+            if (record && typeof record.actionEdit === 'function') {
+                record.actionEdit();
+            }
+        },
+
+        actionEdit: function () {
+            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
+
+            if (record && typeof record.actionEdit === 'function') {
+                record.actionEdit();
+
+                return;
+            }
+
+            Dep.prototype.actionEdit.call(this);
+        },
+
         getCaseTitle: function () {
             return CaseRadicadoLabel.getLabel(this.model);
         },
