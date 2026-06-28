@@ -21,6 +21,20 @@ define('custom:views/case/detail', [
             });
         },
 
+        actionRadicarCaso: function () {
+            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
+
+            if (record && typeof record.dispatchRadicarCase === 'function') {
+                record.dispatchRadicarCase();
+
+                return;
+            }
+
+            if (record && typeof record.actionRadicarCaso === 'function') {
+                record.actionRadicarCaso();
+            }
+        },
+
         getCaseTitle: function () {
             return CaseRadicadoLabel.getLabel(this.model);
         },

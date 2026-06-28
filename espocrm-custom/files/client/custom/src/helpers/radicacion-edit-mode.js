@@ -78,8 +78,29 @@ define('custom:helpers/radicacion-edit-mode', [
             return;
         }
 
+        if (typeof recordView.dispatchRadicarCase === 'function') {
+            recordView.dispatchRadicarCase();
+
+            return;
+        }
+
         activateRadicarMode(recordView.model.id);
-        recordView.getRouter().navigate(getCaseRadicarUrl(recordView), {trigger: true});
+
+        const router = recordView.getRouter();
+        const options = {
+            id: recordView.model.id,
+            returnUrl: '#Case/view/' + recordView.model.id,
+        };
+
+        if (router && typeof router.dispatch === 'function') {
+            router.dispatch('Case', 'radicar', options);
+
+            return;
+        }
+
+        if (router && typeof router.navigate === 'function') {
+            router.navigate(getCaseRadicarUrl(recordView), {trigger: true});
+        }
     };
 
     const getEditableFields = function () {

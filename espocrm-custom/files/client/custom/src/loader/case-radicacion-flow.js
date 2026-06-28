@@ -4,7 +4,7 @@
  */
 (function () {
 
-    var FLOW_VERSION = 'v5';
+    var FLOW_VERSION = 'v6';
     var PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCache';
     var profileInflight = null;
 
@@ -174,6 +174,36 @@
         return '#Case/radicar/' + caseId;
     }
 
+    function dispatchRadicarCase(caseId) {
+        if (!caseId) {
+            return;
+        }
+
+        var app = getApp();
+        var router = app && app.getRouter && app.getRouter();
+
+        if (!router) {
+            window.location.hash = getCaseRadicarUrl(caseId);
+
+            return;
+        }
+
+        var options = {
+            id: caseId,
+            returnUrl: '#Case/view/' + caseId,
+        };
+
+        if (typeof router.dispatch === 'function') {
+            router.dispatch('Case', 'radicar', options);
+
+            return;
+        }
+
+        if (typeof router.navigate === 'function') {
+            router.navigate(getCaseRadicarUrl(caseId), {trigger: true});
+        }
+    }
+
     function patchDetailRadicarButton(caseId) {
         if (!caseId) {
             return;
@@ -182,9 +212,13 @@
         var targetHref = getCaseRadicarUrl(caseId);
         var selectors = [
             '.detail[data-scope="Case"] [data-action="edit"]',
+            '.detail[data-scope="Case"] [data-action="radicarCaso"]',
             '.header-buttons [data-action="edit"]',
+            '.header-buttons [data-action="radicarCaso"]',
             '.detail-button-container [data-action="edit"]',
+            '.detail-button-container [data-action="radicarCaso"]',
             '.page-header [data-action="edit"]',
+            '.page-header [data-action="radicarCaso"]',
         ];
 
         selectors.forEach(function (selector) {
@@ -201,6 +235,11 @@
 
                 btn.classList.remove('hidden');
                 btn.style.removeProperty('display');
+                el.setAttribute('data-action', 'radicarCaso');
+
+                if (btn !== el && btn.getAttribute('data-action')) {
+                    btn.setAttribute('data-action', 'radicarCaso');
+                }
 
                 var labelNode = btn.querySelector('.title, .btn-text');
 
@@ -232,6 +271,64 @@
         document.querySelectorAll('.detail-button-container.hidden, .edit-buttons.hidden').forEach(function (node) {
             node.classList.remove('hidden');
         });
+    }
+
+    function bindRadicarClickFallback() {
+        if (document.__alcaldiaRadicarClickBound) {
+            return;
+        }
+
+        document.__alcaldiaRadicarClickBound = true;
+
+        document.addEventListener('click', function (event) {
+            if (!isCaseDetailRoute()) {
+                return;
+            }
+
+            var actionEl = event.target.closest('[data-action="radicarCaso"]');
+
+            if (!actionEl) {
+                var editEl = event.target.closest('[data-action="edit"]');
+
+                if (!editEl || editEl.closest('.dropdown-menu')) {
+                    return;
+                }
+
+                var editBtn = editEl.closest('.btn, a.btn') || editEl;
+                var label = (editBtn.textContent || '').trim();
+
+                if (!/radicar/i.test(label)) {
+                    return;
+                }
+
+                actionEl = editEl;
+            }
+
+            var caseId = getCaseIdFromHash('Case/view');
+
+            if (!caseId) {
+                return;
+            }
+
+            var app = getApp();
+            var userId = getUserId(app);
+            var cached = readCachedProfile(userId);
+
+            if (!isRadicacionOperator(cached, app)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            try {
+                if (typeof sessionStorage !== 'undefined') {
+                    sessionStorage.setItem('crm-case-radicar-mode', caseId);
+                }
+            } catch (error) {}
+
+            dispatchRadicarCase(caseId);
+        }, true);
     }
 
     function applyRadicarEditPage() {
@@ -469,6 +566,7 @@
     }
 
     window.__alcaldiaRadicacionFlowVersion = FLOW_VERSION;
+    bindRadicarClickFallback();
     window.addEventListener('hashchange', scheduleHandleRoute, true);
 
     if (document.readyState === 'loading') {

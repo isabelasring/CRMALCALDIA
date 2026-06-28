@@ -136,45 +136,46 @@ define('custom:views/case/record/detail', [
         },
 
         configureRadicacionDetailMenu: function () {
+            if (this._radicarButtonAdded) {
+                this.safeRemoveMenuItem('radicarCaso');
+                this._radicarButtonAdded = false;
+            }
+
+            this.updateDetailActionLabels();
+        },
+
+        dispatchRadicarCase: function () {
             const self = this;
+            const id = this.model && this.model.id;
+
+            if (!id) {
+                return;
+            }
 
             RadicacionFields.ensureProfile(this.getUser()).then(function () {
-                if (!self.isRendered || !self.isRendered()) {
-                    return;
-                }
-
-                if (!RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
-                    if (self._radicarButtonAdded) {
-                        self.safeRemoveMenuItem('radicarCaso');
-                        self._radicarButtonAdded = false;
-                    }
+                if (!RadicacionFields.canEditRadicadoCase(self.getUser())) {
+                    Espo.Ui.warning(self.translate('Access denied', 'messages'));
 
                     return;
                 }
 
-                self.$el.find('[data-action="edit"]')
-                    .filter(function () {
-                        return $(this).closest('.dropdown-menu').length === 0;
-                    })
-                    .closest('.btn, a.btn')
-                    .hide();
+                RadicacionEditMode.activateRadicarMode(id);
 
-                if (self._radicarButtonAdded) {
-                    self.updateDetailActionLabels();
+                const router = self.getRouter();
+                const options = {
+                    id: id,
+                    returnUrl: '#Case/view/' + id,
+                };
+
+                if (router && typeof router.dispatch === 'function') {
+                    router.dispatch('Case', 'radicar', options);
 
                     return;
                 }
 
-                if (self.safeAddMenuItem({
-                    name: 'radicarCaso',
-                    label: self.translate('radicarCaso', 'labels', 'Case'),
-                    action: 'radicarCaso',
-                    style: 'primary',
-                })) {
-                    self._radicarButtonAdded = true;
+                if (router && typeof router.navigate === 'function') {
+                    router.navigate(RadicacionEditMode.getCaseRadicarUrl(self), {trigger: true});
                 }
-
-                self.updateDetailActionLabels();
             });
         },
 
@@ -316,8 +317,8 @@ define('custom:views/case/record/detail', [
             const self = this;
 
             RadicacionFields.ensureProfile(this.getUser()).then(function () {
-                if (RadicacionEditMode.isPureRadicacionUser(self.getUser())) {
-                    RadicacionEditMode.openRadicadoEdit(self);
+                if (RadicacionFields.canEditRadicadoCase(self.getUser())) {
+                    self.dispatchRadicarCase();
 
                     return;
                 }
@@ -333,7 +334,7 @@ define('custom:views/case/record/detail', [
         },
 
         actionRadicarCaso: function () {
-            RadicacionEditMode.openRadicadoEdit(this);
+            this.dispatchRadicarCase();
         },
 
         actionAsignarCaso: function () {
@@ -374,6 +375,7 @@ define('custom:views/case/record/detail', [
                         $editBtn,
                         this.translate('radicarCaso', 'labels', 'Case')
                     );
+                    this.setPrimaryActionButtonAction($editBtn, 'radicarCaso');
                     this.setPrimaryActionButtonHref($editBtn, this.getCaseRadicarUrl());
                 }
 
@@ -493,6 +495,22 @@ define('custom:views/case/record/detail', [
             }
 
             $btn.find('a[href]').attr('href', href);
+        },
+
+        setPrimaryActionButtonAction: function ($btn, action) {
+            if (!$btn || !$btn.length || !action) {
+                return;
+            }
+
+            const $targets = $btn.find('[data-action]').add($btn.filter('[data-action]'));
+
+            if ($targets.length) {
+                $targets.attr('data-action', action);
+
+                return;
+            }
+
+            $btn.attr('data-action', action);
         },
 
         setPrimaryActionButtonLabel: function ($btn, label) {
