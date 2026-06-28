@@ -3,7 +3,7 @@
  */
 (function () {
 
-    var FLOW_VERSION = 'v2';
+    var FLOW_VERSION = 'v4';
     var PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCache';
 
     function getApp() {
@@ -164,13 +164,45 @@
             return;
         }
 
+        var app = getApp();
+        var detailEl = document.querySelector('.detail[data-scope="Case"][data-id="' + caseId + '"]');
+
+        if (detailEl) {
+            var $panel = $(detailEl).find(
+                '.panel[data-name="gestionPosteriorRadicacion"], ' +
+                '.record-panel[data-name="gestionPosteriorRadicacion"]'
+            ).first();
+
+            if ($panel.length) {
+                $panel.show();
+
+                window.setTimeout(function () {
+                    var top = $panel.offset() ? $panel.offset().top - 90 : 0;
+
+                    $('html, body').animate({scrollTop: top}, 250);
+
+                    $panel.find('[data-action="selectLink"], [data-action="editLink"], input').first().trigger('focus');
+                }, 120);
+
+                return;
+            }
+        }
+
         try {
             sessionStorage.setItem('crm-case-asignar-mode', String(caseId));
         } catch (error) {}
 
-        var app = getApp();
         var router = app && app.getRouter && app.getRouter();
         var url = getCaseAsignarUrl(caseId);
+
+        if (router && typeof router.dispatch === 'function') {
+            router.dispatch('Case', 'asignar', {
+                id: caseId,
+                returnUrl: '#Case/view/' + caseId,
+            });
+
+            return;
+        }
 
         if (router && typeof router.navigate === 'function') {
             router.navigate(url, {trigger: true});
@@ -216,7 +248,11 @@
                 return;
             }
 
-            if (!actionEl.closest('.detail[data-scope="Case"], .page-header, .header-page')) {
+            if (!actionEl.closest(
+                '.detail[data-scope="Case"], ' +
+                '.page-header, .header-page, .header, .record-header, ' +
+                '.detail-button-container, .header-buttons, .edit-buttons'
+            )) {
                 return;
             }
 

@@ -54,6 +54,53 @@ define('custom:controllers/case', [
                 || 'custom:views/case/asignar';
         },
 
+        fetchCaseModel: function (id) {
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+                var finish = function (model) {
+                    if (!model || !model.id) {
+                        reject(new Error('Case model unavailable'));
+
+                        return;
+                    }
+
+                    resolve(model);
+                };
+
+                if (self.modelFactory) {
+                    var model = self.modelFactory.create(self.name);
+
+                    model.id = id;
+
+                    model.fetch().then(function () {
+                        finish(model);
+                    }).catch(reject);
+
+                    return;
+                }
+
+                if (!window.Espo || !Espo.Ajax) {
+                    reject(new Error('Model factory unavailable'));
+
+                    return;
+                }
+
+                Espo.Ajax.getRequest(self.name + '/' + encodeURIComponent(id)).then(function (data) {
+                    if (!self.modelFactory) {
+                        reject(new Error('Model factory unavailable'));
+
+                        return;
+                    }
+
+                    var fetchedModel = self.modelFactory.create(self.name);
+
+                    fetchedModel.set(data || {});
+                    finish(fetchedModel);
+                }).catch(reject);
+            });
+        },
+
         loadAsignarView: function (id, options) {
             options = options || {};
             var self = this;
@@ -79,14 +126,28 @@ define('custom:controllers/case', [
                 }
 
                 try {
-                    self.main(self.getAsignarViewName(), {
-                        scope: self.name,
-                        id: id,
-                        model: options.model || null,
-                        returnUrl: options.returnUrl || ('#Case/view/' + id),
-                        returnDispatchParams: options.returnDispatchParams,
-                        isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
-                        asignar: true,
+                    var launch = function (model) {
+                        self.main(self.getAsignarViewName(), {
+                            scope: self.name,
+                            entityType: self.name,
+                            id: id,
+                            model: model,
+                            returnUrl: options.returnUrl || ('#Case/view/' + id),
+                            returnDispatchParams: options.returnDispatchParams,
+                            isReturned: options.isReturned || (self.store && self.store.get('isReturned')),
+                            asignar: true,
+                        });
+                    };
+
+                    if (options.model) {
+                        launch(options.model);
+
+                        return;
+                    }
+
+                    self.fetchCaseModel(id).then(launch).catch(function () {
+                        Espo.Ui.error(self.translateText('Error', 'messages'));
+                        self.getRouter().navigate('#Case/view/' + id, {trigger: true});
                     });
                 } catch (error) {
                     Espo.Ui.error(self.translateText('Error', 'messages'));

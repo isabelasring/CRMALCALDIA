@@ -84,8 +84,21 @@ define('custom:helpers/asignador-edit-mode', [
 
         activateAsignarMode(recordView.model.id);
 
+        const caseId = recordView.model.id;
+        const scope = recordView.scope || recordView.entityType || 'Case';
         const url = getCaseAsignarUrl(recordView);
         const router = recordView.getRouter();
+        const dispatchOptions = {
+            id: caseId,
+            returnUrl: '#' + scope + '/view/' + caseId,
+            model: recordView.model,
+        };
+
+        if (router && typeof router.dispatch === 'function') {
+            router.dispatch(scope, 'asignar', dispatchOptions);
+
+            return;
+        }
 
         if (router && typeof router.navigate === 'function') {
             router.navigate(url, {trigger: true});
@@ -291,6 +304,16 @@ define('custom:helpers/asignador-edit-mode', [
 
         if (typeof recordView.setReadOnly === 'function') {
             recordView.setReadOnly();
+        }
+
+        const panelView = typeof recordView.getFieldView === 'function'
+            ? recordView.getFieldView('cPanelAsignacionPatrullero')
+            : null;
+
+        if (panelView && typeof panelView.mountFields === 'function') {
+            window.setTimeout(function () {
+                panelView.mountFields();
+            }, 0);
         }
 
         recordView.$el.find('[data-action="delete"], [data-action="remove"]').closest('.btn, .dropdown-item, li').hide();

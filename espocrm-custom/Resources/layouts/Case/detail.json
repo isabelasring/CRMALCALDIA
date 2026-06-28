@@ -15,7 +15,9 @@
                     "name": "cNumeroRadicado",
                     "fullWidth": true
                 },
-                false
+                {
+                    "name": "cExpediente"
+                }
             ],
             [
                 {
@@ -243,13 +245,9 @@
         "rows": [
             [
                 {
-                    "name": "assignedUser"
-                },
-                false
-            ],
-            [
-                {
-                    "name": "cMotivoReasignacion",
+                    "name": "cPanelAsignacionPatrullero",
+                    "view": "custom:views/case/fields/asignacion-patrullero-action",
+                    "noLabel": true,
                     "fullWidth": true
                 }
             ]
