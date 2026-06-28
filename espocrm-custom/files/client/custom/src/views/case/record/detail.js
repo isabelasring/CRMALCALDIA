@@ -82,7 +82,11 @@ define('custom:views/case/record/detail', [
             this.listenTo(this.model, 'change:cNumeroRadicado change:cExpediente change:assignedUserId change:cFormatoSolicitudPdfId change:status', function () {
                 this.toggleRadicacionFields();
                 this.togglePostRadicacionFields();
-                this.scheduleRoleAwareUi();
+
+                if (!this._asignacionEditMode) {
+                    this.scheduleRoleAwareUi();
+                }
+
                 this.scheduleRefreshActaVisitaPanel();
                 this.scheduleRefreshFormatoGeneradoDocs();
             });
@@ -155,6 +159,14 @@ define('custom:views/case/record/detail', [
 
                 return;
             }
+
+            if (this._asignacionEditMode && this.isAsignadorOperator()) {
+                this.enableAsignacionFields();
+                this.updateAsignacionActionButtons();
+
+                return;
+            }
+
             this.toggleRadicacionFields();
             this.togglePostRadicacionFields();
             this.toggleRegistroExcelPanel();
@@ -618,12 +630,28 @@ define('custom:views/case/record/detail', [
             this.exitAsignacionEditMode();
         },
 
+        findAsignacionPrimaryButton: function () {
+            let $btn = this.findPrimaryActionButton('edit');
+
+            if (!$btn.length) {
+                $btn = this.findPrimaryActionButton('saveAsignacion');
+            }
+
+            if (!$btn.length) {
+                $btn = this.getDetailActionElements()
+                    .find('.detail-button-container .btn-primary, .header-buttons .btn-primary')
+                    .first();
+            }
+
+            return $btn;
+        },
+
         updateAsignacionActionButtons: function () {
             if (!this.isAsignadorOperator()) {
                 return;
             }
 
-            const $editBtn = this.findPrimaryActionButton('edit');
+            const $editBtn = this.findAsignacionPrimaryButton();
 
             if (!$editBtn.length) {
                 return;
@@ -674,8 +702,6 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            const $editBtn = this.findPrimaryActionButton('edit');
-
             if (this._radicarButtonAdded) {
                 this.safeRemoveMenuItem('radicarCaso');
                 this._radicarButtonAdded = false;
@@ -686,6 +712,14 @@ define('custom:views/case/record/detail', [
 
                 return;
             }
+
+            if (this.isAsignadorOperator(user)) {
+                this.updateAsignacionActionButtons();
+
+                return;
+            }
+
+            const $editBtn = this.findPrimaryActionButton('edit');
 
             if (!$editBtn.length) {
                 return;
@@ -713,12 +747,6 @@ define('custom:views/case/record/detail', [
             }
 
             $('body').removeClass('alcaldia-radicacion-detail-ui');
-
-            if (this.isAsignadorOperator(user)) {
-                this.updateAsignacionActionButtons();
-
-                return;
-            }
 
             // Juan: editar el caso completo.
             if (AlcaldiaCaseRoles.isGestionInspeccionUser(user)) {

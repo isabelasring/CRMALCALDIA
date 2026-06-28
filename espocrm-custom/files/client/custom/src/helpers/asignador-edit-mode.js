@@ -311,6 +311,8 @@ define('custom:helpers/asignador-edit-mode', [
                 recordView.enableAsignacionFields();
             }
 
+            lockAllFieldViewsExcept(recordView, getEditableFields(recordView));
+
             return;
         }
 
