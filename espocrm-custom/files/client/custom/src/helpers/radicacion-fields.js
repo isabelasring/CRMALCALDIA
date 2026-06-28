@@ -451,6 +451,10 @@ define('custom:helpers/radicacion-fields', [], function () {
                 return false;
             }
 
+            if (cached.isInspeccion || cached.homeProfile === 'gestion') {
+                return false;
+            }
+
             return true;
         }
 

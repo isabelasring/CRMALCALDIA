@@ -207,6 +207,14 @@ define('custom:views/case/record/detail', [
         isAsignadorOperator: function (user) {
             user = user || this.getUser();
 
+            if (RadicacionFields.isInspeccionUser(user)) {
+                return false;
+            }
+
+            if (InspeccionEditMode.canEditFullCase(user, this)) {
+                return false;
+            }
+
             return AsignadorEditMode.isPureAsignadorUser(user)
                 || RadicacionFields.canAssignCase(user);
         },
@@ -409,6 +417,12 @@ define('custom:views/case/record/detail', [
             const self = this;
 
             RadicacionFields.ensureProfile(this.getUser()).then(function () {
+                if (InspeccionEditMode.canEditFullCase(self.getUser(), self)) {
+                    Dep.prototype.actionEdit.call(self);
+
+                    return;
+                }
+
                 if (RadicacionFields.canEditRadicadoCase(self.getUser())) {
                     self.dispatchRadicarCase();
 
@@ -905,6 +919,22 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
+            if (AlcaldiaCaseRoles.isGestionInspeccionUser(user)) {
+                const $editBtn = this.findPrimaryActionButton('edit');
+
+                if ($editBtn.length) {
+                    $editBtn.show();
+                    this.setPrimaryActionButtonLabel(
+                        $editBtn,
+                        this.translate('Edit', 'labels', 'Global')
+                    );
+                    this.setPrimaryActionButtonAction($editBtn, 'edit');
+                    this.setPrimaryActionButtonHref($editBtn, this.getCaseEditUrl());
+                }
+
+                return;
+            }
+
             if (this.isAsignadorOperator(user)) {
                 this.updateAsignacionActionButtons();
 
@@ -939,16 +969,6 @@ define('custom:views/case/record/detail', [
             }
 
             $('body').removeClass('alcaldia-radicacion-detail-ui');
-
-            // Juan: editar el caso completo.
-            if (AlcaldiaCaseRoles.isGestionInspeccionUser(user)) {
-                $editBtn.show();
-                this.setPrimaryActionButtonLabel(
-                    $editBtn,
-                    this.translate('Edit', 'labels', 'Global')
-                );
-                this.setPrimaryActionButtonHref($editBtn, this.getCaseEditUrl());
-            }
         },
 
         updateAsignadorDetailActions: function () {
@@ -1157,9 +1177,21 @@ define('custom:views/case/record/detail', [
 
         checkAccessAction: function (action) {
             const user = this.getUser();
-            const isAsignador = RadicacionFields.isAsignadorUser(user)
-                || RadicacionFields.canAssignCase(user)
-                || AsignadorEditMode.isPureAsignadorUser(user);
+
+            if (InspeccionEditMode.canEditFullCase(user, this)) {
+                if (action === 'delete' || action === 'create' || action === 'remove') {
+                    return Dep.prototype.checkAccessAction
+                        ? Dep.prototype.checkAccessAction.call(this, action)
+                        : true;
+                }
+
+                return Dep.prototype.checkAccessAction
+                    ? Dep.prototype.checkAccessAction.call(this, action)
+                    : true;
+            }
+
+            const isAsignador = AsignadorEditMode.isPureAsignadorUser(user)
+                || RadicacionFields.canAssignCase(user);
 
             if (isAsignador) {
                 if (action === 'delete' || action === 'create' || action === 'remove') {

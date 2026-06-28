@@ -251,6 +251,15 @@ define('custom:controllers/case', [
             }
 
             var proceed = function () {
+                if (
+                    RadicacionFields.isInspeccionUser(self.getUser())
+                    && !AsignadorEditMode.isPureAsignadorUser(self.getUser())
+                ) {
+                    Dep.prototype.actionEdit.call(self, options);
+
+                    return;
+                }
+
                 if (RadicacionFields.canEditRadicadoCase(self.getUser())) {
                     self.loadRadicarView(options.id, options);
 
