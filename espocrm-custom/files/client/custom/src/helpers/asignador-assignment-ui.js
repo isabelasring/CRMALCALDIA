@@ -224,40 +224,120 @@ define('custom:helpers/asignador-assignment-ui', [
         return null;
     };
 
-    const askMotivoReasignacion = function (callback) {
-        const $modal = $(
-            '<div class="modal fade alcaldia-motivo-modal" tabindex="-1">' +
-            '<div class="modal-dialog"><div class="modal-content">' +
-            '<div class="modal-header"><h4 class="modal-title">Motivo de reasignación</h4></div>' +
-            '<div class="modal-body">' +
+    const escapeHtml = function (value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    };
+
+    const openAssignmentModal = function (recordView) {
+        if (!recordView || !recordView.model || !recordView.model.id) {
+            return;
+        }
+
+        if (!RadicacionFields.isCaseRadicado(recordView.model)) {
+            Espo.Ui.warning('El caso aún no está listo para asignación.');
+
+            return;
+        }
+
+        const isReasign = AsignadorCaseFlow.isReasignacionCaseOnOpen(recordView.model);
+        const caseId = recordView.model.id;
+        const selectedUser = {
+            id: recordView.model.get('assignedUserId') || null,
+            name: recordView.model.get('assignedUserName') || '',
+        };
+
+        const title = isReasign ? 'Reasignar caso' : 'Asignar patrullero';
+        const motivoBlock = isReasign
+            ? '<div class="form-group alcaldia-motivo-group">' +
+            '<label>Motivo de reasignación <span class="text-danger">*</span></label>' +
             '<textarea class="form-control js-motivo-input" rows="4" ' +
             'placeholder="Indique el motivo de la reasignación"></textarea>' +
+            '</div>'
+            : '';
+
+        const $modal = $(
+            '<div class="modal fade alcaldia-asignacion-modal" tabindex="-1">' +
+            '<div class="modal-dialog"><div class="modal-content">' +
+            '<div class="modal-header">' +
+            '<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>' +
+            '<h4 class="modal-title">' + escapeHtml(title) + '</h4>' +
+            '</div>' +
+            '<div class="modal-body">' +
+            '<div class="form-group">' +
+            '<label>Asignado a <span class="text-danger">*</span></label>' +
+            '<div class="input-group">' +
+            '<input type="text" class="form-control js-user-name" readonly ' +
+            'placeholder="Seleccione un patrullero">' +
+            '<span class="input-group-btn">' +
+            '<button type="button" class="btn btn-default" data-action="pick-user">Seleccionar</button>' +
+            '</span></div></div>' +
+            motivoBlock +
             '</div>' +
             '<div class="modal-footer">' +
-            '<button type="button" class="btn btn-default" data-action="cancel">Cancelar</button>' +
+            '<button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>' +
             '<button type="button" class="btn btn-primary" data-action="save">Guardar</button>' +
             '</div></div></div></div>'
         );
 
         $('body').append($modal);
-        $modal.modal({backdrop: 'static'});
 
-        $modal.on('click', '[data-action="save"]', function () {
-            const motivo = String($modal.find('.js-motivo-input').val() || '').trim();
+        const $userNameInput = $modal.find('.js-user-name');
+        $userNameInput.val(selectedUser.name || '');
 
-            if (!motivo) {
-                Espo.Ui.error('El motivo de reasignación es obligatorio.');
+        const updateSelectedUser = function (user) {
+            selectedUser.id = user.id;
+            selectedUser.name = user.name;
+            $userNameInput.val(user.name || '');
+        };
+
+        $modal.on('click', '[data-action="pick-user"]', function (e) {
+            e.preventDefault();
+
+            openUserPicker(recordView, function (user) {
+                updateSelectedUser(user);
+            });
+        });
+
+        $modal.on('click', '[data-action="save"]', function (e) {
+            e.preventDefault();
+
+            if (!selectedUser.id) {
+                Espo.Ui.error('Debe seleccionar un patrullero.');
 
                 return;
             }
 
+            const data = {
+                assignedUserId: selectedUser.id,
+                assignedUserName: selectedUser.name,
+            };
+
+            if (isReasign) {
+                const motivo = String($modal.find('.js-motivo-input').val() || '').trim();
+
+                if (!motivo) {
+                    Espo.Ui.error('El motivo de reasignación es obligatorio.');
+
+                    return;
+                }
+
+                data.cMotivoReasignacion = motivo;
+            }
+
             $modal.modal('hide');
-            callback(motivo);
+
+            patchCaseAssignment(caseId, data, recordView);
         });
 
         $modal.on('hidden.bs.modal', function () {
             $modal.remove();
         });
+
+        $modal.modal({backdrop: 'static'});
     };
 
     const openUserPicker = function (recordView, callback) {
@@ -287,69 +367,6 @@ define('custom:helpers/asignador-assignment-ui', [
                     name: userModel.get('name') || userModel.get('userName') || '',
                 });
             });
-        });
-    };
-
-    const openAssignmentModal = function (recordView) {
-        if (!recordView || !recordView.model || !recordView.model.id) {
-            return;
-        }
-
-        if (!RadicacionFields.isCaseRadicado(recordView.model)) {
-            Espo.Ui.warning('El caso aún no está listo para asignación.');
-
-            return;
-        }
-
-        const isReasign = AsignadorCaseFlow.isReasignacionCaseOnOpen(recordView.model);
-        const caseId = recordView.model.id;
-
-        openUserPicker(recordView, function (user) {
-            const data = {
-                assignedUserId: user.id,
-                assignedUserName: user.name,
-            };
-
-            const save = function (motivo) {
-                if (isReasign) {
-                    data.cMotivoReasignacion = motivo;
-                }
-
-                patchCaseAssignment(caseId, data, recordView);
-            };
-
-            if (isReasign) {
-                askMotivoReasignacion(save);
-
-                return;
-            }
-
-            save(null);
-        });
-    };
-
-    const injectPatrulleroPickerButton = function (recordView) {
-        if (!recordView || !recordView.$el || !recordView.$el.length) {
-            return;
-        }
-
-        const $cell = recordView.$el
-            .find('.cell[data-name="assignedUser"], .field[data-name="assignedUser"]')
-            .first();
-
-        if (!$cell.length || $cell.find('.alcaldia-pick-patrullero').length) {
-            return;
-        }
-
-        $cell.append(
-            '<button type="button" class="btn btn-primary btn-sm alcaldia-pick-patrullero" ' +
-            'style="margin-left:8px; pointer-events:auto;">Asignar patrullero</button>'
-        );
-
-        $cell.find('.alcaldia-pick-patrullero').on('click.alcaldiaPickPatrullero', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openAssignmentModal(recordView);
         });
     };
 
@@ -406,7 +423,6 @@ define('custom:helpers/asignador-assignment-ui', [
 
         lockAllFieldViewsExcept(recordView, editableFields);
         unlockAssignmentDom(recordView, editableFields);
-        injectPatrulleroPickerButton(recordView);
     };
 
     const openAssignmentEditPage = function (recordView) {

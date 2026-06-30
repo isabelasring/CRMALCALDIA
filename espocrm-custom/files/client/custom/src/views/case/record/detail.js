@@ -201,7 +201,7 @@ define('custom:views/case/record/detail', [
                 $heading.append(
                     '<div class="alcaldia-asignacion-panel-actions pull-right" style="margin-top:-2px;">' +
                     '<button type="button" class="btn btn-primary btn-sm" data-action="alcaldiaEditAsignacion">' +
-                    'Asignar patrullero</button>' +
+                    'Editar asignación</button>' +
                     '<button type="button" class="btn btn-primary btn-sm hidden" data-action="alcaldiaSaveAsignacion">' +
                     'Guardar</button>' +
                     '<button type="button" class="btn btn-default btn-sm hidden" data-action="alcaldiaCancelAsignacion">' +

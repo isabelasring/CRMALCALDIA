@@ -383,3 +383,17 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-name="
   flex-wrap: wrap;
   gap: 8px;
 }
+
+.alcaldia-asignacion-modal .modal-body .form-group {
+  margin-bottom: 16px;
+}
+
+.alcaldia-asignacion-modal .js-user-name {
+  background: #fff;
+  cursor: default;
+}
+
+.alcaldia-asignacion-modal .js-motivo-input {
+  min-height: 96px;
+  resize: vertical;
+}
