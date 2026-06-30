@@ -245,12 +245,12 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .field[data-name="
   visibility: visible !important;
 }
 
-.edit[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible),
-.edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible) {
+body:not(.alcaldia-reasignacion-caso) .edit[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible),
+body:not(.alcaldia-reasignacion-caso) .edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible) {
   display: none !important;
 }
 
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible) {
+body.alcaldia-asignador-asignar-page:not(.alcaldia-reasignacion-caso) .edit[data-scope="Case"] .cell[data-name="cMotivoReasignacion"]:not(.alcaldia-motivo-reasignacion-visible) {
   display: none !important;
 }
 

@@ -31,9 +31,9 @@ define('custom:views/case/record/edit', [
 
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
+            AsignadorCaseFlow.schedule(this);
             InspeccionCaseFlow.schedule(this);
             RadicacionCaseFlow.schedule(this);
-            AsignadorCaseFlow.schedule(this);
             CaseCreateForm.schedule(this);
         },
 

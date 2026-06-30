@@ -26,8 +26,24 @@ define('custom:helpers/inspeccion-case-flow', [
         return !isAsignadorAssignmentPage();
     };
 
+    const showAsignacionPanel = function (recordView) {
+        const $panel = findPanel(recordView, PANEL_ASIGNACION);
+
+        if ($panel.length) {
+            $panel.removeClass('hidden alcaldia-inspeccion-asignacion-hidden');
+        }
+
+        ASIGNACION_FIELDS.forEach(function (field) {
+            recordView.$el
+                .find('.cell[data-name="' + field + '"], .field[data-name="' + field + '"]')
+                .closest('.cell, .field')
+                .removeClass('hidden');
+        });
+    };
+
     const hideAsignacionPanel = function (recordView) {
         if (!shouldHideAsignacion()) {
+            showAsignacionPanel(recordView);
             return;
         }
 

@@ -28,7 +28,15 @@ define('custom:helpers/asignador-case-flow', [
             return false;
         }
 
-        return !!String(model.getFetched('assignedUserId') || '').trim();
+        const fetchedId = String(model.getFetched('assignedUserId') || '').trim();
+
+        if (fetchedId) {
+            return true;
+        }
+
+        const status = String(model.getFetched('status') || model.get('status') || '').trim();
+
+        return status === 'Asignado';
     };
 
     const restoreNonAsignacionAttributes = function (model) {
@@ -116,5 +124,6 @@ define('custom:helpers/asignador-case-flow', [
         setup: setup,
         schedule: schedule,
         prepareModelForSave: prepareModelForSave,
+        isReasignacionCase: isReasignacionCase,
     };
 });

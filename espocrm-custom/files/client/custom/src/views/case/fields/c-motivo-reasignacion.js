@@ -1,23 +1,30 @@
-define('custom:views/case/fields/c-motivo-reasignacion', ['views/fields/text'], function (Dep) {
+define('custom:views/case/fields/c-motivo-reasignacion', [
+    'views/fields/text',
+    'custom:helpers/asignador-case-flow',
+], function (Dep, AsignadorCaseFlow) {
 
     const VISIBLE_CLASS = 'alcaldia-motivo-reasignacion-visible';
 
-    const hadPreviousAssignee = function (model) {
-        if (!model || typeof model.getFetched !== 'function') {
-            return false;
-        }
-
-        return !!String(model.getFetched('assignedUserId') || '').trim();
-    };
-
     const getCell = function (view) {
-        if (!view.$el || !view.$el.length) {
-            return null;
+        if (view.$el && view.$el.length) {
+            const $cell = view.$el.closest('.cell[data-name="cMotivoReasignacion"]');
+
+            if ($cell.length) {
+                return $cell;
+            }
         }
 
-        const $cell = view.$el.closest('.cell[data-name="cMotivoReasignacion"]');
+        const recordView = view.getRecordView && view.getRecordView();
 
-        return $cell.length ? $cell : null;
+        if (recordView && recordView.$el) {
+            const $cell = recordView.$el.find('.cell[data-name="cMotivoReasignacion"]').first();
+
+            if ($cell.length) {
+                return $cell;
+            }
+        }
+
+        return null;
     };
 
     return Dep.extend({
@@ -25,18 +32,28 @@ define('custom:views/case/fields/c-motivo-reasignacion', ['views/fields/text'], 
         setup: function () {
             Dep.prototype.setup.call(this);
 
-            this.listenTo(this.model, 'sync change:assignedUserId', function () {
+            this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCase(this.model);
+
+            this.listenTo(this.model, 'sync', function () {
+                if (!this._hadAssigneeOnOpen) {
+                    this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCase(this.model);
+                }
+
                 this.manageVisibility();
             });
         },
 
+        isReasignacion: function () {
+            return this._hadAssigneeOnOpen || AsignadorCaseFlow.isReasignacionCase(this.model);
+        },
+
         manageVisibility: function () {
+            const isReasignacion = this.isReasignacion();
             const $cell = getCell(this);
-            const isReasignacion = hadPreviousAssignee(this.model);
 
             if (isReasignacion) {
                 if ($cell) {
-                    $cell.addClass(VISIBLE_CLASS).show();
+                    $cell.addClass(VISIBLE_CLASS).removeClass('hidden');
                 }
 
                 this.show();
@@ -45,7 +62,7 @@ define('custom:views/case/fields/c-motivo-reasignacion', ['views/fields/text'], 
             }
 
             if ($cell) {
-                $cell.removeClass(VISIBLE_CLASS).hide();
+                $cell.removeClass(VISIBLE_CLASS);
             }
 
             this.hide();
@@ -59,6 +76,14 @@ define('custom:views/case/fields/c-motivo-reasignacion', ['views/fields/text'], 
             Dep.prototype.afterRender.call(this);
 
             this.manageVisibility();
+
+            const self = this;
+
+            [0, 150, 500].forEach(function (delay) {
+                window.setTimeout(function () {
+                    self.manageVisibility();
+                }, delay);
+            });
         },
     });
 });
