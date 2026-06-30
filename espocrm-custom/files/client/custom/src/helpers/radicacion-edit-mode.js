@@ -22,6 +22,10 @@ define('custom:helpers/radicacion-edit-mode', [
             return false;
         }
 
+        if (hasRadicarUrlHint(recordView)) {
+            return true;
+        }
+
         return isPureRadicacionUser(recordView.getUser());
     };
 

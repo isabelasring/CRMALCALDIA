@@ -421,14 +421,14 @@ define('custom:views/case/record/detail', [
             const self = this;
 
             RadicacionFields.ensureProfile(this.getUser()).then(function () {
-                if (InspeccionEditMode.canEditFullCase(self.getUser(), self)) {
-                    Dep.prototype.actionEdit.call(self);
+                if (RadicacionFields.canEditRadicadoCase(self.getUser())) {
+                    self.dispatchRadicarCase();
 
                     return;
                 }
 
-                if (RadicacionFields.canEditRadicadoCase(self.getUser())) {
-                    self.dispatchRadicarCase();
+                if (InspeccionEditMode.canEditFullCase(self.getUser(), self)) {
+                    Dep.prototype.actionEdit.call(self);
 
                     return;
                 }
@@ -964,7 +964,7 @@ define('custom:views/case/record/detail', [
                 if ($editBtn.length) {
                     $editBtn.show();
                     this.setPrimaryActionButtonAction($editBtn, 'edit');
-                    this.setPrimaryActionButtonHref($editBtn, this.getCaseEditUrl());
+                    this.setPrimaryActionButtonHref($editBtn, this.getCaseRadicarUrl());
                 }
 
                 RadicacionEditMode.hideRadicacionTextButtons(this);

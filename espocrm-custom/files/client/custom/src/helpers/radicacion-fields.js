@@ -341,10 +341,6 @@ define('custom:helpers/radicacion-fields', [], function () {
             return false;
         }
 
-        if (isInspeccionUser(user)) {
-            return false;
-        }
-
         return resolveHomeProfile(user) === 'radicacion';
     };
 
@@ -394,7 +390,7 @@ define('custom:helpers/radicacion-fields', [], function () {
         }
 
         if (user.isAdmin()) {
-            return true;
+            return false;
         }
 
         if (hasRole(user, ROLE_INSPECCION)) {
