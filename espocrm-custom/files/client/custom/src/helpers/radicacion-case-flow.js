@@ -63,6 +63,12 @@ define('custom:helpers/radicacion-case-flow', [
         if ($panel.length) {
             $panel.show();
         }
+
+        const radicadoView = recordView.getFieldView('cNumeroRadicado');
+
+        if (radicadoView && radicadoView.isRendered && radicadoView.isRendered()) {
+            radicadoView.reRender();
+        }
     };
 
     const restoreNonRadicadoAttributes = function (model) {

@@ -16,6 +16,17 @@ define('custom:views/case/fields/numero-radicado', [
 
             this._fetchRequest = null;
 
+            const self = this;
+
+            RadicacionFields.ensureProfile(typeof this.getUser === 'function' ? this.getUser() : null);
+            RadicacionFields.onProfileReady(function () {
+                if (!self.isRendered || !self.isRendered()) {
+                    return;
+                }
+
+                self.reRender();
+            });
+
             if (!this.useAssistant()) {
                 return;
             }
@@ -76,7 +87,12 @@ define('custom:views/case/fields/numero-radicado', [
                     ? Espo.App.instance.getUser()
                     : null);
 
-            return RadicacionFields.canEditRadicadoCase(user);
+            if (!user) {
+                return false;
+            }
+
+            return RadicacionFields.isRadicacionUser(user)
+                || RadicacionFields.canEditRadicadoCase(user);
         },
 
         getDisplayRadicado: function () {

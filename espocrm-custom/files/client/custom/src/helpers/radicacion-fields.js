@@ -6,7 +6,7 @@ define('custom:helpers/radicacion-fields', [], function () {
     const ROLE_ASIGNACION = 'asignacion';
     const ROLE_PATRULLERO = 'patrullero';
     const ROLE_PATRULLAJE = 'patrullaje';
-    const PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCacheV7';
+    const PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCacheV8';
 
     const RADICADO_PERSISTED_FIELDS = [
         'cNumeroRadicado',
@@ -364,7 +364,7 @@ define('custom:helpers/radicacion-fields', [], function () {
         }
 
         if (isInspeccionUser(user)) {
-            return true;
+            return isCaseRadicado(model);
         }
 
         return isCaseRadicado(model);
