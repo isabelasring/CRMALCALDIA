@@ -1,10 +1,14 @@
 define('custom:helpers/excel-alcaldia-viewer-loader', [], function () {
 
-    const SHEETJS_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
     const PREFERRED_SHEET = '2026';
     let sheetJsPromise = null;
 
-    const loadSheetJs = function () {
+    const getSheetJsUrl = function (basePath) {
+        return String(basePath || '').replace(/\/?$/, '/')
+            + 'client/custom/lib/xlsx.mini.min.js';
+    };
+
+    const loadSheetJs = function (basePath) {
         if (window.XLSX) {
             return Promise.resolve(window.XLSX);
         }
@@ -16,7 +20,7 @@ define('custom:helpers/excel-alcaldia-viewer-loader', [], function () {
         sheetJsPromise = new Promise(function (resolve, reject) {
             const script = document.createElement('script');
 
-            script.src = SHEETJS_URL;
+            script.src = getSheetJsUrl(basePath);
             script.async = true;
             script.onload = function () {
                 if (window.XLSX) {
@@ -39,7 +43,7 @@ define('custom:helpers/excel-alcaldia-viewer-loader', [], function () {
 
     const fetchWorkbook = function (basePath, fileId) {
         const url = String(basePath || '').replace(/\/?$/, '/')
-            + '?entryPoint=download&id=' + encodeURIComponent(fileId);
+            + '?entryPoint=ExcelAlcaldiaViewerFile&id=' + encodeURIComponent(fileId);
 
         return fetch(url, {
             method: 'GET',
@@ -87,7 +91,7 @@ define('custom:helpers/excel-alcaldia-viewer-loader', [], function () {
 
         $container.html('<div class="excel-alcaldia-empty text-muted">Cargando registro…</div>');
 
-        return loadSheetJs()
+        return loadSheetJs(basePath)
             .then(function (XLSX) {
                 return fetchWorkbook(basePath, fileId).then(function (buffer) {
                     const workbook = XLSX.read(buffer, {type: 'array'});

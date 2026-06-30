@@ -11,11 +11,6 @@ define('custom:views/document/record/panels/excel-onlyoffice-viewer', [
         setup: function () {
             Dep.prototype.setup.call(this);
 
-            this.canView = null;
-            this.errorMessage = null;
-
-            this.checkAccess();
-
             this.listenTo(this.model, 'change:fileId sync', function () {
                 this.togglePanel();
             });
@@ -25,9 +20,10 @@ define('custom:views/document/record/panels/excel-onlyoffice-viewer', [
             const fileId = this.model.get('fileId');
 
             return {
-                errorMessage: this.errorMessage,
                 downloadUrl: fileId
-                    ? (this.getBasePath() + '?entryPoint=download&id=' + encodeURIComponent(fileId))
+                    ? (this.getBasePath()
+                        + '?entryPoint=ExcelAlcaldiaViewerFile&id='
+                        + encodeURIComponent(fileId))
                     : null,
             };
         },
@@ -49,31 +45,11 @@ define('custom:views/document/record/panels/excel-onlyoffice-viewer', [
                 return;
             }
 
-            if (this.isExcelDocument() && this.canView !== false) {
+            if (this.isExcelDocument()) {
                 $panel.show();
             } else {
                 $panel.hide();
             }
-        },
-
-        checkAccess: function () {
-            const self = this;
-
-            if (!this.isExcelDocument()) {
-                this.canView = false;
-
-                return;
-            }
-
-            Espo.Ajax.getRequest('Case/action/alcaldiaProfile')
-                .then(function (profile) {
-                    self.canView = !!(profile && profile.canDownloadExcelAlcaldia);
-                    self.togglePanel();
-                })
-                .catch(function () {
-                    self.canView = false;
-                    self.togglePanel();
-                });
         },
 
         bindActions: function () {
@@ -89,13 +65,7 @@ define('custom:views/document/record/panels/excel-onlyoffice-viewer', [
             const fileId = this.model.get('fileId');
 
             if (!fileId) {
-                Espo.Ui.warning(this.translate('excelViewerNoFile', 'Document'));
-
-                return;
-            }
-
-            if (this.canView === false) {
-                Espo.Ui.warning(this.translate('excelViewerForbidden', 'Document'));
+                Espo.Ui.warning(this.translate('excelViewerNoFile', 'Document', 'labels'));
 
                 return;
             }
@@ -104,7 +74,8 @@ define('custom:views/document/record/panels/excel-onlyoffice-viewer', [
 
             this.createView('dialog', 'custom:views/modals/excel-alcaldia-viewer', {
                 fileId: fileId,
-                title: this.model.get('name') || this.translate('excelViewerTitle', 'Document'),
+                title: this.model.get('name')
+                    || this.translate('excelViewerTitle', 'Document', 'labels'),
             }, function (view) {
                 view.render();
                 self.listenToOnce(view, 'remove', function () {});

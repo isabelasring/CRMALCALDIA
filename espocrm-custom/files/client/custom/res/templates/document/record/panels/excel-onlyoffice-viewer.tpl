@@ -1,18 +1,18 @@
 <div class="excel-alcaldia-panel">
     <p class="excel-alcaldia-panel__help text-muted">
-        {{translate 'excelViewerHelp' scope='Document'}}
+        {{translate 'excelViewerHelp' scope='Document' category='labels'}}
     </p>
 
     <div class="excel-alcaldia-panel__actions">
         <button type="button" class="btn btn-primary" data-action="openExcelViewer">
             <span class="fas fa-table"></span>
-            {{translate 'excelViewerOpen' scope='Document'}}
+            {{translate 'excelViewerOpen' scope='Document' category='labels'}}
         </button>
 
         {{#if downloadUrl}}
             <a href="{{downloadUrl}}" class="btn btn-default" target="_blank" rel="noopener">
                 <span class="fas fa-download"></span>
-                {{translate 'excelViewerDownload' scope='Document'}}
+                {{translate 'excelViewerDownload' scope='Document' category='labels'}}
             </a>
         {{/if}}
     </div>

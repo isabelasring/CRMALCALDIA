@@ -107,9 +107,7 @@ class AlcaldiaUserProfile
 
     public function canDownloadExcelAlcaldia(User $user): bool
     {
-        return $user->isAdmin()
-            || $this->hasAnyRole($user, self::NAMES_INSPECCION)
-            || $this->hasAnyRole($user, self::NAMES_RADICACION);
+        return $user->isActive() && $user->isRegular();
     }
 
     /**
