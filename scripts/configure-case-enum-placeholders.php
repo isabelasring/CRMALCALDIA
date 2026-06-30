@@ -41,6 +41,25 @@ if (!is_array($defs) || !isset($defs['fields'])) {
     exit(1);
 }
 
+/** Campos opcionales hasta definir obligatorios por fase (Inspección / radicación). */
+$optionalUntilRadicacion = [
+    'description',
+    'cFechaCaso',
+    'cTipoPersonaPeticionario',
+    'cDocumentoPeticionario',
+    'cNombrePeticionario',
+    'cTelefonoPeticionario',
+    'cCanalDeReportePeticionario',
+];
+
+foreach ($optionalUntilRadicacion as $fieldName) {
+    if (!isset($defs['fields'][$fieldName]) || !is_array($defs['fields'][$fieldName])) {
+        continue;
+    }
+
+    $defs['fields'][$fieldName]['required'] = false;
+}
+
 foreach ($defs['fields'] as $name => &$field) {
     if (($field['type'] ?? '') !== 'enum') {
         continue;

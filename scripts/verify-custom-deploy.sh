@@ -60,6 +60,18 @@ check_file "Helper radicacion-fields" \
 
 check_file "Helper inspeccion-case-flow" \
   "$CLIENT/src/helpers/inspeccion-case-flow.js" \
+  "hideAsignacionPanel" || errors=$((errors + 1))
+
+check_file "Defaults Recibida/Remitido al crear" \
+  "$CUSTOM/Tools/CaseObj/CaseCreateDefaultsService.php" \
+  "cRecibidaPorId" || errors=$((errors + 1))
+
+check_file "Validacion persona solo tras radicado" \
+  "$CUSTOM/Hooks/CaseObj/ValidatePersonaTipoOnSave.php" \
+  "isRadicadoCompleto" || errors=$((errors + 1))
+
+check_file "Helper inspeccion-case-flow (radicado)" \
+  "$CLIENT/src/helpers/inspeccion-case-flow.js" \
   "lockRadicadoFields" || errors=$((errors + 1))
 
 check_file "Perfil API AlcaldiaUserProfile" \
