@@ -38,4 +38,9 @@ class CasePartyNameHelper
             $entity->get('cTipoPersonaPeticionario')
         );
     }
+
+    public static function hasPeticionarioName(Entity $entity): bool
+    {
+        return self::getPeticionarioFullName($entity) !== '';
+    }
 }

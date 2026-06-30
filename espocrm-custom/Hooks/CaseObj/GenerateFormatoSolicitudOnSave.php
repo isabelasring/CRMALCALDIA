@@ -5,6 +5,7 @@ namespace Espo\Custom\Hooks\CaseObj;
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\InjectableFactory;
 use Espo\Custom\Tools\CaseObj\CasePartyNameHelper;
+use Espo\Custom\Tools\CaseObj\CaseRadicadoHelper;
 use Espo\Custom\Tools\CaseObj\FormatoSolicitudAttacher;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
@@ -84,9 +85,6 @@ class GenerateFormatoSolicitudOnSave implements AfterSave
 
     private function isPostRadicado(Entity $entity): bool
     {
-        $numero = trim((string) $entity->get('cNumeroRadicado'));
-        $expediente = trim((string) $entity->get('cExpediente'));
-
-        return $numero !== '' && $expediente !== '';
+        return CaseRadicadoHelper::isRadicadoCompleto($entity);
     }
 }

@@ -4,6 +4,7 @@ namespace Espo\Custom\Hooks\ActaVisita;
 
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\InjectableFactory;
+use Espo\Custom\Tools\CaseObj\CaseRadicadoHelper;
 use Espo\Custom\Tools\CaseObj\ExcelAlcaldiaExporter;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
@@ -63,10 +64,7 @@ class ExportActaVisitaExcelOnSave implements AfterSave
             return;
         }
 
-        $numero = trim((string) $case->get('cNumeroRadicado'));
-        $expediente = trim((string) $case->get('cExpediente'));
-
-        if ($numero === '' || $expediente === '') {
+        if (!CaseRadicadoHelper::isRadicadoCompleto($case)) {
             return;
         }
 

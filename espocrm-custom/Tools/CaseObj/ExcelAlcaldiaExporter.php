@@ -27,10 +27,7 @@ class ExcelAlcaldiaExporter
             return false;
         }
 
-        $radicado = trim((string) $case->get('cNumeroRadicado'));
-        $consecutivo = trim((string) $case->get('cExpediente'));
-
-        if ($radicado === '' && $consecutivo === '') {
+        if (!CaseRadicadoHelper::isRadicadoCompleto($case)) {
             return false;
         }
 

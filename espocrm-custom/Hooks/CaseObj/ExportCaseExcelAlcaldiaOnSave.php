@@ -5,12 +5,13 @@ namespace Espo\Custom\Hooks\CaseObj;
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\InjectableFactory;
 use Espo\Custom\Tools\CaseObj\CasePartyNameHelper;
+use Espo\Custom\Tools\CaseObj\CaseRadicadoHelper;
 use Espo\Custom\Tools\CaseObj\ExcelAlcaldiaExporter;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Actualiza excelAlcaldia.xlsx al guardar un caso radicado (radicado + expediente).
+ * Actualiza excelAlcaldia.xlsx solo cuando el caso tiene radicado y expediente válidos (tras radicación).
  */
 class ExportCaseExcelAlcaldiaOnSave implements AfterSave
 {
@@ -107,9 +108,6 @@ class ExportCaseExcelAlcaldiaOnSave implements AfterSave
 
     private function isPostRadicado(Entity $entity): bool
     {
-        $numero = trim((string) $entity->get('cNumeroRadicado'));
-        $expediente = trim((string) $entity->get('cExpediente'));
-
-        return $numero !== '' && $expediente !== '';
+        return CaseRadicadoHelper::isRadicadoCompleto($entity);
     }
 }
