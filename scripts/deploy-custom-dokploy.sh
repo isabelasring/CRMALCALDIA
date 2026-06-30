@@ -13,7 +13,7 @@ CLIENT_SOURCE="$REPO_ROOT/espocrm-custom/files/client/custom"
 SCRIPTS_SOURCE="$REPO_ROOT/scripts"
 FORMATOS_SOURCE="$REPO_ROOT/formatos"
 EXPORTS_SOURCE="$REPO_ROOT/exports"
-EXCEL_SOURCE="$REPO_ROOT/excelAlcaldia.xlsx"
+EXCEL_SOURCE="$REPO_ROOT/exports/excelAlcaldia.xlsx"
 
 CUSTOM_TARGET="$APP_ROOT/custom/Espo/Custom"
 CLIENT_TARGET="$APP_ROOT/client/custom"
@@ -144,15 +144,11 @@ require_path "$CLIENT_SOURCE" "client custom source"
 cp -R "$CLIENT_SOURCE/." "$CLIENT_TARGET/"
 
 if [ -f "$EXCEL_SOURCE" ]; then
-  echo "Copying excelAlcaldia.xlsx..."
-  mkdir -p "$APP_ROOT/data/exports"
-  cp "$EXCEL_SOURCE" "$APP_ROOT/data/exports/excelAlcaldia.xlsx"
-elif [ -d "$EXPORTS_SOURCE" ] && [ -f "$EXPORTS_SOURCE/excelAlcaldia.xlsx" ]; then
   echo "Copying exports/excelAlcaldia.xlsx..."
   mkdir -p "$APP_ROOT/data/exports"
-  cp "$EXPORTS_SOURCE/excelAlcaldia.xlsx" "$APP_ROOT/data/exports/excelAlcaldia.xlsx"
+  cp "$EXCEL_SOURCE" "$APP_ROOT/data/exports/excelAlcaldia.xlsx"
 else
-  echo "WARNING: excelAlcaldia.xlsx not found in repo root or exports/."
+  echo "WARNING: exports/excelAlcaldia.xlsx not found."
 fi
 
 echo "Checking runtime packages..."

@@ -3,7 +3,7 @@
 /**
  * Borra TODOS los datos operativos: casos, contactos, usuarios, roles, equipos, etc.
  * Conserva solo configuración del sistema (layouts, plantillas, jobs, moneda, integraciones).
- * Tras el deploy se recrea únicamente el usuario admin (seed-admin-user.php).
+ * Tras el deploy se recrea únicamente el usuario admin (ensure-admin-login.php).
  *
  * Automático en deploy. Forzar: ESPO_WIPE_BUSINESS_DATA=1
  */

@@ -11,12 +11,9 @@ dump-espocrm-*.sql
 Untitled
 *.drawio
 
-# Documentación: versionar README e índices; ignorar notas sueltas en raíz
+# Documentación: solo README raíz
 *.md
 !README.md
-!docs/**/*.md
-!scripts/README.md
-!espocrm-custom/README.md
 
 # Artefactos de desarrollo / runtime
 __pycache__/

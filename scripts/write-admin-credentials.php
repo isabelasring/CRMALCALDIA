@@ -2,7 +2,7 @@
 
 /**
  * Guarda credenciales admin en data/.alcaldia-admin-credentials.json
- * para que seed-admin-user.php siempre las encuentre (Dokploy / .env).
+ * para que ensure-admin-login.php siempre las encuentre (Dokploy / .env).
  */
 
 require_once __DIR__ . '/includes/admin-credentials.php';

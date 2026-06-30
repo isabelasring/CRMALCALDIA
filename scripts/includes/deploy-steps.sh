@@ -12,7 +12,7 @@ DEPLOY_SETUP_STEPS=(
   "Idioma, zona horaria Bogotá y hora 24 h|configure-default-locale.php"
   "Calendario: reuniones, tareas y casos|configure-calendar-meetings-only.php"
   "Kanban de Casos (todos los usuarios)|configure-case-kanban.php"
-  "Home: tablero estándar EspoCRM|configure-user-dashboards.php"
+  "Home: tablero custom (custom:views/home)|configure-user-dashboards.php"
   "Acceso completo — menú y permisos amplios|configure-full-access-all-roles.php"
   "Documentos: plantillas oficiales (solicitud, acta, actuo)|configure-document-plantillas.php"
   "Documentos: Excel oficial (excelAlcaldia.xlsx)|configure-excel-alcaldia-document.php"
