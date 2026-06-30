@@ -93,6 +93,12 @@ ensure_admin_login() {
     echo "AVISO: ESPOCRM_ADMIN_PASSWORD vacía — define la variable en Dokploy → Environment."
     return 0
   fi
+
+  if [ ! -f "$REPO_ROOT/scripts/includes/admin-credentials.php" ]; then
+    mkdir -p /tmp/includes
+    cp "$REPO_ROOT/scripts/includes/admin-credentials.php" /tmp/includes/admin-credentials.php 2>/dev/null || true
+  fi
+
   ESPOCRM_ADMIN_USERNAME="${ESPOCRM_ADMIN_USERNAME:-admin}" \
   ESPOCRM_ADMIN_PASSWORD="${ESPOCRM_ADMIN_PASSWORD:-}" \
   php "$script" || echo "AVISO: ensure-admin-login falló — revisa ESPOCRM_ADMIN_* en Dokploy."

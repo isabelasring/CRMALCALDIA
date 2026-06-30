@@ -104,6 +104,12 @@ require_admin_credentials
 mkdir -p "$APP_ROOT/data"
 write_admin_credentials_file
 
+echo "Sincronizando usuario admin (inicio deploy)..."
+if ! run_php_script ensure-admin-login.php; then
+  echo "ERROR: ensure-admin-login falló al inicio del deploy."
+  exit 1
+fi
+
 echo "Copying backend custom..."
 mkdir -p "$CUSTOM_TARGET" "$CLIENT_TARGET" "$APP_ROOT/data"
 cp -R "$CUSTOM_SOURCE/." "$CUSTOM_TARGET/"
@@ -210,7 +216,10 @@ echo "Rebuild final..."
 (cd "$APP_ROOT" && "$PHP_BIN" command.php clear-cache)
 
 echo "Verificación final: usuario admin..."
-run_php_script ensure-admin-login.php
+if ! run_php_script ensure-admin-login.php; then
+  echo "ERROR: ensure-admin-login falló — revisa ESPOCRM_ADMIN_* en Dokploy."
+  exit 1
+fi
 
 unset ESPO_DEPLOY_BATCH
 

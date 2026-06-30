@@ -1,14 +1,15 @@
 <?php
 
 /**
- * Repara o crea el admin usando comandos nativos de EspoCRM.
- * Se ejecuta en cada arranque del contenedor y al final del deploy.
+ * Repara o crea el usuario admin con la contraseña de ESPOCRM_ADMIN_* o del JSON en data/.
+ * Se ejecuta al arrancar el contenedor y al final del deploy.
  */
 
 require_once '/var/www/html/bootstrap.php';
 require_once __DIR__ . '/includes/admin-credentials.php';
 
 use Espo\Core\Application;
+use Espo\Core\InjectableFactory;
 use Espo\ORM\EntityManager;
 
 $app = new Application();
@@ -16,83 +17,172 @@ $app->setupSystemUser();
 
 /** @var EntityManager $em */
 $em = $app->getContainer()->getByClass(EntityManager::class);
+/** @var InjectableFactory $injectableFactory */
+$injectableFactory = $app->getContainer()->getByClass(InjectableFactory::class);
 $pdo = $em->getPDO();
 
-$envUser = alcaldiaEnv('ESPOCRM_ADMIN_USERNAME', '');
+$envUser = trim(alcaldiaEnv('ESPOCRM_ADMIN_USERNAME', ''));
 $envPass = alcaldiaEnv('ESPOCRM_ADMIN_PASSWORD', '');
 
 if ($envUser !== '' && $envPass !== '') {
-    alcaldiaWriteAdminCredentialsFile(trim($envUser), $envPass);
+    alcaldiaWriteAdminCredentialsFile($envUser, $envPass);
 }
 
-$userName = alcaldiaAdminUsername();
+$userName = trim(alcaldiaAdminUsername());
 $password = alcaldiaAdminPassword();
 
 if ($userName === '' || $password === '') {
-    echo 'AVISO: sin credenciales admin (ESPOCRM_ADMIN_*). Omitiendo ensure-admin-login.' . PHP_EOL;
-    exit(0);
+    fwrite(STDERR, 'ERROR: sin credenciales admin (ESPOCRM_ADMIN_* o data/.alcaldia-admin-credentials.json).' . PHP_EOL);
+    exit(1);
 }
 
-$removeUser = static function (PDO $pdo, string $userName): void {
-    $stmt = $pdo->prepare('SELECT id FROM "user" WHERE user_name = ?');
-    $stmt->execute([$userName]);
-    $ids = $stmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
+echo "ensure-admin-login: usuario={$userName}, longitud_clave=" . strlen($password) . PHP_EOL;
 
-    foreach ($ids as $id) {
-        $quotedId = $pdo->quote((string) $id);
+$clearAuthState = static function (PDO $pdo, ?string $userId = null): void {
+    try {
+        if ($userId) {
+            $quotedId = $pdo->quote($userId);
+            $pdo->exec("DELETE FROM auth_log_record WHERE user_id = {$quotedId}");
+        } else {
+            $pdo->exec('DELETE FROM auth_log_record');
+        }
+    } catch (Throwable $exception) {
+    }
 
-        foreach (['auth_token', 'preferences', 'role_user', 'team_user', 'user_data'] as $table) {
-            try {
-                if ($table === 'preferences' || $table === 'user_data') {
-                    $pdo->exec("DELETE FROM {$table} WHERE id = {$quotedId}");
-                } else {
-                    $pdo->exec("DELETE FROM {$table} WHERE user_id = {$quotedId}");
-                }
-            } catch (Throwable $exception) {
-                // Tabla puede no existir en algunas versiones.
-            }
+    try {
+        $pdo->exec('DELETE FROM auth_token');
+    } catch (Throwable $exception) {
+    }
+};
+
+$setPasswordViaCli = static function (string $userName, string $password): bool {
+    $commandPhp = '/var/www/html/command.php';
+    $commands = [
+        ['php', $commandPhp, 'set-password', $userName],
+        ['php', $commandPhp, 'SetPassword', $userName],
+    ];
+
+    foreach ($commands as $cmd) {
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $process = @proc_open($cmd, $descriptors, $pipes, '/var/www/html');
+
+        if (!is_resource($process)) {
+            continue;
+        }
+
+        fwrite($pipes[0], $password . "\n" . $password . "\n");
+        fclose($pipes[0]);
+
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+
+        $exitCode = proc_close($process);
+
+        if ($stdout !== false && trim($stdout) !== '') {
+            echo trim($stdout) . PHP_EOL;
+        }
+
+        if ($stderr !== false && trim($stderr) !== '') {
+            echo trim($stderr) . PHP_EOL;
+        }
+
+        if ($exitCode === 0) {
+            echo 'set-password CLI: OK (' . implode(' ', array_slice($cmd, 2)) . ')' . PHP_EOL;
+
+            return true;
         }
     }
 
-    $pdo->prepare('DELETE FROM "user" WHERE user_name = ?')->execute([$userName]);
+    return false;
 };
 
-$removeUser($pdo, $userName);
+$verifyPassword = static function (PDO $pdo, InjectableFactory $injectableFactory, string $userId, string $password): bool {
+    $storedHash = (string) $pdo->query(
+        'SELECT password FROM "user" WHERE id = ' . $pdo->quote($userId)
+    )->fetchColumn();
 
-$commandPhp = '/var/www/html/command.php';
-$createCmd = 'php ' . escapeshellarg($commandPhp) . ' create-admin-user ' . escapeshellarg($userName) . ' 2>&1';
+    if (trim($storedHash) === '') {
+        return false;
+    }
 
-chdir('/var/www/html');
-exec($createCmd, $createOutput, $createCode);
+    foreach ([
+        'Espo\\Core\\Utils\\PasswordHash',
+        'Espo\\Core\\Authentication\\Password\\LegacyPasswordHash',
+        'Espo\\Core\\Authentication\\Password\\PasswordHash',
+    ] as $className) {
+        if (!class_exists($className)) {
+            continue;
+        }
 
-if ($createOutput !== []) {
-    echo implode(PHP_EOL, $createOutput) . PHP_EOL;
-}
+        try {
+            $hasher = $injectableFactory->create($className);
 
-$user = $em->getRDBRepository('User')->where(['userName' => $userName])->findOne();
+            if (method_exists($hasher, 'verify')) {
+                return (bool) $hasher->verify($password, $storedHash);
+            }
+
+            if (method_exists($hasher, 'hashVerify')) {
+                return (bool) $hasher->hashVerify($password, $storedHash);
+            }
+        } catch (Throwable $exception) {
+            continue;
+        }
+    }
+
+    return password_verify($password, $storedHash);
+};
+
+$user = $em->getRDBRepository('User')
+    ->where(['userName' => $userName])
+    ->findOne();
 
 if (!$user) {
     $user = $em->getRDBRepository('User')->getNew();
     $user->set('userName', $userName);
-    $user->set('type', 'admin');
     $user->set('firstName', 'Administrador');
     $user->set('lastName', 'Sistema');
-    echo "Fallback ORM: creando admin {$userName}" . PHP_EOL;
+    echo "Creando usuario admin «{$userName}»..." . PHP_EOL;
 }
 
 $user->set('type', 'admin');
 $user->set('name', $userName);
 $user->set('isActive', true);
+$user->set('deleted', false);
 $user->set('authMethod', null);
 $user->set('password', $password);
 
-$em->saveEntity($user);
+$em->saveEntity($user, ['skipAll' => false]);
 
-$userId = $user->getId();
+$userId = (string) $user->getId();
 
-if (!$userId) {
-    echo 'ERROR: no se pudo guardar el admin.' . PHP_EOL;
+if ($userId === '') {
+    fwrite(STDERR, 'ERROR: no se pudo guardar el admin.' . PHP_EOL);
     exit(1);
+}
+
+$clearAuthState($pdo, $userId);
+
+if (!$verifyPassword($pdo, $injectableFactory, $userId, $password)) {
+    echo 'AVISO: verificación ORM falló; intentando set-password CLI...' . PHP_EOL;
+
+    if (!$setPasswordViaCli($userName, $password)) {
+        fwrite(STDERR, 'ERROR: no se pudo fijar la contraseña del admin.' . PHP_EOL);
+        exit(1);
+    }
+
+    $clearAuthState($pdo, $userId);
+
+    if (!$verifyPassword($pdo, $injectableFactory, $userId, $password)) {
+        fwrite(STDERR, 'ERROR: la contraseña del admin no verifica tras set-password.' . PHP_EOL);
+        exit(1);
+    }
 }
 
 $prefs = $em->getEntityById('Preferences', $userId);
@@ -106,22 +196,17 @@ $prefs->set('tabList', null);
 $prefs->set('useCustomTabList', false);
 $em->saveEntity($prefs, ['skipHooks' => true]);
 
-try {
-    $pdo->exec('DELETE FROM auth_token');
-} catch (Throwable $exception) {
-}
-
 $adminCount = (int) $pdo->query(
     "SELECT COUNT(*) FROM \"user\" WHERE deleted = false AND type = 'admin' AND is_active = true"
 )->fetchColumn();
 
-$storedHash = (string) $pdo->query(
-    'SELECT password FROM "user" WHERE id = ' . $pdo->quote($userId)
+$isActive = (bool) $pdo->query(
+    'SELECT is_active FROM "user" WHERE id = ' . $pdo->quote($userId)
 )->fetchColumn();
 
-if ($adminCount < 1 || trim($storedHash) === '') {
-    echo 'ERROR: admin no quedó activo en BD.' . PHP_EOL;
+if ($adminCount < 1 || !$isActive) {
+    fwrite(STDERR, 'ERROR: admin no quedó activo en BD.' . PHP_EOL);
     exit(1);
 }
 
-echo "Admin OK: usuario «{$userName}», id={$userId}, admins_activos={$adminCount}." . PHP_EOL;
+echo "Admin OK: usuario «{$userName}», id={$userId}, admins_activos={$adminCount}, clave_verificada=si." . PHP_EOL;
