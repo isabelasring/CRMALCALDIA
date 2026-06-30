@@ -9,7 +9,7 @@ use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
 /**
- * Rol Asignación: solo puede persistir assignedUser y motivo de reasignación.
+ * Rol Asignación: solo puede persistir assignedUser y motivo de asignación.
  */
 class LimitAsignadorCaseEdit implements BeforeSave
 {

@@ -3,7 +3,6 @@ define('custom:helpers/asignador-case-flow', [
 ], function (RadicacionFields) {
 
     const BODY_CLASS = 'alcaldia-asignador-asignar-page';
-    const REASIGNACION_CLASS = 'alcaldia-reasignacion-caso';
 
     const ASIGNACION_FIELDS = [
         'assignedUser',
@@ -18,17 +17,8 @@ define('custom:helpers/asignador-case-flow', [
         return RadicacionFields.resolveHomeProfile(user) === 'asignador';
     };
 
-    const syncBodyClass = function (enabled, isReasignacion) {
+    const syncBodyClass = function (enabled) {
         document.body.classList.toggle(BODY_CLASS, enabled);
-        document.body.classList.toggle(REASIGNACION_CLASS, enabled && !!isReasignacion);
-    };
-
-    const isReasignacionCase = function (model) {
-        if (!model || model.isNew() || typeof model.getFetched !== 'function') {
-            return false;
-        }
-
-        return !!model.getFetched('assignedUserId');
     };
 
     const restoreNonAsignacionAttributes = function (model) {
@@ -65,11 +55,11 @@ define('custom:helpers/asignador-case-flow', [
         const user = recordView.getUser();
 
         if (!isAsignadorOnlyUser(user) || recordView.model.isNew() || recordView.mode === 'detail') {
-            syncBodyClass(false, false);
+            syncBodyClass(false);
             return;
         }
 
-        syncBodyClass(true, isReasignacionCase(recordView.model));
+        syncBodyClass(true);
     };
 
     const schedule = function (recordView) {
@@ -85,10 +75,6 @@ define('custom:helpers/asignador-case-flow', [
     const prepareModelForSave = function (recordView) {
         if (!isAsignadorOnlyUser(recordView.getUser())) {
             return;
-        }
-
-        if (!isReasignacionCase(recordView.model)) {
-            recordView.model.set('cMotivoReasignacion', null, {silent: true});
         }
 
         restoreNonAsignacionAttributes(recordView.model);
@@ -108,7 +94,7 @@ define('custom:helpers/asignador-case-flow', [
         });
 
         self.once('remove', function () {
-            syncBodyClass(false, false);
+            syncBodyClass(false);
         });
     };
 
