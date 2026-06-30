@@ -34,11 +34,9 @@ purge_obsolete_custom() {
     "$custom_target/Hooks/CaseObj/LimitFechaVencimientoEdit.php" \
     "$custom_target/Hooks/CaseObj/LimitPatrulleroCaseEdit.php" \
     "$custom_target/Hooks/CaseObj/LimitRadicadoFieldEdit.php" \
-    "$custom_target/Hooks/CaseObj/NotifyPatrulleroAssignment.php" \
     "$custom_target/Hooks/CaseObj/RestrictAsignadorCaseAccess.php" \
     "$custom_target/Hooks/CaseObj/SetEnProcesoOnPatrulleroAssignment.php" \
     "$custom_target/Hooks/CaseObj/SetPendienteRadicacionOnCaseCreate.php" \
-    "$custom_target/Hooks/CaseObj/SetRadicadoOnPostRadicacion.php" \
     "$custom_target/Hooks/CaseObj/ValidateSolicitudCompletaOnSave.php" \
     "$custom_target/Tools/CaseObj/LegacyCaseFieldMirror.php" \
     "$custom_target/Tools/CaseObj/CrmRegistroExcelExporter.php" \
@@ -62,7 +60,6 @@ purge_obsolete_custom() {
       "$client_target/src/helpers/inspeccion-edit-mode.js" \
       "$client_target/src/helpers/alcaldia-case-roles.js" \
       "$client_target/src/helpers/alcaldia-roles-config.js" \
-      "$client_target/src/helpers/alcaldia-notification-message.js" \
       "$client_target/src/loader/alcaldia-profile-sync.js" \
       "$client_target/src/loader/case-radicacion-flow.js" \
       "$client_target/src/loader/case-asignacion-flow.js" \

@@ -157,6 +157,46 @@ else
   echo "OK: sin TeamRoleSync obsoleto"
 fi
 
+check_file "Hook estado Radicado al radicar" \
+  "$CUSTOM/Hooks/CaseObj/SetRadicadoOnPostRadicacion.php" \
+  "STATUS_RADICADO" || errors=$((errors + 1))
+
+check_file "Hook notificación asignación patrullero" \
+  "$CUSTOM/Hooks/CaseObj/NotifyPatrulleroAssignment.php" \
+  "skipAll" || errors=$((errors + 1))
+
+check_file "Hook notificación radicado→Inspección/Asignación" \
+  "$CUSTOM/Hooks/CaseObj/NotifyInspeccionAndAsignadorOnRadicado.php" \
+  "isRadicado" || errors=$((errors + 1))
+
+if grep -q "alcaldia-notification-message.js" "$REPO_ROOT/scripts/includes/purge-obsolete-custom.sh" 2>/dev/null; then
+  echo "FALTA: purge-obsolete-custom.sh aún borra alcaldia-notification-message.js"
+  errors=$((errors + 1))
+else
+  echo "OK: purge no borra alcaldia-notification-message.js"
+fi
+
+if grep -q "NotifyPatrulleroAssignment.php" "$REPO_ROOT/scripts/includes/purge-obsolete-custom.sh" 2>/dev/null; then
+  echo "FALTA: purge-obsolete-custom.sh aún borra NotifyPatrulleroAssignment.php"
+  errors=$((errors + 1))
+else
+  echo "OK: purge no borra NotifyPatrulleroAssignment.php"
+fi
+
+if grep -q "SetRadicadoOnPostRadicacion.php" "$REPO_ROOT/scripts/includes/purge-obsolete-custom.sh" 2>/dev/null; then
+  echo "FALTA: purge-obsolete-custom.sh aún borra SetRadicadoOnPostRadicacion.php"
+  errors=$((errors + 1))
+else
+  echo "OK: purge no borra SetRadicadoOnPostRadicacion.php"
+fi
+
+if grep -q "patrullero-acta.js" "$REPO_ROOT/scripts/includes/purge-obsolete-custom.sh" 2>/dev/null; then
+  echo "FALTA: purge-obsolete-custom.sh aún borra patrullero-acta.js"
+  errors=$((errors + 1))
+else
+  echo "OK: purge no borra patrullero-acta.js"
+fi
+
 check_file "Hook notificación Inspección→Radicación" \
   "$CUSTOM/Hooks/CaseObj/NotifyRadicacionOnCaseCreated.php" \
   "isInspeccion" || errors=$((errors + 1))
