@@ -89,7 +89,17 @@ $fullScope = static function (string $scope = ''): array {
     return $perms;
 };
 
-$restrictedCaseRoles = [];
+$restrictedCaseRoles = [
+    'Inspección',
+    'Inspeccion',
+    'Radicación',
+    'Radicacion',
+    'Asignación',
+    'Asignacion',
+    'Asignador',
+    'Patrullaje',
+    'Patrullero',
+];
 
 foreach ($em->getRDBRepository('Role')->find() as $role) {
     $name = (string) $role->get('name');

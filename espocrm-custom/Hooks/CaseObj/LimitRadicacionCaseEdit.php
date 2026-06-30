@@ -14,7 +14,7 @@ use Espo\ORM\Repository\Option\SaveOptions;
  */
 class LimitRadicacionCaseEdit implements BeforeSave
 {
-    public static int $order = 5;
+    public static int $order = 25;
 
     public function __construct(
         private User $user,

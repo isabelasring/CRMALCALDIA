@@ -1,10 +1,5 @@
 {
     "itemViews": {
         "Message": "custom:views/notification/items/radicado"
-    },
-    "fields": {
-        "data": {
-            "view": "custom:views/notification/fields/container"
-        }
     }
 }

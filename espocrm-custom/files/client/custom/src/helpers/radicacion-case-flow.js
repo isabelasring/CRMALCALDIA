@@ -4,6 +4,7 @@ define('custom:helpers/radicacion-case-flow', [
 
     const BODY_CLASS = 'alcaldia-radicacion-edit-mode';
     const DETAIL_CLASS = 'alcaldia-radicacion-detail-ui';
+    const SOLO_RADICAR_CLASS = 'alcaldia-radicacion-solo-radicar';
     const PANEL_RADICACION = 'radicacionCaso';
     const EDITABLE_FIELDS = RadicacionFields.RADICADO_ALL_FIELDS;
 
@@ -114,10 +115,15 @@ define('custom:helpers/radicacion-case-flow', [
         if (recordView.mode === 'detail') {
             document.body.classList.remove(BODY_CLASS);
             document.body.classList.remove(DETAIL_CLASS);
+            document.body.classList.remove(SOLO_RADICAR_CLASS);
             return;
         }
 
-        lockNonRadicadoFields(recordView);
+        if (recordView.mode === 'edit') {
+            document.body.classList.add(SOLO_RADICAR_CLASS);
+            lockNonRadicadoFields(recordView);
+            return;
+        }
     };
 
     const schedule = function (recordView) {
@@ -146,6 +152,7 @@ define('custom:helpers/radicacion-case-flow', [
         self.once('remove', function () {
             document.body.classList.remove(BODY_CLASS);
             document.body.classList.remove(DETAIL_CLASS);
+            document.body.classList.remove(SOLO_RADICAR_CLASS);
         });
     };
 
