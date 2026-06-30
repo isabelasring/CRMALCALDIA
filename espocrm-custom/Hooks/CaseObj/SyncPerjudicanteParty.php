@@ -41,6 +41,15 @@ class SyncPerjudicanteParty implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        try {
+            $this->runBeforeSave($entity, $options);
+        } catch (\Throwable $e) {
+            // No bloquear guardado del caso si falla la sincronización con Contact/Account.
+        }
+    }
+
+    private function runBeforeSave(Entity $entity, SaveOptions $options): void
+    {
         if ($options->get('skipPerjudicantePartySync')) {
             return;
         }
@@ -110,6 +119,7 @@ class SyncPerjudicanteParty implements BeforeSave
             $this->applyCaseDataToContact($contact, $case);
             $this->entityManager->saveEntity($contact, [
                 'skipDuplicateDocumentCheck' => true,
+                'skipAll' => true,
             ]);
         }
 
@@ -130,6 +140,7 @@ class SyncPerjudicanteParty implements BeforeSave
             $this->applyCaseDataToAccount($account, $case);
             $this->entityManager->saveEntity($account, [
                 'skipDuplicateNitCheck' => true,
+                'skipAll' => true,
             ]);
         }
 

@@ -130,7 +130,7 @@ class NotifyRadicacionOnCaseCreated implements AfterSave
             ])
             ->setRelated(LinkParent::createFromEntity($entity));
 
-        $this->entityManager->saveEntity($notification);
+        $this->entityManager->saveEntity($notification, ['skipAll' => true]);
     }
 
     private function sendEmail(Entity $entity, User $notifyUser, string $label, string $recordUrl): void

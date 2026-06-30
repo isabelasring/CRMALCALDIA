@@ -163,7 +163,7 @@ class NotifyInspeccionAndAsignadorOnRadicado implements AfterSave
             ])
             ->setRelated(LinkParent::createFromEntity($entity));
 
-        $this->entityManager->saveEntity($notification);
+        $this->entityManager->saveEntity($notification, ['skipAll' => true]);
     }
 
     private function sendEmail(

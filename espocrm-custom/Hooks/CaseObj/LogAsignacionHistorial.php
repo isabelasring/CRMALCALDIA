@@ -25,6 +25,15 @@ class LogAsignacionHistorial implements AfterSave
 
     public function afterSave(Entity $entity, SaveOptions $options): void
     {
+        try {
+            $this->runAfterSave($entity, $options);
+        } catch (\Throwable $e) {
+            // No bloquear guardado del caso por fallos de historial.
+        }
+    }
+
+    private function runAfterSave(Entity $entity, SaveOptions $options): void
+    {
         if ($options->get('skipLogAsignacionHistorial')) {
             return;
         }
@@ -71,7 +80,7 @@ class LogAsignacionHistorial implements AfterSave
             ->set('motivo', $motivo !== '' ? $motivo : null)
             ->set('name', $caseLabel . ': ' . $prevName . ' → ' . $newName);
 
-        $this->entityManager->saveEntity($historial);
+        $this->entityManager->saveEntity($historial, ['skipAll' => true]);
     }
 
     private function isPostRadicado(Entity $entity): bool
