@@ -54,6 +54,14 @@ check_file "Vista record edit simplificada" \
   "$CLIENT/src/views/case/record/edit.js" \
   "persona-tipo-fields" || errors=$((errors + 1))
 
+check_file "Campo motivo reasignacion" \
+  "$CLIENT/src/views/case/fields/c-motivo-reasignacion.js" \
+  "views/fields/text" || errors=$((errors + 1))
+
+check_file "Campo numero radicado" \
+  "$CLIENT/src/views/case/fields/numero-radicado.js" \
+  "radicado-catalog" || errors=$((errors + 1))
+
 if [ -f "$REPO_ROOT/.deploy-version" ]; then
   echo "OK: Versión en imagen → $(cat "$REPO_ROOT/.deploy-version")"
 else
