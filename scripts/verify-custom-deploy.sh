@@ -66,6 +66,18 @@ check_file "Defaults Recibida/Remitido al crear" \
   "$CUSTOM/Tools/CaseObj/CaseCreateDefaultsService.php" \
   "cRecibidaPorId" || errors=$((errors + 1))
 
+check_file "PartyRegistryService (sync peticionario/perjudicante)" \
+  "$CUSTOM/Tools/Party/PartyRegistryService.php" \
+  "findContactByDocument" || errors=$((errors + 1))
+
+check_file "CasePartyNameHelper completo" \
+  "$CUSTOM/Tools/CaseObj/CasePartyNameHelper.php" \
+  "hasPerjudicanteName" || errors=$((errors + 1))
+
+check_file "Sync peticionario con skipAll" \
+  "$CUSTOM/Hooks/CaseObj/SyncPeticionarioToContact.php" \
+  "skipAll" || errors=$((errors + 1))
+
 check_file "Validacion persona solo tras radicado" \
   "$CUSTOM/Hooks/CaseObj/ValidatePersonaTipoOnSave.php" \
   "isRadicadoCompleto" || errors=$((errors + 1))
