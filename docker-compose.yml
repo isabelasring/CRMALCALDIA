@@ -23,8 +23,9 @@ services:
       context: .
       dockerfile: docker/espocrm/Dockerfile
       args:
-        # Dokploy: pasa commit corto para forzar huella nueva en cada build.
+        # Dokploy inyecta SOURCE_COMMIT; si no, usa DEPLOY_VERSION del Environment.
         DEPLOY_VERSION: ${DEPLOY_VERSION:-local}
+        SOURCE_COMMIT: ${SOURCE_COMMIT:-}
     image: crm-alcaldia/espocrm
     entrypoint: ["/usr/local/bin/entrypoint-with-deploy.sh"]
     command: ["apache2-foreground"]
@@ -42,9 +43,8 @@ services:
       ESPOCRM_SITE_URL: ${ESPOCRM_SITE_URL}
       ESPOCRM_TIME_ZONE: ${ESPOCRM_TIME_ZONE}
       ESPOCRM_WEB_SOCKET_URL: ${ESPOCRM_WEB_SOCKET_URL:-}
-      # Aplica espocrm-custom al arrancar si el código en la imagen cambió (Dokploy + local).
-      ESPO_RUN_AUTO_DEPLOY: "1"
       REPO_ROOT: /opt/bootstrap/repo
+      ESPO_RUN_AUTO_DEPLOY: "1"
     volumes:
       - espocrm:/var/www/html
     restart: always
@@ -55,8 +55,8 @@ services:
       test: ["CMD-SHELL", "pgrep -x apache2 >/dev/null || exit 1"]
       interval: 15s
       timeout: 5s
-      retries: 8
-      start_period: 120s
+      retries: 12
+      start_period: 300s
     ports:
       - "8080:80"
 

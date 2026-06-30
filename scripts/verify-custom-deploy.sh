@@ -112,9 +112,15 @@ check_file "Campo numero radicado" \
   "radicado-catalog" || errors=$((errors + 1))
 
 if [ -f "$REPO_ROOT/.deploy-version" ]; then
-  echo "OK: Versión en imagen → $(cat "$REPO_ROOT/.deploy-version")"
+  echo "OK: Versión en imagen → $(tr -d '\r\n' < "$REPO_ROOT/.deploy-version")"
 else
-  echo "AVISO: sin $REPO_ROOT/.deploy-version (rebuild imagen recomendado)"
+  echo "AVISO: sin $REPO_ROOT/.deploy-version"
+fi
+
+if [ -f "$APP_ROOT/data/.deploy-version-applied" ]; then
+  echo "OK: Versión aplicada en volumen → $(tr -d '\r\n' < "$APP_ROOT/data/.deploy-version-applied")"
+else
+  echo "AVISO: sin $APP_ROOT/data/.deploy-version-applied (auto-deploy no corrió tras último build?)"
 fi
 
 if [ -f "$STAMP_FILE" ]; then

@@ -1,9 +1,11 @@
 #!/bin/bash
-# Auto-deploy opcional (solo local). Nunca debe impedir que Apache arranque.
+# Al arrancar el contenedor: aplica espocrm-custom si el código en la imagen cambió.
+# Dokploy: push a main → Redeploy (rebuild imagen) → este script corre solo.
 set -uo pipefail
 
 REPO_ROOT="${REPO_ROOT:-/opt/bootstrap/repo}"
 STAMP_FILE="/var/www/html/data/.custom-deploy-stamp"
+DEPLOY_VERSION_FILE="/var/www/html/data/.deploy-version-applied"
 DEPLOY_SCRIPT="$REPO_ROOT/scripts/deploy-custom-dokploy.sh"
 STAMP_SCRIPT="$REPO_ROOT/scripts/includes/deploy-stamp.sh"
 
@@ -28,52 +30,100 @@ is_espocrm_installed() {
   ' 2>/dev/null || echo "0"
 }
 
-run_auto_deploy_background() {
-  if [ "${ESPO_RUN_AUTO_DEPLOY:-0}" != "1" ]; then
+read_image_deploy_version() {
+  if [ -f "$REPO_ROOT/.deploy-version" ]; then
+    tr -d '\r\n' < "$REPO_ROOT/.deploy-version"
     return 0
   fi
 
-  (
-    if [ ! -f "$DEPLOY_SCRIPT" ]; then
-      echo "Auto-deploy: no se encontró $DEPLOY_SCRIPT"
-      exit 0
-    fi
-
-    if [ "$(is_espocrm_installed)" != "1" ]; then
-      echo "Auto-deploy: EspoCRM aún no está instalado."
-      exit 0
-    fi
-
-    if [ "${ESPO_FORCE_AUTO_DEPLOY:-0}" != "1" ] && command -v deploy_stamp_compute >/dev/null 2>&1; then
-      new_stamp="$(deploy_stamp_compute)"
-      current_stamp=""
-
-      if [ -f "$STAMP_FILE" ]; then
-        current_stamp="$(cat "$STAMP_FILE")"
-      fi
-
-      if [ -n "$new_stamp" ] && [ "$new_stamp" = "$current_stamp" ]; then
-        echo "Auto-deploy: sin cambios (omitido). Huella=$current_stamp"
-        if [ -f "$REPO_ROOT/.deploy-version" ]; then
-          echo "Auto-deploy: imagen .deploy-version=$(cat "$REPO_ROOT/.deploy-version")"
-        fi
-        exit 0
-      fi
-    fi
-
-    echo "==> Auto-deploy CRM Alcaldía (en segundo plano)... huella_nueva=$new_stamp huella_actual=${current_stamp:-ninguna}"
-    if bash "$DEPLOY_SCRIPT"; then
-      if command -v deploy_stamp_write >/dev/null 2>&1; then
-        deploy_stamp_write "$STAMP_FILE"
-      fi
-      echo "==> Auto-deploy completado."
-    else
-      echo "AVISO: auto-deploy falló; el CRM sigue en línea con la versión anterior."
-    fi
-  ) &
+  echo "unknown"
 }
 
-run_auto_deploy_background
+deploy_version_changed() {
+  local image_version applied_version
+
+  image_version="$(read_image_deploy_version)"
+  applied_version=""
+
+  if [ -f "$DEPLOY_VERSION_FILE" ]; then
+    applied_version="$(tr -d '\r\n' < "$DEPLOY_VERSION_FILE")"
+  fi
+
+  if [ "$image_version" != "$applied_version" ]; then
+    echo "Auto-deploy: versión imagen=$image_version aplicada=${applied_version:-ninguna}"
+    return 0
+  fi
+
+  return 1
+}
+
+write_deploy_version_applied() {
+  mkdir -p "$(dirname "$DEPLOY_VERSION_FILE")"
+  read_image_deploy_version > "$DEPLOY_VERSION_FILE"
+  chown www-data:www-data "$DEPLOY_VERSION_FILE" 2>/dev/null || true
+}
+
+run_auto_deploy_if_needed() {
+  # Por defecto activo (Dockerfile ENV). Desactivar solo con ESPO_RUN_AUTO_DEPLOY=0
+  if [ "${ESPO_RUN_AUTO_DEPLOY:-1}" != "1" ]; then
+    echo "Auto-deploy: desactivado (ESPO_RUN_AUTO_DEPLOY=0)."
+    return 0
+  fi
+
+  if [ ! -f "$DEPLOY_SCRIPT" ]; then
+    echo "Auto-deploy: no se encontró $DEPLOY_SCRIPT"
+    return 0
+  fi
+
+  if [ "$(is_espocrm_installed)" != "1" ]; then
+    echo "Auto-deploy: EspoCRM aún no está instalado (se aplicará con espocrm-init)."
+    return 0
+  fi
+
+  local new_stamp="" current_stamp="" should_deploy=0
+
+  if [ "${ESPO_FORCE_AUTO_DEPLOY:-0}" = "1" ]; then
+    should_deploy=1
+  elif deploy_version_changed; then
+    should_deploy=1
+  elif command -v deploy_stamp_compute >/dev/null 2>&1; then
+    new_stamp="$(deploy_stamp_compute)"
+    current_stamp=""
+
+    if [ -f "$STAMP_FILE" ]; then
+      current_stamp="$(tr -d '\r\n' < "$STAMP_FILE")"
+    fi
+
+    if [ -z "$new_stamp" ] || [ "$new_stamp" != "$current_stamp" ]; then
+      should_deploy=1
+      echo "Auto-deploy: huella nueva=$new_stamp actual=${current_stamp:-ninguna}"
+    fi
+  else
+    should_deploy=1
+  fi
+
+  if [ "$should_deploy" != "1" ]; then
+    echo "Auto-deploy: sin cambios (omitido). Huella=${current_stamp:-$(cat "$STAMP_FILE" 2>/dev/null || echo '?')}"
+    if [ -f "$REPO_ROOT/.deploy-version" ]; then
+      echo "Auto-deploy: imagen .deploy-version=$(read_image_deploy_version)"
+    fi
+    return 0
+  fi
+
+  echo "==> Auto-deploy CRM Alcaldía (sincronizando custom antes de servir tráfico)..."
+  if bash "$DEPLOY_SCRIPT"; then
+    if command -v deploy_stamp_write >/dev/null 2>&1; then
+      deploy_stamp_write "$STAMP_FILE"
+    fi
+    write_deploy_version_applied
+    echo "==> Auto-deploy completado."
+  else
+    echo "ERROR: auto-deploy falló — revisa logs de deploy-custom-dokploy.sh"
+    exit 1
+  fi
+}
+
+run_auto_deploy_if_needed
 
 ensure_admin_login() {
   if [ "$(is_espocrm_installed)" != "1" ]; then

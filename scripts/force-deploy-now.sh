@@ -1,7 +1,6 @@
 #!/bin/bash
-# Fuerza deploy del custom en el contenedor (Dokploy / Docker).
-# Uso en el servidor:
-#   docker exec espocrm bash /opt/bootstrap/repo/scripts/force-deploy-now.sh
+# Fuerza deploy del custom (solo diagnóstico; en producción basta Redeploy en Dokploy).
+# Uso: docker exec espocrm bash /opt/bootstrap/repo/scripts/force-deploy-now.sh
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT:-/opt/bootstrap/repo}"

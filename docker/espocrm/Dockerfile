@@ -18,16 +18,27 @@ RUN apt-get update \
 RUN mkdir -p /opt/bootstrap/repo
 
 ARG DEPLOY_VERSION=unknown
-RUN echo "${DEPLOY_VERSION}" > /opt/bootstrap/repo/.deploy-version
+ARG SOURCE_COMMIT=
 
 COPY espocrm-custom /opt/bootstrap/repo/espocrm-custom
 COPY scripts /opt/bootstrap/repo/scripts
 COPY formatos /opt/bootstrap/repo/formatos
 COPY sql /opt/bootstrap/repo/sql
-RUN mkdir -p /opt/bootstrap/repo/exports
+COPY .deploy-version /opt/bootstrap/repo/.deploy-version
+RUN mkdir -p /opt/bootstrap/repo/exports \
+    && if [ -n "${SOURCE_COMMIT}" ]; then \
+         printf '%s\n' "${SOURCE_COMMIT}" > /opt/bootstrap/repo/.deploy-version; \
+       elif [ "${DEPLOY_VERSION}" != "unknown" ] && [ "${DEPLOY_VERSION}" != "local" ]; then \
+         printf '%s\n' "${DEPLOY_VERSION}" > /opt/bootstrap/repo/.deploy-version; \
+       fi
+
 COPY docker/espocrm/run-custom-init.sh /usr/local/bin/run-custom-init.sh
 COPY docker/espocrm/entrypoint-with-deploy.sh /usr/local/bin/entrypoint-with-deploy.sh
 COPY docker/espocrm/apache-websocket-proxy.conf /etc/apache2/conf-available/websocket-proxy.conf
 RUN a2enconf websocket-proxy
 
 RUN chmod +x /usr/local/bin/run-custom-init.sh /usr/local/bin/entrypoint-with-deploy.sh
+
+# Producción: auto-deploy activo sin variables extra en Dokploy.
+ENV REPO_ROOT=/opt/bootstrap/repo
+ENV ESPO_RUN_AUTO_DEPLOY=1
