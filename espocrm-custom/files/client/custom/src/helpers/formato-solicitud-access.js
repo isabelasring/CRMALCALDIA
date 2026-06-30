@@ -1,17 +1,23 @@
-define('custom:helpers/formato-solicitud-access', [
-    'custom:helpers/post-radicacion-fields',
-], function (PostRadicacionFields) {
+define('custom:helpers/formato-solicitud-access', [], function () {
+
+    const isCasePostRadicado = function (model) {
+        if (!model) {
+            return false;
+        }
+
+        return !!String(model.get('cNumeroRadicado') || '').trim();
+    };
 
     const canDownloadFormatoSolicitud = function (user, model) {
         if (!user || !model) {
             return false;
         }
 
-        return PostRadicacionFields.isCasePostRadicado(model);
+        return isCasePostRadicado(model);
     };
 
     const isFormatoSolicitudHabilitado = function (model) {
-        return PostRadicacionFields.isCasePostRadicado(model);
+        return isCasePostRadicado(model);
     };
 
     const requiresActaDiligenciada = function () {

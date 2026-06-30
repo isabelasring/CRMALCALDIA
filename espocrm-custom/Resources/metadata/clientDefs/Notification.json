@@ -1,7 +1,4 @@
 {
-    "itemViews": {
-        "Message": "custom:views/notification/items/radicado"
-    },
     "views": {
         "panel": "custom:views/notification/panel"
     },

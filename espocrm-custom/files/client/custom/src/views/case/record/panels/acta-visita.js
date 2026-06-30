@@ -1,10 +1,8 @@
 define('custom:views/case/record/panels/acta-visita', [
     'views/record/panels/side',
-    'custom:helpers/patrullero-acta',
-    'custom:helpers/radicacion-fields',
     'custom:helpers/acta-visita-modal',
     'custom:helpers/acta-visita-case-status',
-], function (Dep, PatrulleroActa, RadicacionFields, ActaVisitaModal, ActaVisitaCaseStatus) {
+], function (Dep, ActaVisitaModal, ActaVisitaCaseStatus) {
 
     return Dep.extend({
 
@@ -33,6 +31,22 @@ define('custom:views/case/record/panels/acta-visita', [
             this.bindButton();
         },
 
+        canManageActa: function () {
+            const user = this.getUser();
+
+            if (!user) {
+                return false;
+            }
+
+            if (user.isAdmin && user.isAdmin()) {
+                return true;
+            }
+
+            const acl = this.getAcl();
+
+            return acl.check('ActaVisita', 'edit') || acl.check('ActaVisita', 'create');
+        },
+
         loadActaState: function () {
             const user = this.getUser();
 
@@ -51,18 +65,15 @@ define('custom:views/case/record/panels/acta-visita', [
 
             const self = this;
 
-            RadicacionFields.ensureProfile().then(function () {
-                ActaVisitaCaseStatus.fetchActaForCase(self.model.id, user, self.model).then((acta) => {
-                    self.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
-                    self.showButton = PatrulleroActa.shouldShowActaVisitaButton(user, self.model, acta)
-                        || PatrulleroActa.canPrintManualActa(user, self.model);
+            ActaVisitaCaseStatus.fetchActaForCase(self.model.id, user, self.model).then((acta) => {
+                self.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
+                self.showButton = self.canManageActa();
 
-                    if (self.isRendered()) {
-                        self.reRender();
-                        self.togglePanel();
-                        self.bindButton();
-                    }
-                });
+                if (self.isRendered()) {
+                    self.reRender();
+                    self.togglePanel();
+                    self.bindButton();
+                }
             });
         },
 
@@ -90,13 +101,9 @@ define('custom:views/case/record/panels/acta-visita', [
         },
 
         data: function () {
-            let unavailableReason = PatrulleroActa.getUnavailableReason(
-                this.getUser(),
-                this.model,
-                null
-            );
+            let unavailableReason = '';
 
-            if (!this.showButton && !unavailableReason) {
+            if (!this.showButton) {
                 unavailableReason = this.translate('actaVisitaPanelUnavailable', 'Case');
             }
 

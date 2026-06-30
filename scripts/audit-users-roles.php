@@ -2,14 +2,11 @@
 
 /**
  * Audita usuarios activos: roles asignados y permiso de lectura en Case.
- *
- * docker exec espocrm php /tmp/audit-users-roles.php
  */
 
 require_once '/var/www/html/bootstrap.php';
 
 use Espo\Core\Application;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\ORM\EntityManager;
 
 $app = new Application();
@@ -18,7 +15,6 @@ $app->setupSystemUser();
 /** @var EntityManager $em */
 $em = $app->getContainer()->getByClass(EntityManager::class);
 
-$profile = new AlcaldiaUserProfile($em);
 $hasWarnings = false;
 
 $users = $em->getRDBRepository('User')
@@ -42,14 +38,11 @@ foreach ($users as $user) {
         }
     }
 
-    $homeProfile = $profile->resolveHomeProfile($user);
     $rolesLabel = $roleNames === [] ? '(sin roles)' : implode(', ', $roleNames);
 
-    echo "{$userName}: roles={$rolesLabel}; home={$homeProfile}\n";
+    echo "{$userName}: roles={$rolesLabel}\n";
 
-    if ($roleNames === [] && !$user->isAdmin()) {
-        echo "  AVISO: sin rol operativo — no podrá leer casos (API 403).\n";
-        $hasWarnings = true;
+    if ($user->isAdmin()) {
         continue;
     }
 
@@ -68,7 +61,7 @@ foreach ($users as $user) {
 
         $caseRead = is_array($data) ? ($data['Case']['read'] ?? 'no') : 'no';
 
-        if ($caseRead !== 'all' && !$user->isAdmin()) {
+        if ($caseRead !== 'all') {
             echo "  AVISO: rol {$roleName} sin lectura Case=all (actual: {$caseRead}).\n";
             $hasWarnings = true;
         }
@@ -76,7 +69,7 @@ foreach ($users as $user) {
 }
 
 if ($hasWarnings) {
-    echo "\nAVISO: hay usuarios sin rol o permisos incompletos. Asigne rol en Administración → Usuarios.\n";
+    echo "\nAVISO: hay usuarios con permisos incompletos. Ejecute configure-alcaldia-no-roles-mode.php.\n";
 }
 
-echo "\nAuditoría de roles finalizada.\n";
+echo "\nAuditoría de usuarios finalizada.\n";

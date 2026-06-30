@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Aplica permisos amplios (tipo admin) cuando AlcaldiaRolesConfig::DISABLED = true.
+ * Aplica permisos amplios para todos los roles (modo admin hasta nuevo flujo).
  * Se ejecuta automáticamente al final de cada deploy (Dokploy / local).
  */
 
@@ -11,11 +11,6 @@ require_once __DIR__ . '/includes/alcaldia-deploy-roles.php';
 use Espo\Core\Application;
 use Espo\Core\Utils\Metadata;
 use Espo\ORM\EntityManager;
-
-if (!alcaldiaDeployRolesDisabled()) {
-    echo 'Modo con roles activo — configure-alcaldia-no-roles-mode omitido.' . PHP_EOL;
-    exit(0);
-}
 
 $app = new Application();
 $app->setupSystemUser();

@@ -1,8 +1,7 @@
 define('custom:views/case/fields/expediente', [
     'views/fields/varchar',
-    'custom:helpers/radicacion-fields',
     'custom:helpers/radicado-catalog',
-], function (Dep, RadicacionFields, RadicadoCatalog) {
+], function (Dep, RadicadoCatalog) {
 
     return Dep.extend({
 
@@ -14,7 +13,6 @@ define('custom:views/case/fields/expediente', [
         toggleVisibility: function () {
             const show = !(
                 this.isEditMode()
-                && RadicacionFields.isRadicacionUser(this.getUser())
                 && RadicadoCatalog.isModoAutomatico(this.model.get('cRadicadoModo'))
             );
 
@@ -24,7 +22,6 @@ define('custom:views/case/fields/expediente', [
         fetch: function () {
             if (
                 this.isEditMode()
-                && RadicacionFields.isRadicacionUser(this.getUser())
                 && RadicadoCatalog.isModoAutomatico(this.model.get('cRadicadoModo'))
             ) {
                 const data = {};

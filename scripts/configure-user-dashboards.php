@@ -10,7 +10,6 @@
 require_once '/var/www/html/bootstrap.php';
 
 use Espo\Core\Application;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\EntityManager;
 
@@ -109,84 +108,25 @@ function buildDashboard(array $widgets): array
 
 function detectProfile(EntityManager $em, User $user): string
 {
-    return (new AlcaldiaUserProfile($em))->resolveHomeProfile($user);
+    return $user->isAdmin() ? 'admin' : 'default';
 }
 
 function profileWidgets(string $profile, string $userId): array
 {
-    return match ($profile) {
-        'radicacion' => [
-            [
-                'prefix' => 'tablero',
-                'name' => 'Iframe',
-                'height' => 9,
-                'options' => iframeOptions('Tablero de control', '/client/custom/dashboard.html'),
-            ],
-            [
-                'prefix' => 'casos',
-                'name' => 'Cases',
-                'height' => 4,
-                'options' => casesOptions('Pendientes de radicación', 'pendienteRadicacion', 15),
-            ],
+    return [
+        [
+            'prefix' => 'tablero',
+            'name' => 'Iframe',
+            'height' => 9,
+            'options' => iframeOptions('Tablero de control', '/client/custom/dashboard.html'),
         ],
-        'asignador' => [
-            [
-                'prefix' => 'tablero',
-                'name' => 'Iframe',
-                'height' => 9,
-                'options' => iframeOptions('Tablero de control', '/client/custom/dashboard.html'),
-            ],
-            [
-                'prefix' => 'asignar',
-                'name' => 'Cases',
-                'height' => 3,
-                'options' => casesOptions('Pendientes de asignación', 'pendienteAsignacion', 10),
-            ],
-            [
-                'prefix' => 'seguimiento',
-                'name' => 'Cases',
-                'height' => 3,
-                'options' => casesOptions('En seguimiento', 'enSeguimiento', 10),
-            ],
+        [
+            'prefix' => 'casos',
+            'name' => 'Cases',
+            'height' => 4,
+            'options' => casesOptions('Casos', 'all', 15),
         ],
-        'patrullero' => [
-            [
-                'prefix' => 'tablero',
-                'name' => 'Iframe',
-                'height' => 4,
-                'options' => iframeOptions(
-                    'Mi tablero',
-                    '/client/custom/dashboard.html?assignedUserId=' . rawurlencode($userId)
-                ),
-            ],
-            [
-                'prefix' => 'casos',
-                'name' => 'Cases',
-                'height' => 3,
-                'options' => casesOptions('Mis casos asignados', 'misCasos', 15),
-            ],
-        ],
-        default => [
-            [
-                'prefix' => 'tablero',
-                'name' => 'Iframe',
-                'height' => 9,
-                'options' => iframeOptions('Tablero de control', '/client/custom/dashboard.html'),
-            ],
-            [
-                'prefix' => 'casos',
-                'name' => 'Cases',
-                'height' => 3,
-                'options' => casesOptions('Todos los casos', 'todos', 15),
-            ],
-            [
-                'prefix' => 'seguimiento',
-                'name' => 'Cases',
-                'height' => 3,
-                'options' => casesOptions('En seguimiento', 'enSeguimiento', 10),
-            ],
-        ],
-    };
+    ];
 }
 
 $users = $em->getRDBRepository('User')
@@ -256,7 +196,7 @@ foreach ($users as $user) {
     $prefs->set('dashboardLocked', false);
     $em->saveEntity($prefs);
 
-    echo "{$userName} → perfil {$profile} (home custom)\n";
+    echo "{$userName} → dashboard estándar\n";
 }
 
 $statePath = '/var/www/html/data/state.php';

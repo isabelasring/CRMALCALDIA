@@ -1,7 +1,5 @@
 #!/bin/bash
-# Comprueba que el custom de Radicación llegó al contenedor EspoCRM.
-# Uso local:  bash scripts/verify-custom-deploy.sh
-# En servidor: docker exec espocrm bash /opt/bootstrap/repo/scripts/verify-custom-deploy.sh
+# Comprueba que el custom base llegó al contenedor EspoCRM.
 set -euo pipefail
 
 APP_ROOT="${APP_ROOT:-/var/www/html}"
@@ -34,33 +32,27 @@ errors=0
 echo "==> Verificación deploy custom (APP_ROOT=$APP_ROOT)"
 echo ""
 
-check_file "Interruptor roles desactivados (cliente)" \
-  "$CLIENT/src/helpers/alcaldia-roles-config.js" \
-  "ROLES_DISABLED = true" || errors=$((errors + 1))
-
-check_file "Interruptor roles desactivados (servidor)" \
-  "$CUSTOM/Tools/User/AlcaldiaRolesConfig.php" \
-  "DISABLED = true" || errors=$((errors + 1))
-
 check_file "scriptList sin flujos por rol" \
   "$CUSTOM/Resources/metadata/app/client.json" \
   "theme-login.js" || errors=$((errors + 1))
 
-if grep -q "case-radicacion-flow.js" "$CUSTOM/Resources/metadata/app/client.json" 2>/dev/null; then
-  echo "ADVERTENCIA: case-radicacion-flow.js sigue en scriptList (modo roles desactivado)"
+if grep -q "case-radicacion-flow.js\|alcaldia-profile-sync.js\|case-create-guard.js" "$CUSTOM/Resources/metadata/app/client.json" 2>/dev/null; then
+  echo "FALTA: scriptList aún referencia loaders de flujo por roles"
+  errors=$((errors + 1))
+else
+  echo "OK: scriptList sin loaders de flujo por roles"
 fi
 
-check_file "Layout radicar" \
-  "$CUSTOM/Resources/layouts/Case/radicar.json" \
-  "radicacionCaso" || errors=$((errors + 1))
+if [ -f "$CUSTOM/Resources/metadata/app/clientRoutes.json" ] && grep -q "radicar\|asignar" "$CUSTOM/Resources/metadata/app/clientRoutes.json" 2>/dev/null; then
+  echo "FALTA: clientRoutes.json aún define rutas radicar/asignar"
+  errors=$((errors + 1))
+else
+  echo "OK: sin rutas radicar/asignar"
+fi
 
-check_file "Edit case (modo radicación)" \
+check_file "Vista record edit simplificada" \
   "$CLIENT/src/views/case/record/edit.js" \
-  "isRadicacionOnlyEdit" || errors=$((errors + 1))
-
-check_file "Controller case (edit?radicar=1)" \
-  "$CLIENT/src/controllers/case.js" \
-  "openRadicarScreen" || errors=$((errors + 1))
+  "persona-tipo-fields" || errors=$((errors + 1))
 
 if [ -f "$REPO_ROOT/.deploy-version" ]; then
   echo "OK: Versión en imagen → $(cat "$REPO_ROOT/.deploy-version")"
@@ -84,8 +76,7 @@ fi
 echo ""
 if [ "$errors" -gt 0 ]; then
   echo "RESULTADO: $errors comprobación(es) fallida(s)."
-  echo "En Dokploy: haz REBUILD de la imagen (no solo restart) y revisa logs de espocrm / espocrm-init."
   exit 1
 fi
 
-echo "RESULTADO: custom de Radicación presente en el contenedor."
+echo "RESULTADO: custom base presente (modo admin, sin flujo por roles)."

@@ -2,17 +2,19 @@
 
 Extensión de EspoCRM para el CRM Alcaldía. Se despliega a `custom/Espo/Custom/` en el contenedor.
 
+## Modo actual
+
+**Sin flujo por roles.** La lógica de Inspección / Radicación / Patrullero / Asignador fue eliminada. El CRM conserva entidades, campos, formatos y paneles; el acceso es vía permisos amplios (admin) hasta implementar el nuevo flujo.
+
 ## Backend (PHP)
 
 ```
 Hooks/              # Eventos al guardar/crear entidades
-  CaseObj/          # Casos: radicado, actas, notificaciones, partes
+  CaseObj/          # Casos: radicado, formatos, partes, Excel
   ActaVisita/       # Generación de formatos y Excel de acta
-  User/             # Sincronización equipos ↔ roles
 Tools/              # Lógica de negocio reutilizable
   CaseObj/          # Radicado, cronograma, alertas, formatos, Excel
   Party/            # Personas naturales/jurídicas y expediente
-  User/             # Perfiles por rol (AlcaldiaUserProfile)
 Controllers/        # Endpoints API extra (Case/action/...)
 Classes/            # Filtros, record hooks
 Entities/           # Entidades custom (ActaVisita, ComunicacionCaso, ...)
@@ -30,13 +32,13 @@ Resources/
 ```
 files/client/custom/
   src/
-    views/          # Vistas extendidas (case, acta-visita, home, ...)
-    helpers/        # Lógica compartida por rol (radicación, actas, ...)
-    loader/         # Parches de carga (i18n, listas)
+    views/          # Vistas extendidas (case, acta-visita, ...)
+    helpers/        # Lógica compartida (formularios, paneles, formatos)
+    loader/         # Parches de carga (i18n, tema)
   res/
     templates/      # Plantillas Handlebars
     css/            # Estilos custom
-  dashboard.js      # Tablero gerencial (Home)
+  dashboard.js      # Tablero gerencial
 ```
 
 Los módulos AMD usan el prefijo `custom:` — **no renombrar archivos** sin actualizar todas las dependencias `define(...)`.
@@ -59,9 +61,3 @@ Herramientas de desarrollo Python van en `scripts/` (raíz del repo), no aquí.
 |-----------|-----|
 | `formatos/` (repo raíz) | **Fuente versionada** — Word/Excel oficiales |
 | `files/templates/` | Copia en runtime + PDFs generados (no editar manualmente) |
-
-## Hooks de CaseObj (orden aproximado)
-
-Los hooks en `Hooks/CaseObj/` controlan radicado, permisos, notificaciones, vínculos con terceros y exportación Excel. Cada uno tiene `public static int $order` para la secuencia de ejecución.
-
-No mover ni renombrar sin probar: flujo de radicación, actas, asignación de patrullero y alertas de vencimiento.

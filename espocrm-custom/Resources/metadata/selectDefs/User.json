@@ -1,7 +1,1 @@
-{
-    "primaryFilterClassNameMap": {
-        "patrulleros": "Espo\\Custom\\Classes\\Select\\User\\PrimaryFilters\\Patrulleros",
-        "recibidores": "Espo\\Custom\\Classes\\Select\\User\\PrimaryFilters\\Recibidores",
-        "radicacion": "Espo\\Custom\\Classes\\Select\\User\\PrimaryFilters\\Radicacion"
-    }
-}
+{}

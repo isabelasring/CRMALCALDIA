@@ -2,8 +2,7 @@ define('custom:helpers/actuo-archivo-modal', [
     'helpers/record-modal',
     'custom:helpers/actuo-archivo-from-case',
     'custom:helpers/actuo-archivo-case-status',
-    'custom:helpers/inspeccion-actuo-archivo',
-], function (RecordModal, ActuoFromCase, ActuoArchivoCaseStatus, InspeccionActuoArchivo) {
+], function (RecordModal, ActuoFromCase, ActuoArchivoCaseStatus) {
 
     const RecordModalHelper = RecordModal.default || RecordModal;
 
@@ -33,6 +32,24 @@ define('custom:helpers/actuo-archivo-modal', [
         return null;
     };
 
+    const canManageActuo = function (hostView, user, caseModel) {
+        if (!user || !caseModel) {
+            return false;
+        }
+
+        if (user.isAdmin && user.isAdmin()) {
+            return true;
+        }
+
+        if (!hostView || !hostView.getAcl) {
+            return false;
+        }
+
+        const acl = hostView.getAcl();
+
+        return acl.check('ActuoArchivo', 'edit') || acl.check('ActuoArchivo', 'create');
+    };
+
     const open = function (hostView, caseModel, user, options) {
         options = options || {};
 
@@ -50,8 +67,8 @@ define('custom:helpers/actuo-archivo-modal', [
             return;
         }
 
-        if (!InspeccionActuoArchivo.shouldShowActuoArchivoButton(user, caseModel)) {
-            Espo.Ui.warning('No puede diligenciar el auto de archivo en este caso.');
+        if (!canManageActuo(host, user, caseModel)) {
+            Espo.Ui.warning('No tiene permiso para diligenciar el auto de archivo en este caso.');
 
             return;
         }

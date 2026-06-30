@@ -21,102 +21,28 @@ define('custom:views/case/detail', [
             });
         },
 
-        actionRadicarCaso: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.dispatchRadicarCase === 'function') {
-                record.dispatchRadicarCase();
-
-                return;
-            }
-
-            if (record && typeof record.actionRadicarCaso === 'function') {
-                record.actionRadicarCaso();
-            }
-        },
-
-        actionEdit: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.actionEdit === 'function') {
-                record.actionEdit();
-
-                return;
-            }
-
-            Dep.prototype.actionEdit.call(this);
-        },
-
-        actionSaveAsignacion: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.actionSaveAsignacion === 'function') {
-                record.actionSaveAsignacion();
-            }
-        },
-
-        actionCancelAsignacion: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.actionCancelAsignacion === 'function') {
-                record.actionCancelAsignacion();
-            }
-        },
-
-        actionLlenarActaVisita: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.actionLlenarActaVisita === 'function') {
-                record.actionLlenarActaVisita();
-            }
-        },
-
-        actionImprimirActaManual: function () {
-            var record = typeof this.getRecordView === 'function' ? this.getRecordView() : null;
-
-            if (record && typeof record.actionImprimirActaManual === 'function') {
-                record.actionImprimirActaManual();
-            }
-        },
-
         getCaseTitle: function () {
             return CaseRadicadoLabel.getLabel(this.model);
         },
 
         getHeader: function () {
-            var title = this.getCaseTitle();
-            var titleEl = document.createElement('span');
-
-            titleEl.classList.add('font-size-flexible', 'title');
-            titleEl.textContent = title;
-
-            if (this.model.attributes.deleted) {
-                titleEl.style.textDecoration = 'line-through';
-            }
-
-            if (this.getRecordMode && this.getRecordMode() === 'detail') {
-                titleEl.title = this.translate('clickToRefresh', 'messages');
-                titleEl.dataset.action = 'fullRefresh';
-                titleEl.style.cursor = 'pointer';
-            }
-
             var scopeLabel = this.getLanguage().translate(this.scope, 'scopeNamesPlural');
             var scopeEl = document.createElement('span');
 
             scopeEl.textContent = scopeLabel;
             scopeEl.style.userSelect = 'none';
 
-            if (!this.rootLinkDisabled) {
-                var link = document.createElement('a');
+            if (!this.options.noHeaderLinks && !this.rootLinkDisabled) {
+                var rootLink = document.createElement('a');
 
-                link.href = this.rootUrl;
-                link.classList.add('action');
-                link.dataset.action = 'navigateToRoot';
-                link.textContent = scopeLabel;
+                rootLink.href = this.rootUrl;
+                rootLink.classList.add('action');
+                rootLink.dataset.action = 'navigateToRoot';
+                rootLink.textContent = scopeLabel;
 
                 scopeEl = document.createElement('span');
                 scopeEl.style.userSelect = 'none';
-                scopeEl.appendChild(link);
+                scopeEl.appendChild(rootLink);
             }
 
             var icon = this.getHeaderIconHtml();
@@ -124,6 +50,11 @@ define('custom:views/case/detail', [
             if (icon) {
                 scopeEl.insertAdjacentHTML('afterbegin', icon);
             }
+
+            var title = this.getCaseTitle();
+            var titleEl = document.createElement('span');
+
+            titleEl.textContent = title;
 
             return this.buildHeaderHtml([scopeEl, titleEl]);
         },

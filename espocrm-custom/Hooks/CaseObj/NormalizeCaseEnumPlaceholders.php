@@ -5,8 +5,6 @@ namespace Espo\Custom\Hooks\CaseObj;
 use Espo\Core\Exceptions\BadRequest;
 use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Custom\Tools\CaseObj\InfractorUnknownHelper;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
-use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
 
@@ -45,11 +43,6 @@ class NormalizeCaseEnumPlaceholders implements BeforeSave
 
     public static int $order = 2;
 
-    public function __construct(
-        private User $user,
-        private AlcaldiaUserProfile $profile
-    ) {}
-
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
         foreach (self::ENUM_FIELDS as $field) {
@@ -65,10 +58,6 @@ class NormalizeCaseEnumPlaceholders implements BeforeSave
             }
 
             if ($value === '' && isset(self::REQUIRED_MESSAGES[$field]) && $this->needsFullSolicitud($entity)) {
-                if (!$this->isInspeccionUser()) {
-                    continue;
-                }
-
                 if (InfractorUnknownHelper::isUnknown($entity)
                     && in_array($field, InfractorUnknownHelper::SKIP_VALIDATION_FIELDS, true)) {
                     continue;
@@ -85,10 +74,5 @@ class NormalizeCaseEnumPlaceholders implements BeforeSave
         $expediente = trim((string) $entity->get('cExpediente'));
 
         return $numero === '' || $expediente === '';
-    }
-
-    private function isInspeccionUser(): bool
-    {
-        return $this->profile->isInspeccion($this->user);
     }
 }

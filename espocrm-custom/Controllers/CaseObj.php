@@ -13,22 +13,11 @@ use Espo\Custom\Tools\CaseObj\CaseTimelineService;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
 use Espo\Custom\Tools\Party\PartyRegistryService;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\Modules\Crm\Controllers\CaseObj as BaseCaseObj;
 
 class CaseObj extends BaseCaseObj
 {
-    /**
-     * GET Case/action/alcaldiaProfile
-     *
-     * @return array<string, bool>
-     */
-    public function getActionAlcaldiaProfile(Request $request): array
-    {
-        return (new AlcaldiaUserProfile($this->entityManager))->build($this->getUser());
-    }
-
     /**
      * GET Case/action/createDefaults
      *
@@ -40,10 +29,7 @@ class CaseObj extends BaseCaseObj
             throw new Forbidden();
         }
 
-        return (new CaseCreateDefaultsService(
-            $this->entityManager,
-            new AlcaldiaUserProfile($this->entityManager)
-        ))->build();
+        return (new CaseCreateDefaultsService())->build();
     }
 
     /**
@@ -259,6 +245,10 @@ class CaseObj extends BaseCaseObj
 
     private function canUseRadicadoAssistant(User $user): bool
     {
-        return (new AlcaldiaUserProfile($this->entityManager))->canEditRadicado($user);
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $this->acl->check('Case', 'edit');
     }
 }

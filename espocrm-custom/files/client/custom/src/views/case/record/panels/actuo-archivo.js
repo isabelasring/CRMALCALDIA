@@ -1,9 +1,8 @@
 define('custom:views/case/record/panels/actuo-archivo', [
     'views/record/panels/side',
-    'custom:helpers/inspeccion-actuo-archivo',
     'custom:helpers/actuo-archivo-modal',
     'custom:helpers/actuo-archivo-case-status',
-], function (Dep, InspeccionActuoArchivo, ActuoArchivoModal, ActuoArchivoCaseStatus) {
+], function (Dep, ActuoArchivoModal, ActuoArchivoCaseStatus) {
 
     return Dep.extend({
 
@@ -27,21 +26,24 @@ define('custom:views/case/record/panels/actuo-archivo', [
             this.bindButton();
         },
 
-        loadActuoState: function () {
+        canManageActuo: function () {
             const user = this.getUser();
 
-            if (!InspeccionActuoArchivo.shouldShowActuoArchivoButton(user, this.model)) {
-                this.actuoIsEditMode = false;
-
-                if (this.isRendered()) {
-                    this.reRender();
-                    this.bindButton();
-                }
-
-                return;
+            if (!user) {
+                return false;
             }
 
-            if (!this.model.id) {
+            if (user.isAdmin && user.isAdmin()) {
+                return true;
+            }
+
+            const acl = this.getAcl();
+
+            return acl.check('ActuoArchivo', 'edit') || acl.check('ActuoArchivo', 'create');
+        },
+
+        loadActuoState: function () {
+            if (!this.model.id || !this.canManageActuo()) {
                 this.actuoIsEditMode = false;
 
                 if (this.isRendered()) {
@@ -82,20 +84,14 @@ define('custom:views/case/record/panels/actuo-archivo', [
                 return;
             }
 
-            const show = InspeccionActuoArchivo.shouldShowActuoArchivoButton(
-                this.getUser(),
-                this.model
-            );
-
-            $panel.toggle(show);
+            $panel.toggle(this.canManageActuo());
         },
 
         data: function () {
-            const user = this.getUser();
-            const showButton = InspeccionActuoArchivo.shouldShowActuoArchivoButton(user, this.model);
-            let unavailableReason = InspeccionActuoArchivo.getUnavailableReason(user, this.model);
+            const showButton = this.canManageActuo();
+            let unavailableReason = '';
 
-            if (!unavailableReason) {
+            if (!showButton) {
                 unavailableReason = 'Disponible cuando el caso esté en estado Finalizado.';
             }
 

@@ -2,8 +2,7 @@ define('custom:helpers/acta-visita-modal', [
     'helpers/record-modal',
     'custom:helpers/acta-visita-from-case',
     'custom:helpers/acta-visita-case-status',
-    'custom:helpers/patrullero-acta',
-], function (RecordModal, ActaFromCase, ActaVisitaCaseStatus, PatrulleroActa) {
+], function (RecordModal, ActaFromCase, ActaVisitaCaseStatus) {
 
     const RecordModalHelper = RecordModal.default || RecordModal;
 
@@ -33,6 +32,24 @@ define('custom:helpers/acta-visita-modal', [
         return null;
     };
 
+    const canManageActa = function (hostView, user) {
+        if (!user) {
+            return false;
+        }
+
+        if (user.isAdmin && user.isAdmin()) {
+            return true;
+        }
+
+        if (!hostView || !hostView.getAcl) {
+            return false;
+        }
+
+        const acl = hostView.getAcl();
+
+        return acl.check('ActaVisita', 'edit') || acl.check('ActaVisita', 'create');
+    };
+
     const open = function (hostView, caseModel, user, options) {
         options = options || {};
 
@@ -50,6 +67,12 @@ define('custom:helpers/acta-visita-modal', [
             return;
         }
 
+        if (!canManageActa(host, user)) {
+            Espo.Ui.warning('No tiene permiso para diligenciar el acta en este caso.');
+
+            return;
+        }
+
         const helper = new RecordModalHelper();
         const afterSave = function () {
             caseModel.fetch();
@@ -60,13 +83,6 @@ define('custom:helpers/acta-visita-modal', [
         };
 
         ActaVisitaCaseStatus.fetchActaForCase(caseModel.id, user, caseModel).then(function (acta) {
-            if (!PatrulleroActa.canOpenActaVisitaModal(user, caseModel, acta)
-                && !PatrulleroActa.canPrintManualActa(user, caseModel)) {
-                Espo.Ui.warning('No puede diligenciar el acta en este caso.');
-
-                return;
-            }
-
             if (acta && acta.id) {
                 helper.showEdit(host, {
                     entityType: 'ActaVisita',

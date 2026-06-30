@@ -7,7 +7,6 @@ use Espo\Core\Hook\Hook\BeforeSave;
 use Espo\Core\InjectableFactory;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
-use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
@@ -20,8 +19,7 @@ class AutoGenerateRadicadoOnSave implements BeforeSave
     public function __construct(
         private EntityManager $entityManager,
         private InjectableFactory $injectableFactory,
-        private User $user,
-        private AlcaldiaUserProfile $profile
+        private User $user
     ) {}
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
@@ -136,6 +134,6 @@ class AutoGenerateRadicadoOnSave implements BeforeSave
 
     private function canEditRadicado(User $user): bool
     {
-        return $this->profile->canEditRadicado($user);
+        return $user->isAdmin();
     }
 }

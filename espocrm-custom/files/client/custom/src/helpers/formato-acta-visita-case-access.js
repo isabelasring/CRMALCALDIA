@@ -1,13 +1,15 @@
-define('custom:helpers/formato-acta-visita-case-access', [
-    'custom:helpers/patrullero-acta',
-], function (PatrulleroActa) {
+define('custom:helpers/formato-acta-visita-case-access', [], function () {
 
     const canDownloadFormatoActaVisitaFromCase = function (user, model) {
         if (!user || !model) {
             return false;
         }
 
-        return PatrulleroActa.canPrintManualActa(user, model);
+        if (user.isAdmin && user.isAdmin()) {
+            return true;
+        }
+
+        return !!model.id;
     };
 
     return {

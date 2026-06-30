@@ -1,8 +1,7 @@
 define('custom:helpers/acta-visita-case-status', [
     'custom:helpers/silent-ajax',
     'custom:helpers/case-fetch-cache',
-    'custom:helpers/inspeccion-acta',
-], function (SilentAjax, CaseFetchCache, InspeccionActa) {
+], function (SilentAjax, CaseFetchCache) {
 
     const POST_VISITA_STATUSES = [
         'Visita realizada',
@@ -79,10 +78,6 @@ define('custom:helpers/acta-visita-case-status', [
 
     const isVisitaRealizadaForFormatos = function (model, acta) {
         if (acta && isActaDiligenciada(acta)) {
-            return true;
-        }
-
-        if (InspeccionActa.hasPatrulleroActaRedactada(model)) {
             return true;
         }
 

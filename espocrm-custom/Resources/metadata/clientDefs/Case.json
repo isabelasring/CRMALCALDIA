@@ -3,20 +3,15 @@
     "color": "#1d8a6e",
     "nameAttribute": "cNumeroRadicado",
     "kanbanViewMode": true,
-    "controller": "custom:controllers/case",
     "views": {
         "list": "custom:views/case/list",
         "detail": "custom:views/case/detail",
-        "edit": "custom:views/case/edit",
-        "radicar": "custom:views/case/radicar",
-        "asignar": "custom:views/case/asignar"
+        "edit": "custom:views/case/edit"
     },
     "recordViews": {
         "edit": "custom:views/case/record/edit",
         "detail": "custom:views/case/record/detail",
-        "editSmall": "custom:views/case/record/edit",
-        "radicar": "custom:views/case/record/radicar-edit",
-        "asignar": "custom:views/case/record/asignar-edit"
+        "editSmall": "custom:views/case/record/edit"
     },
     "quickEditDisabled": true,
     "defaultSidePanelDisabled": true,
@@ -149,32 +144,14 @@
         "cFormatoSolicitudPdf": {
             "view": "custom:views/case/fields/formato-generado-docs"
         },
-        "cPanelActaVisita": {
-            "view": "custom:views/case/fields/acta-visita-action"
-        },
-        "status": {
-            "view": "custom:views/case/fields/status"
-        },
-        "assignedUser": {
-            "view": "custom:views/case/fields/assigned-user"
-        },
-        "cNumeroRadicado": {
-            "view": "custom:views/case/fields/numero-radicado"
-        },
-        "cExpediente": {
-            "view": "custom:views/case/fields/expediente"
-        },
         "cDireccionPeticionario": {
             "view": "custom:views/case/fields/direccion-computada"
         },
         "cDireccionPerjudicante": {
             "view": "custom:views/case/fields/direccion-computada"
         },
-        "cRecibidaPor": {
-            "primaryFilter": "recibidores"
-        },
-        "cRemitidoA": {
-            "primaryFilter": "radicacion"
+        "cExpediente": {
+            "view": "custom:views/case/fields/expediente"
         }
     }
 }

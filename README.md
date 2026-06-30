@@ -46,8 +46,8 @@ CRMALCALDIA/
 
 Ambos flujos automáticos comparten el manifiesto en `scripts/includes/deploy-steps.sh`.
 
-## Roles operativos
+## Modo actual
 
-Inspección · Radicación · Patrullero · Asignador
+El flujo por roles (Inspección, Radicación, Patrullero, Asignador) fue **eliminado** del código. El CRM opera en modo admin con permisos amplios hasta que se implemente el nuevo flujo desde cero.
 
-Tras asignar rol en Administración → Usuarios, el usuario debe cerrar sesión y volver a entrar.
+Tras desplegar, use el usuario administrador. El script `configure-alcaldia-no-roles-mode.php` aplica permisos amplios a todos los roles existentes.
