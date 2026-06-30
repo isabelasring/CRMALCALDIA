@@ -6,7 +6,7 @@ define('custom:helpers/radicacion-fields', [], function () {
     const ROLE_ASIGNACION = 'asignacion';
     const ROLE_PATRULLERO = 'patrullero';
     const ROLE_PATRULLAJE = 'patrullaje';
-    const PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCacheV6';
+    const PROFILE_CACHE_KEY = 'alcaldiaCaseProfileCacheV7';
 
     const RADICADO_ALL_FIELDS = [
         'cRadicadoModo',
@@ -270,6 +270,30 @@ define('custom:helpers/radicacion-fields', [], function () {
         return !!(profile && profile.isRadicacion);
     };
 
+    const isAsignadorUser = function (user) {
+        if (!user) {
+            return false;
+        }
+
+        if (isAdminUser(user)) {
+            return false;
+        }
+
+        if (hasRole(user, ROLE_ASIGNADOR) || hasRole(user, ROLE_ASIGNACION)) {
+            return true;
+        }
+
+        const profile = serverProfile && profileUserId === getCurrentUserId(user)
+            ? serverProfile
+            : null;
+
+        if (profile && profile.isAsignador) {
+            return true;
+        }
+
+        return resolveHomeProfile(user) === 'asignador';
+    };
+
     const canEditRadicadoCase = function (user) {
         if (!user) {
             return false;
@@ -344,6 +368,7 @@ define('custom:helpers/radicacion-fields', [], function () {
         resolveHomeProfile: resolveHomeProfile,
         isInspeccionUser: isInspeccionUser,
         isRadicacionUser: isRadicacionUser,
+        isAsignadorUser: isAsignadorUser,
         canEditRadicadoCase: canEditRadicadoCase,
         isCaseRadicado: isCaseRadicado,
         shouldShowRadicacionFields: shouldShowRadicacionFields,

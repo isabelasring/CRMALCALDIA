@@ -17,20 +17,55 @@ define('custom:helpers/asignador-case-flow', [
         'Visita aprobada',
     ];
 
+    const ASIGNACION_PANEL = 'gestionPosteriorRadicacion';
+
     const isAsignadorUser = function (user) {
-        if (!user || RadicacionFields.isAdminUser(user)) {
-            return false;
-        }
-
-        if (RadicacionFields.resolveHomeProfile(user) === 'asignador') {
-            return true;
-        }
-
-        return RadicacionFields.hasRole(user, 'asignador')
-            || RadicacionFields.hasRole(user, 'asignacion');
+        return RadicacionFields.isAsignadorUser(user);
     };
 
     const isAsignadorOnlyUser = isAsignadorUser;
+
+    const findPanel = function (recordView, name) {
+        return recordView.$el.find(
+            '.panel[data-name="' + name + '"], ' +
+            '.panel[data-panel-name="' + name + '"], ' +
+            '.record-panel[data-name="' + name + '"], ' +
+            '[data-name="' + name + '"].panel'
+        );
+    };
+
+    const unlockAssignmentUi = function (recordView) {
+        if (!recordView || !recordView.$el || !recordView.$el.length) {
+            return;
+        }
+
+        const $panel = findPanel(recordView, ASIGNACION_PANEL);
+
+        if ($panel.length) {
+            $panel
+                .removeClass('hidden alcaldia-inspeccion-asignacion-hidden')
+                .css('display', '');
+        }
+
+        ASIGNACION_FIELDS.forEach(function (field) {
+            recordView.$el
+                .find('.cell[data-name="' + field + '"], .field[data-name="' + field + '"]')
+                .closest('.cell, .field')
+                .removeClass('hidden alcaldia-inspeccion-asignacion-hidden alcaldia-radicacion-readonly alcaldia-field-readonly')
+                .css({
+                    display: '',
+                    visibility: '',
+                    pointerEvents: '',
+                    opacity: '',
+                });
+
+            const fieldView = recordView.getFieldView(field);
+
+            if (fieldView && typeof fieldView.setReadOnly === 'function') {
+                fieldView.setReadOnly(false);
+            }
+        });
+    };
 
     const syncBodyClass = function (assignarPage, isReasignacion) {
         document.body.classList.toggle(BODY_CLASS, !!assignarPage);
@@ -179,6 +214,7 @@ define('custom:helpers/asignador-case-flow', [
         }
 
         syncBodyClass(true, isReasign);
+        unlockAssignmentUi(recordView);
     };
 
     const schedule = function (recordView) {

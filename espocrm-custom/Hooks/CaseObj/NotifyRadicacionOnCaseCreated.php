@@ -6,6 +6,7 @@ use Espo\Core\Field\LinkParent;
 use Espo\Core\Hook\Hook\AfterSave;
 use Espo\Core\Mail\EmailSender;
 use Espo\Core\Utils\Config;
+use Espo\Custom\Tools\CaseObj\CaseNotificationDuplicateGuard;
 use Espo\Custom\Tools\CaseObj\CasePartyNameHelper;
 use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\Email;
@@ -74,6 +75,12 @@ class NotifyRadicacionOnCaseCreated implements AfterSave
                 continue;
             }
 
+            $guard = new CaseNotificationDuplicateGuard($this->entityManager);
+
+            if ($guard->existsRecent($entity, $notifyUserId, 'case.created.radicacion')) {
+                continue;
+            }
+
             $this->createNotification($entity, $notifyUser, $label, $caseHref);
             $this->sendEmail($entity, $notifyUser, $label, $recordUrl);
         }
@@ -121,6 +128,7 @@ class NotifyRadicacionOnCaseCreated implements AfterSave
                 'userId' => $this->user->getId(),
                 'userName' => $this->user->getName(),
                 'isNuevaSolicitud' => true,
+                'eventKey' => 'case.created.radicacion',
                 'recordUrl' => $caseHref,
             ])
             ->setRelated(LinkParent::createFromEntity($entity));

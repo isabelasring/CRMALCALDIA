@@ -25,7 +25,7 @@ define('custom:helpers/inspeccion-case-flow', [
     const shouldHideAsignacion = function (recordView) {
         const user = recordView && recordView.getUser && recordView.getUser();
 
-        if (AsignadorCaseFlow.isAsignadorUser(user)) {
+        if (RadicacionFields.isAsignadorUser(user)) {
             return false;
         }
 

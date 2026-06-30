@@ -235,7 +235,8 @@ body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .side {
 
 body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"],
 body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"],
-body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .asignacion-assignment-panel {
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .asignacion-assignment-panel,
+body.alcaldia-asignador-asignar-page .edit[data-scope="Case"] .alcaldia-inspeccion-asignacion-hidden {
   display: block !important;
 }
 

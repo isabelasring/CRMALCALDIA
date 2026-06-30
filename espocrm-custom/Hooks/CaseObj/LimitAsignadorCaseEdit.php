@@ -33,7 +33,7 @@ class LimitAsignadorCaseEdit implements BeforeSave
             return;
         }
 
-        if ($this->profile->resolveHomeProfile($this->user) !== 'asignador') {
+        if (!$this->profile->isAsignador($this->user)) {
             return;
         }
 

@@ -4,6 +4,7 @@ namespace Espo\Custom\Hooks\CaseObj;
 
 use Espo\Core\Field\LinkParent;
 use Espo\Core\Hook\Hook\AfterSave;
+use Espo\Custom\Tools\CaseObj\CaseNotificationDuplicateGuard;
 use Espo\Custom\Tools\CaseObj\CaseRadicadoHelper;
 use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\Notification;
@@ -69,6 +70,12 @@ class NotifyPatrulleroAssignment implements AfterSave
 
     private function notifyAssignedUser(Entity $entity, User $assignedUser): void
     {
+        $guard = new CaseNotificationDuplicateGuard($this->entityManager);
+
+        if ($guard->existsRecent($entity, $assignedUser->getId(), 'case.assigned.patrullero')) {
+            return;
+        }
+
         $caseHref = '#Case/view/' . $entity->getId();
         $numero = trim((string) $entity->get('cNumeroRadicado'));
         $expediente = trim((string) $entity->get('cExpediente'));
@@ -92,6 +99,7 @@ class NotifyPatrulleroAssignment implements AfterSave
                 'userId' => $this->user->getId(),
                 'userName' => $this->user->getName(),
                 'isPatrulleroAsignacion' => true,
+                'eventKey' => 'case.assigned.patrullero',
                 'recordUrl' => $caseHref,
             ])
             ->setRelated(LinkParent::createFromEntity($entity));
@@ -123,6 +131,12 @@ class NotifyPatrulleroAssignment implements AfterSave
                 continue;
             }
 
+            $guard = new CaseNotificationDuplicateGuard($this->entityManager);
+
+            if ($guard->existsRecent($entity, $notifyUserId, 'case.assigned.inspeccion')) {
+                continue;
+            }
+
             $notification = $this->entityManager
                 ->getRDBRepositoryByClass(Notification::class)
                 ->getNew();
@@ -143,6 +157,7 @@ class NotifyPatrulleroAssignment implements AfterSave
                     'assignedUserId' => $assignedUser->getId(),
                     'assignedUserName' => $assignedName,
                     'isAsignacion' => true,
+                    'eventKey' => 'case.assigned.inspeccion',
                     'recordUrl' => $caseHref,
                 ])
                 ->setRelated(LinkParent::createFromEntity($entity));

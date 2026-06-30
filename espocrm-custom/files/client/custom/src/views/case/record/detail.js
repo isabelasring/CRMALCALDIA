@@ -21,9 +21,9 @@ define('custom:views/case/record/detail', [
 
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
-            AsignadorCaseFlow.schedule(this);
             InspeccionCaseFlow.schedule(this);
             RadicacionCaseFlow.schedule(this);
+            AsignadorCaseFlow.schedule(this);
         },
 
         prepareModelForSave: function () {

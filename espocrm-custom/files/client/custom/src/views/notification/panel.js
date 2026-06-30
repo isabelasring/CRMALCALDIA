@@ -35,10 +35,18 @@ define('custom:views/notification/panel', ['views/notification/panel'], function
 
             $window.off('resize.notifications-height');
             $window.on('resize.notifications-height', this.processSizing.bind(this));
+
+            Dep.prototype.afterRender.call(this);
             this.processSizing();
 
             $('#navbar li.notifications-badge-container').addClass('open');
             this.$el.find('> .panel').focus();
+
+            if (this._alcaldiaMarkReadStarted) {
+                return;
+            }
+
+            this._alcaldiaMarkReadStarted = true;
 
             Espo.Ajax.postRequest('Notification/action/markAllRead')
                 .then(function () {
@@ -51,19 +59,17 @@ define('custom:views/notification/panel', ['views/notification/panel'], function
                         model.set('read', true, {sync: true});
                     });
 
-                    return self.createRecordView();
-                })
-                .then(function (view) {
-                    return view.render();
+                    var listView = self.getView('list');
+
+                    if (listView && typeof listView.reRender === 'function') {
+                        return listView.reRender();
+                    }
                 })
                 .catch(function () {
-                    self.collection.fetch()
-                        .then(function () {
-                            return self.createRecordView();
-                        })
-                        .then(function (view) {
-                            return view.render();
-                        });
+                    // Mantener panel usable aunque falle markAllRead.
+                })
+                .finally(function () {
+                    self._alcaldiaMarkReadStarted = false;
                 });
         },
     });
