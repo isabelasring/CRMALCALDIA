@@ -4,6 +4,7 @@
 # No cambiar el orden sin revisar dependencias entre scripts configure-*.
 
 DEPLOY_SETUP_STEPS=(
+  "Credenciales admin (Dokploy → archivo local)|write-admin-credentials.php"
   "Usuario administrador (desde .env)|seed-admin-user.php"
   "Roles y equipos base (despliegue desde cero)|seed-roles.php"
   "Sincronizar equipos homónimos (utilidad Espo; perfiles por rol en alcaldiaProfile)|sync-user-teams-from-roles.php"

@@ -35,7 +35,15 @@ run_php_script() {
 
   require_path "$script_path" "script $script_name"
   echo "Running $script_name..."
-  "$PHP_BIN" "$script_path"
+  env \
+    ESPOCRM_ADMIN_USERNAME="${ESPOCRM_ADMIN_USERNAME:-admin}" \
+    ESPOCRM_ADMIN_PASSWORD="${ESPOCRM_ADMIN_PASSWORD:-}" \
+    "$PHP_BIN" "$script_path"
+}
+
+write_admin_credentials_file() {
+  echo "Guardando credenciales admin para el deploy..."
+  run_php_script write-admin-credentials.php
 }
 
 ensure_package() {
@@ -75,6 +83,9 @@ generate_pdf_if_missing() {
 
 require_path "$CUSTOM_SOURCE" "espocrm-custom"
 require_path "$SCRIPTS_SOURCE" "scripts"
+
+mkdir -p "$APP_ROOT/data"
+write_admin_credentials_file
 
 echo "Copying backend custom..."
 mkdir -p "$CUSTOM_TARGET" "$CLIENT_TARGET" "$APP_ROOT/data"
@@ -180,6 +191,9 @@ done
 echo "Rebuild final..."
 (cd "$APP_ROOT" && "$PHP_BIN" command.php rebuild)
 (cd "$APP_ROOT" && "$PHP_BIN" command.php clear-cache)
+
+echo "Verificación final: usuario admin..."
+run_php_script seed-admin-user.php
 
 unset ESPO_DEPLOY_BATCH
 
