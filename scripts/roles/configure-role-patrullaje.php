@@ -6,6 +6,7 @@
 
 require_once '/var/www/html/bootstrap.php';
 require_once __DIR__ . '/../includes/alcaldia-comunicacion-caso-permissions.php';
+require_once __DIR__ . '/../includes/alcaldia-task-permissions.php';
 
 use Espo\Core\Application;
 use Espo\Core\Utils\Metadata;
@@ -98,6 +99,7 @@ if ($actaFields !== []) {
 }
 
 alcaldiaApplyComunicacionCasoPermissions($metadata, $data, $fieldData, 'team', 'team');
+alcaldiaApplyTaskPermissions($metadata, $data, $fieldData);
 
 $role->set('data', $data);
 $role->set('fieldData', $fieldData);
