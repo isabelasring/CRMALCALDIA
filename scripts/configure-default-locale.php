@@ -2,6 +2,7 @@
 
 /**
  * Idioma español, zona horaria Bogotá y formato de hora militar (24 h) para todo el sistema.
+ * Vuelva a ejecutar tras crear usuarios nuevos para aplicarles estas preferencias.
  */
 require_once '/var/www/html/bootstrap.php';
 

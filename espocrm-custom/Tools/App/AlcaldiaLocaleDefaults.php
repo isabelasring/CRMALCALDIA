@@ -39,11 +39,12 @@ class AlcaldiaLocaleDefaults
             $prefs = $entityManager->getEntityById('Preferences', $user->getId());
 
             if (!$prefs) {
-                continue;
+                $prefs = $entityManager->getNewEntity('Preferences');
+                $prefs->set('id', $user->getId());
             }
 
             $this->applyToPreferences($prefs);
-            $entityManager->saveEntity($prefs);
+            $entityManager->saveEntity($prefs, ['skipHooks' => true]);
             $count++;
         }
 
