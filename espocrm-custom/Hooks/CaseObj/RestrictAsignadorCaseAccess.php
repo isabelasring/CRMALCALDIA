@@ -9,6 +9,7 @@ use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 /**
  * Rol Asignador: no crear casos; solo editar casos post-radicados (radicado + expediente).
@@ -22,6 +23,10 @@ class RestrictAsignadorCaseAccess implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($this->user->isAdmin()) {
             return;
         }

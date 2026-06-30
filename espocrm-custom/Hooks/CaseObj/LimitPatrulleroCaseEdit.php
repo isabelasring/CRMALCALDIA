@@ -9,6 +9,7 @@ use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 /**
  * Rol Patrullero: solo consulta casos asignados, sin editar el caso.
@@ -23,6 +24,10 @@ class LimitPatrulleroCaseEdit implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($this->user->isAdmin()) {
             return;
         }

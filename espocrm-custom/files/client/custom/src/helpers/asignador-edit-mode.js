@@ -1,7 +1,8 @@
 define('custom:helpers/asignador-edit-mode', [
     'custom:helpers/radicacion-fields',
     'custom:helpers/post-radicacion-fields',
-], function (RadicacionFields, PostRadicacionFields) {
+    'custom:helpers/alcaldia-roles-config',
+], function (RadicacionFields, PostRadicacionFields, AlcaldiaRolesConfig) {
 
     const STORAGE_KEY = 'crm-case-asignar-mode';
     const ASSIGNMENT_PANEL = 'gestionPosteriorRadicacion';
@@ -38,6 +39,10 @@ define('custom:helpers/asignador-edit-mode', [
     };
 
     const isAsignarMode = function (recordView) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!recordView || !isPureAsignadorUser(recordView.getUser())) {
             return false;
         }

@@ -34,21 +34,21 @@ errors=0
 echo "==> Verificación deploy custom (APP_ROOT=$APP_ROOT)"
 echo ""
 
-check_file "Loader flujo radicación v3" \
-  "$CLIENT/src/loader/case-radicacion-flow.js" \
-  "FLOW_VERSION = 'v3'" || errors=$((errors + 1))
+check_file "Interruptor roles desactivados (cliente)" \
+  "$CLIENT/src/helpers/alcaldia-roles-config.js" \
+  "ROLES_DISABLED = true" || errors=$((errors + 1))
 
-check_file "Loader perfil (IIFE, sin define)" \
-  "$CLIENT/src/loader/alcaldia-profile-sync.js" \
-  "Espo.loader.require" || errors=$((errors + 1))
+check_file "Interruptor roles desactivados (servidor)" \
+  "$CUSTOM/Tools/User/AlcaldiaRolesConfig.php" \
+  "DISABLED = true" || errors=$((errors + 1))
 
-check_file "Rutas cliente radicar" \
-  "$CUSTOM/Resources/metadata/app/clientRoutes.json" \
-  "Case/radicar" || errors=$((errors + 1))
-
-check_file "scriptList case-radicacion-flow" \
+check_file "scriptList sin flujos por rol" \
   "$CUSTOM/Resources/metadata/app/client.json" \
-  "case-radicacion-flow.js" || errors=$((errors + 1))
+  "theme-login.js" || errors=$((errors + 1))
+
+if grep -q "case-radicacion-flow.js" "$CUSTOM/Resources/metadata/app/client.json" 2>/dev/null; then
+  echo "ADVERTENCIA: case-radicacion-flow.js sigue en scriptList (modo roles desactivado)"
+fi
 
 check_file "Layout radicar" \
   "$CUSTOM/Resources/layouts/Case/radicar.json" \

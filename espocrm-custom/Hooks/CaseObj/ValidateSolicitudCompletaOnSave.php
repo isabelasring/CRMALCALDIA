@@ -10,6 +10,7 @@ use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 /**
  * Exige todos los campos del formato de solicitud antes de radicar.
@@ -55,6 +56,10 @@ class ValidateSolicitudCompletaOnSave implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($options->get('skipSolicitudValidation')) {
             return;
         }

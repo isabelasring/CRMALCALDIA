@@ -3,6 +3,7 @@
 namespace Espo\Custom\Classes\Select\Case\AccessControlFilters;
 
 use Espo\Core\Select\AccessControl\Filter;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\Query\SelectBuilder as QueryBuilder;
@@ -19,6 +20,14 @@ class Mandatory implements Filter
 
     public function apply(QueryBuilder $queryBuilder): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            if ($this->user->isPortal()) {
+                $queryBuilder->where(['isInternal' => false]);
+            }
+
+            return;
+        }
+
         if ($this->user->isPortal()) {
             $queryBuilder->where(['isInternal' => false]);
 

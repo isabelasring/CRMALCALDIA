@@ -7,6 +7,7 @@ use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 /**
  * Registro Excel: Inspección y Radicación editan; el resto solo lectura.
@@ -31,6 +32,10 @@ class LimitFechaVencimientoEdit implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($this->user->isAdmin() || $this->profile->isInspeccion($this->user)) {
             return;
         }

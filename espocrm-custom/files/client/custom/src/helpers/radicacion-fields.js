@@ -1,4 +1,4 @@
-define('custom:helpers/radicacion-fields', [], function () {
+define('custom:helpers/radicacion-fields', ['custom:helpers/alcaldia-roles-config'], function (AlcaldiaRolesConfig) {
 
     /**
      * Roles operativos Alcaldía — solo entidad Role (rolesNames + API alcaldiaProfile).
@@ -359,6 +359,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const canEditRadicadoCase = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user || user.isAdmin()) {
             return false;
         }
@@ -387,6 +391,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const isOperationalRadicacionUser = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user || user.isAdmin()) {
             return false;
         }
@@ -439,6 +447,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const isInspeccionUser = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user) {
             return false;
         }
@@ -469,6 +481,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const isOperationalAsignadorUser = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user || user.isAdmin()) {
             return false;
         }
@@ -526,6 +542,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const canAssignCase = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user || user.isAdmin()) {
             return false;
         }
@@ -560,6 +580,10 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const isPatrulleroUser = function (user) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         if (!user) {
             return false;
         }

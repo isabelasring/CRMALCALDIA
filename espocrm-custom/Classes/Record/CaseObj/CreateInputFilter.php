@@ -5,6 +5,7 @@ namespace Espo\Custom\Classes\Record\CaseObj;
 use Espo\Core\Record\Input\Data;
 use Espo\Core\Record\Input\Filter;
 use Espo\Custom\Tools\CaseObj\InfractorUnknownHelper;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 
@@ -37,6 +38,10 @@ class CreateInputFilter implements Filter
 
     private function clearRadicadoFieldsForGestionUser(Data $data): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($this->user->isAdmin() || $this->profile->isOperationalRadicacion($this->user)) {
             return;
         }

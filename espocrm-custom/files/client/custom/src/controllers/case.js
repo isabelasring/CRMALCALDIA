@@ -4,7 +4,8 @@ define('custom:controllers/case', [
     'custom:helpers/radicacion-fields',
     'custom:helpers/asignador-edit-mode',
     'custom:helpers/alcaldia-case-roles',
-], function (Dep, RadicacionEditMode, RadicacionFields, AsignadorEditMode, AlcaldiaCaseRoles) {
+    'custom:helpers/alcaldia-roles-config',
+], function (Dep, RadicacionEditMode, RadicacionFields, AsignadorEditMode, AlcaldiaCaseRoles, AlcaldiaRolesConfig) {
 
     return Dep.extend({
 
@@ -243,13 +244,14 @@ define('custom:controllers/case', [
 
         actionEdit: function (options) {
             options = options || {};
-            var self = this;
 
-            if (!options.id) {
+            if (AlcaldiaRolesConfig.isDisabled() || !options.id) {
                 Dep.prototype.actionEdit.call(this, options);
 
                 return;
             }
+
+            var self = this;
 
             var proceed = function () {
                 if (RadicacionFields.canEditRadicadoCase(self.getUser())) {

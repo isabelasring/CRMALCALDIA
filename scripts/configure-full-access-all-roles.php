@@ -76,7 +76,7 @@ $fullScope = static function (): array {
     ];
 };
 
-$restrictedCaseRoles = ['Radicación', 'Radicacion', 'Patrullero', 'Asignador'];
+$restrictedCaseRoles = [];
 
 foreach ($em->getRDBRepository('Role')->find() as $role) {
     $name = (string) $role->get('name');

@@ -8,6 +8,7 @@ use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 /**
  * Rol Asignador (Julian): con radicado y expediente, solo puede cambiar Asignado a.
@@ -25,6 +26,10 @@ class LimitAsignadorCaseEdit implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($this->user->isAdmin() || $entity->isNew()) {
             return;
         }

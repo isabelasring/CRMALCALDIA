@@ -1,6 +1,7 @@
 define('custom:helpers/radicacion-edit-mode', [
     'custom:helpers/radicacion-fields',
-], function (RadicacionFields) {
+    'custom:helpers/alcaldia-roles-config',
+], function (RadicacionFields, AlcaldiaRolesConfig) {
 
     const STORAGE_KEY = 'crm-case-radicar-mode';
 
@@ -26,6 +27,10 @@ define('custom:helpers/radicacion-edit-mode', [
     };
 
     const isRadicacionOnlyEdit = function (recordView) {
+        if (AlcaldiaRolesConfig.isDisabled()) {
+            return false;
+        }
+
         return shouldUseRadicacionRestrictedEdit(recordView);
     };
 

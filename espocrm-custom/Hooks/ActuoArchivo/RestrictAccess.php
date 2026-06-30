@@ -9,6 +9,7 @@ use Espo\Entities\User;
 use Espo\ORM\Entity;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Repository\Option\SaveOptions;
+use Espo\Custom\Tools\User\AlcaldiaRolesConfig;
 
 class RestrictAccess implements BeforeSave
 {
@@ -23,6 +24,10 @@ class RestrictAccess implements BeforeSave
 
     public function beforeSave(Entity $entity, SaveOptions $options): void
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return;
+        }
+
         if ($options->get('skipActuoArchivoAccess')) {
             return;
         }

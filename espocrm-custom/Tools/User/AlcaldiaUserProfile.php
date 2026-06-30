@@ -60,6 +60,21 @@ class AlcaldiaUserProfile
      */
     public function build(User $user): array
     {
+        if (AlcaldiaRolesConfig::isDisabled()) {
+            return [
+                'isInspeccion' => false,
+                'isRadicacion' => false,
+                'isPatrullero' => false,
+                'isAsignador' => false,
+                'canDownloadExcelAlcaldia' => true,
+                'roles' => $this->getAssignedRoleNames($user),
+                'homeProfile' => 'gestion',
+                'canEditRadicado' => false,
+                'canAssignCase' => false,
+                'rolesDisabled' => true,
+            ];
+        }
+
         $flags = [
             'isInspeccion' => $user->isAdmin() || $this->hasAnyRole($user, self::NAMES_INSPECCION),
             'isRadicacion' => $this->isRadicacion($user),
