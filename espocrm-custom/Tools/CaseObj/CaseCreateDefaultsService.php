@@ -9,6 +9,10 @@ class CaseCreateDefaultsService
      */
     public function build(): array
     {
-        return [];
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('America/Bogota'));
+
+        return [
+            'cFechaCaso' => $now->format('Y-m-d H:i'),
+        ];
     }
 }

@@ -16,7 +16,7 @@
             "type": "datetime",
             "required": true,
             "default": "javascript: return this.dateTime.getNow(1);",
-            "minuteStep": 30,
+            "minuteStep": 1,
             "isCustom": true
         },
         "cNumeroRadicado": {

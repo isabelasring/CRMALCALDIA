@@ -34,8 +34,22 @@ define('custom:helpers/direccion-estructurada', [], function () {
         target: 'cDireccionPerjudicante',
     };
 
+    const PLACEHOLDER_VALUES = [
+        '',
+        'Seleccione una opción',
+        'Seleccione una opcion',
+        '-',
+        '—',
+    ];
+
     const getTrimmed = function (model, field) {
-        return String(model.get(field) || '').trim();
+        const value = String(model.get(field) || '').trim();
+
+        if (PLACEHOLDER_VALUES.indexOf(value) !== -1) {
+            return '';
+        }
+
+        return value;
     };
 
     const joinParts = function (parts) {

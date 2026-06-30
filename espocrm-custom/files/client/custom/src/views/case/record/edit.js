@@ -5,11 +5,13 @@ define('custom:views/case/record/edit', [
     'custom:helpers/direccion-estructurada',
     'custom:helpers/radicacion-fields',
     'custom:helpers/inspeccion-case-flow',
-], function (Dep, PersonaTipoFields, PartyDocumentLookup, DireccionEstructurada, RadicacionFields, InspeccionCaseFlow) {
+    'custom:helpers/case-create-form',
+], function (Dep, PersonaTipoFields, PartyDocumentLookup, DireccionEstructurada, RadicacionFields, InspeccionCaseFlow, CaseCreateForm) {
 
     return Dep.extend({
 
         setup: function () {
+            CaseCreateForm.setup(this);
             InspeccionCaseFlow.setup(this);
 
             Dep.prototype.setup.call(this);
@@ -26,6 +28,7 @@ define('custom:views/case/record/edit', [
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
             InspeccionCaseFlow.schedule(this);
+            CaseCreateForm.schedule(this);
         },
 
         prepareModelForSave: function () {

@@ -65,6 +65,13 @@
   min-width: 0;
 }
 
+/* Crear caso: ocultar paneles y campos solo de detalle */
+.edit[data-scope="Case"] .panel.hidden,
+.edit[data-scope="Case"] .cell.hidden,
+.edit[data-scope="Case"] .field.hidden {
+  display: none !important;
+}
+
 /* Estatus dentro de Solicitud de queja */
 .detail[data-scope="Case"] .field[data-name="status"] .label .label-text {
   font-weight: 600 !important;
