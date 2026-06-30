@@ -39,8 +39,8 @@ def build_html(data: dict) -> str:
     filtro = data.get("filtroAsignado")
 
     th_style = (
-        'bgcolor="#2a5934" style="border:1px solid #64748b;padding:5pt;'
-        'font-family:Arial,sans-serif;font-size:9pt;color:#ffffff;"'
+        'bgcolor="#e2e8f0" style="border:1px solid #94a3b8;padding:5pt;'
+        'font-family:Arial,sans-serif;font-size:9pt;color:#334155;"'
     )
     td_style = 'style="border:1px solid #94a3b8;padding:5pt;font-family:Arial,sans-serif;font-size:9pt;"'
     td_right = (
@@ -50,8 +50,16 @@ def build_html(data: dict) -> str:
     td_num = td_right
     section_style = (
         'style="border:none;padding:10pt 0 4pt 0;font-family:Arial,sans-serif;'
-        'font-size:10pt;font-weight:bold;color:#2a5934;"'
+        'font-size:10pt;font-weight:bold;color:#334155;"'
     )
+
+    def semaforo_corto(label: str) -> str:
+        cortos = {
+            "Próximo a vencer": "Próx. a vencer",
+            "Al día": "Al día",
+            "Vencido": "Vencido",
+        }
+        return cortos.get(label, label)
 
     filtro_row = ""
     if filtro:
@@ -98,32 +106,34 @@ def build_html(data: dict) -> str:
 
     detalle_rows = ""
     for row in data.get("detalle", []):
-        semaforo = esc(row.get("semaforo"))
+        semaforo_raw = row.get("semaforo") or ""
+        semaforo = esc(semaforo_corto(semaforo_raw))
         sem_bg = "#ffffff"
-        if semaforo == "Vencido":
+        if semaforo_raw == "Vencido":
             sem_bg = "#fee2e2"
-        elif semaforo == "Próximo a vencer":
+        elif semaforo_raw == "Próximo a vencer":
             sem_bg = "#fef3c7"
-        elif semaforo == "Al día":
+        elif semaforo_raw == "Al día":
             sem_bg = "#dcfce7"
 
         detalle_rows += (
             "<tr>"
-            f'<td width="13%" {td_style}><font face="Courier New" size="1">{esc(row.get("radicado"))}</font></td>'
-            f'<td width="17%" {td_style}>{esc(row.get("peticionario"))}</td>'
-            f'<td width="11%" {td_style}>{esc(row.get("estado"))}</td>'
-            f'<td width="10%" {td_style}>{esc(row.get("recurso"))}</td>'
-            f'<td width="16%" {td_style}>{esc(row.get("asignado"))}</td>'
-            f'<td width="11%" {td_style}>{esc(row.get("fechaVencimiento"))}</td>'
-            f'<td width="12%" style="border:1px solid #94a3b8;padding:5pt;font-family:Arial,sans-serif;'
-            f'font-size:8pt;background-color:{sem_bg};">{semaforo}</td>'
+            f'<td width="12%" {td_style}><font face="Courier New" size="1">{esc(row.get("radicado"))}</font></td>'
+            f'<td width="16%" {td_style}>{esc(row.get("peticionario"))}</td>'
+            f'<td width="10%" {td_style}>{esc(row.get("estado"))}</td>'
+            f'<td width="9%" {td_style}>{esc(row.get("recurso"))}</td>'
+            f'<td width="15%" {td_style}>{esc(row.get("asignado"))}</td>'
+            f'<td width="10%" {td_style}>{esc(row.get("fechaVencimiento"))}</td>'
+            f'<td width="18%" nowrap align="center" bgcolor="{sem_bg}" '
+            f'style="border:1px solid #94a3b8;padding:5pt;font-family:Arial,sans-serif;'
+            f'font-size:9pt;white-space:nowrap;">{semaforo}</td>'
             "</tr>"
         )
 
     if not detalle_rows:
         detalle_rows = f"<tr><td colspan='7' {td_style} align='center'><i>Sin casos</i></td></tr>"
 
-    def kpi_cell(label: str, value, value_color: str = "#2a5934") -> str:
+    def kpi_cell(label: str, value, value_color: str = "#1e293b") -> str:
         return (
             f'<td width="33%" valign="top" style="border:1px solid #94a3b8;padding:8pt;'
             f'font-family:Arial,sans-serif;">'
@@ -165,11 +175,11 @@ def build_html(data: dict) -> str:
     <tr>
       <td width="70" valign="middle">{logo_html(data)}</td>
       <td valign="middle" style="padding-left:10pt;">
-        <font face="Arial" size="4" color="#2a5934"><b>{esc(data.get('titulo'))}</b></font><br/>
+        <font face="Arial" size="4" color="#1e293b"><b>{esc(data.get('titulo'))}</b></font><br/>
         <font face="Arial" size="2" color="#64748b">{esc(data.get('subtitulo'))}</font>
       </td>
     </tr>
-    <tr><td colspan="2" style="border-bottom:2px solid #2a5934;height:8pt;">&nbsp;</td></tr>
+    <tr><td colspan="2" style="border-bottom:2px solid #cbd5e1;height:8pt;">&nbsp;</td></tr>
   </table>
 
   <br/>
@@ -192,15 +202,19 @@ def build_html(data: dict) -> str:
   <table width="100%" border="0" cellspacing="0" cellpadding="0">
     <tr><td {section_style}>Detalle de casos</td></tr>
     <tr><td>
-      <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+      <table width="100%" border="1" cellspacing="0" cellpadding="0" style="border-collapse:collapse;table-layout:fixed;">
+        <colgroup>
+          <col width="12%"/><col width="16%"/><col width="10%"/><col width="9%"/>
+          <col width="15%"/><col width="10%"/><col width="18%"/>
+        </colgroup>
         <tr>
-          <td width="13%" {th_style}><b>Radicado</b></td>
-          <td width="17%" {th_style}><b>Peticionario</b></td>
-          <td width="11%" {th_style}><b>Estado</b></td>
-          <td width="10%" {th_style}><b>Recurso</b></td>
-          <td width="16%" {th_style}><b>Asignado</b></td>
-          <td width="11%" {th_style}><b>Vencimiento</b></td>
-          <td width="12%" {th_style}><b>Semáforo</b></td>
+          <td {th_style}><b>Radicado</b></td>
+          <td {th_style}><b>Peticionario</b></td>
+          <td {th_style}><b>Estado</b></td>
+          <td {th_style}><b>Recurso</b></td>
+          <td {th_style}><b>Asignado</b></td>
+          <td {th_style}><b>Vencimiento</b></td>
+          <td {th_style} align="center"><b>Semáforo</b></td>
         </tr>
         {detalle_rows}
       </table>
@@ -232,11 +246,11 @@ def write_xlsx(data: dict, output_path: Path) -> None:
     ws = wb.active
     ws.title = "Resumen"
 
-    header_fill = PatternFill("solid", fgColor="2A5934")
-    header_font = Font(color="FFFFFF", bold=True)
+    header_fill = PatternFill("solid", fgColor="E2E8F0")
+    header_font = Font(color="334155", bold=True)
 
     ws["A1"] = data.get("titulo", "Reporte gerencial")
-    ws["A1"].font = Font(size=14, bold=True, color="2A5934")
+    ws["A1"].font = Font(size=14, bold=True, color="1E293B")
     ws["A2"] = data.get("subtitulo", "")
     ws["A3"] = f"Generado: {data.get('generadoEn', '')}"
     ws["A4"] = f"Elaborado por: {data.get('generadoPor', '')}"
