@@ -27,5 +27,8 @@ class EarlyBeforeCreate implements SaveHook
                 $entity->set('name', 'Solicitud ' . AlcaldiaDateTimeHelper::labelNowDateTime());
             }
         }
+
+        // Siempre hora real Bogotá en UTC (Espo resta 5 h al mostrar si se guarda hora local como UTC).
+        $entity->set('cFechaCaso', AlcaldiaDateTimeHelper::espoStorageNowString());
     }
 }
