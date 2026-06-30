@@ -184,6 +184,17 @@ body.alcaldia-radicacion-detail-ui .detail[data-scope="Case"] .header-buttons .b
   display: none !important;
 }
 
+/* Crear/editar: panel Radicación oculto salvo rol Radicación */
+.edit[data-scope="Case"] .panel[data-name="radicacionCaso"],
+.edit[data-scope="Case"] .panel[data-panel-name="radicacionCaso"] {
+  display: none !important;
+}
+
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .panel[data-name="radicacionCaso"],
+body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .panel[data-panel-name="radicacionCaso"] {
+  display: block !important;
+}
+
 /* Crear/editar caso: ocultar Asignación para todos (admin, inspección, etc.) */
 .edit[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"],
 .edit[data-scope="Case"] .panel[data-panel-name="gestionPosteriorRadicacion"],

@@ -5,14 +5,18 @@ define('custom:views/case/record/edit', [
     'custom:helpers/direccion-estructurada',
     'custom:helpers/radicacion-fields',
     'custom:helpers/inspeccion-case-flow',
+    'custom:helpers/radicacion-case-flow',
+    'custom:helpers/asignador-case-flow',
     'custom:helpers/case-create-form',
-], function (Dep, PersonaTipoFields, PartyDocumentLookup, DireccionEstructurada, RadicacionFields, InspeccionCaseFlow, CaseCreateForm) {
+], function (Dep, PersonaTipoFields, PartyDocumentLookup, DireccionEstructurada, RadicacionFields, InspeccionCaseFlow, RadicacionCaseFlow, AsignadorCaseFlow, CaseCreateForm) {
 
     return Dep.extend({
 
         setup: function () {
             CaseCreateForm.setup(this);
             InspeccionCaseFlow.setup(this);
+            RadicacionCaseFlow.setup(this);
+            AsignadorCaseFlow.setup(this);
 
             Dep.prototype.setup.call(this);
 
@@ -28,6 +32,8 @@ define('custom:views/case/record/edit', [
         afterRender: function () {
             Dep.prototype.afterRender.call(this);
             InspeccionCaseFlow.schedule(this);
+            RadicacionCaseFlow.schedule(this);
+            AsignadorCaseFlow.schedule(this);
             CaseCreateForm.schedule(this);
         },
 
@@ -37,6 +43,8 @@ define('custom:views/case/record/edit', [
             }
 
             InspeccionCaseFlow.prepareModelForSave(this);
+            RadicacionCaseFlow.prepareModelForSave(this);
+            AsignadorCaseFlow.prepareModelForSave(this);
 
             Dep.prototype.prepareModelForSave.apply(this, arguments);
         },

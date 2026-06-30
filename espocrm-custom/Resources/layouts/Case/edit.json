@@ -229,6 +229,22 @@
     "label": "Queja y gestion"
   },
   {
+    "name": "radicacionCaso",
+    "rows": [
+      [
+        {
+          "name": "cNumeroRadicado",
+          "fullWidth": true
+        },
+        {
+          "name": "cExpediente"
+        }
+      ]
+    ],
+    "style": "default",
+    "label": "Radicación"
+  },
+  {
     "name": "gestionPosteriorRadicacion",
     "rows": [
       [

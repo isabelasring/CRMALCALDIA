@@ -31,11 +31,9 @@ purge_obsolete_custom() {
     "$custom_target/Hooks/CaseObj/SyncLegacyCaseFieldsOnSave.php" \
     "$custom_target/Hooks/CaseObj/ExportCaseSolicitudExcelOnSave.php" \
     "$custom_target/Hooks/CaseObj/EnsureCaseCreateDefaults.php" \
-    "$custom_target/Hooks/CaseObj/LimitAsignadorCaseEdit.php" \
     "$custom_target/Hooks/CaseObj/LimitFechaVencimientoEdit.php" \
     "$custom_target/Hooks/CaseObj/LimitPatrulleroCaseEdit.php" \
     "$custom_target/Hooks/CaseObj/LimitRadicadoFieldEdit.php" \
-    "$custom_target/Hooks/CaseObj/NotifyInspeccionAndAsignadorOnRadicado.php" \
     "$custom_target/Hooks/CaseObj/NotifyPatrulleroAssignment.php" \
     "$custom_target/Hooks/CaseObj/RestrictAsignadorCaseAccess.php" \
     "$custom_target/Hooks/CaseObj/SetEnProcesoOnPatrulleroAssignment.php" \

@@ -17,6 +17,8 @@ DEPLOY_SETUP_STEPS=(
   "Home: tablero custom (custom:views/home)|configure-user-dashboards.php"
   "Acceso completo — menú y permisos amplios|configure-full-access-all-roles.php"
   "Rol Inspección — permisos y campos|roles/configure-role-inspeccion.php"
+  "Rol Radicación — solo radicado/expediente|roles/configure-role-radicacion.php"
+  "Rol Asignación — solo panel Asignación|roles/configure-role-asignacion.php"
   "Documentos: plantillas oficiales (solicitud, acta, actuo)|configure-document-plantillas.php"
   "Documentos: Excel oficial (excelAlcaldia.xlsx)|configure-excel-alcaldia-document.php"
 )

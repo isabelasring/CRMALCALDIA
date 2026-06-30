@@ -8,6 +8,7 @@ use Espo\Core\EntryPoint\EntryPoint;
 use Espo\Core\Exceptions\Forbidden;
 use Espo\Core\Exceptions\NotFound;
 use Espo\Custom\Tools\CaseObj\ExcelAlcaldiaExporter;
+use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use GuzzleHttp\Psr7\Utils;
 
@@ -15,12 +16,13 @@ class ExcelAlcaldiaDownload implements EntryPoint
 {
     public function __construct(
         private User $user,
-        private ExcelAlcaldiaExporter $exporter
+        private ExcelAlcaldiaExporter $exporter,
+        private AlcaldiaUserProfile $profile
     ) {}
 
     public function run(Request $request, Response $response): void
     {
-        if (!$this->user->isAdmin()) {
+        if (!$this->profile->canDownloadExcelAlcaldia($this->user)) {
             throw new Forbidden();
         }
 

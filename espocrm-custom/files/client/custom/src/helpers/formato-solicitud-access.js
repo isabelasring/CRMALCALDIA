@@ -1,4 +1,6 @@
-define('custom:helpers/formato-solicitud-access', [], function () {
+define('custom:helpers/formato-solicitud-access', [
+    'custom:helpers/radicacion-fields',
+], function (RadicacionFields) {
 
     const isCasePostRadicado = function (model) {
         if (!model) {
@@ -13,7 +15,23 @@ define('custom:helpers/formato-solicitud-access', [], function () {
             return false;
         }
 
-        return isCasePostRadicado(model);
+        if (!isCasePostRadicado(model)) {
+            return false;
+        }
+
+        if (RadicacionFields.isAdminUser(user)) {
+            return true;
+        }
+
+        if (RadicacionFields.isRadicacionUser(user)) {
+            return true;
+        }
+
+        if (RadicacionFields.isInspeccionUser(user)) {
+            return true;
+        }
+
+        return false;
     };
 
     const isFormatoSolicitudHabilitado = function (model) {
