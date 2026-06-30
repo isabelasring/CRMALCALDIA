@@ -76,19 +76,19 @@ define('custom:views/home', ['views/dashboard'], function (Dep) {
         return 'gestion';
     };
 
-    var profileConfig = function (profile, userId, appTimestamp) {
+    var profileConfig = function (profile, userId, appTimestamp, isAdmin) {
         var cacheBuster = String(appTimestamp || Date.now()) + '-dash6';
         var iframeUrl = '/client/custom/dashboard.html?v=' + encodeURIComponent(cacheBuster)
             + '&profile=' + encodeURIComponent(profile);
 
-        if (profile === 'patrullero') {
+        if (profile === 'patrullero' && !isAdmin) {
             iframeUrl += '&assignedUserId=' + encodeURIComponent(userId);
         }
 
         return {
             profile: profile,
             showTablero: true,
-            showHistorialAsignaciones: profile === 'asignador',
+            showHistorialAsignaciones: isAdmin || profile === 'asignador',
             iframeUrl: iframeUrl,
             lists: [
                 {title: 'Todos los casos', where: []},
@@ -104,8 +104,8 @@ define('custom:views/home', ['views/dashboard'], function (Dep) {
         };
     };
 
-    var homeConfig = function (profile, userId, appTimestamp) {
-        return profileConfig(profile || 'gestion', userId, appTimestamp);
+    var homeConfig = function (profile, userId, appTimestamp, isAdmin) {
+        return profileConfig(profile || 'gestion', userId, appTimestamp, !!isAdmin);
     };
 
     return Dep.extend({
@@ -115,21 +115,23 @@ define('custom:views/home', ['views/dashboard'], function (Dep) {
             var user = this.getUser();
             var userId = user.id;
             var appTimestamp = this.getConfig().get('appTimestamp');
+            var isAdmin = user.isAdmin();
             var profile = detectProfileFromRoles(user);
 
-            this.config = homeConfig(profile, userId, appTimestamp);
+            this.config = homeConfig(profile, userId, appTimestamp, isAdmin);
             this._pageState = {};
 
             Espo.Ajax.getRequest('Case/action/alcaldiaProfile').then(function (data) {
                 var apiProfile = detectProfileFromApi(data);
+                var apiIsAdmin = !!(data && data.isAdmin);
 
-                if (!apiProfile || apiProfile === self.config.profile) {
+                if ((!apiProfile || apiProfile === self.config.profile) && apiIsAdmin === isAdmin) {
                     return;
                 }
 
                 self._gestionLoaded = false;
                 self._historialLoaded = false;
-                self.config = homeConfig(apiProfile, userId, appTimestamp);
+                self.config = homeConfig(apiProfile || profile, userId, appTimestamp, apiIsAdmin || isAdmin);
 
                 if (self.isRendered()) {
                     self.renderCustomPanels();

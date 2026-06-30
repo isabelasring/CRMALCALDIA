@@ -54,8 +54,24 @@ class AlcaldiaUserProfile
      */
     public function build(User $user): array
     {
+        if ($user->isAdmin()) {
+            return [
+                'isAdmin' => true,
+                'isInspeccion' => true,
+                'isRadicacion' => true,
+                'isPatrullero' => true,
+                'isAsignador' => true,
+                'canDownloadExcelAlcaldia' => true,
+                'homeProfile' => 'gestion',
+                'canEditRadicado' => true,
+                'canAssignCase' => true,
+                'roles' => $this->getAssignedRoleNames($user),
+            ];
+        }
+
         $flags = [
-            'isInspeccion' => $user->isAdmin() || $this->hasAnyRole($user, self::NAMES_INSPECCION),
+            'isAdmin' => false,
+            'isInspeccion' => $this->hasAnyRole($user, self::NAMES_INSPECCION),
             'isRadicacion' => $this->isRadicacion($user),
             'isPatrullero' => $this->hasAnyRole($user, self::NAMES_PATRULLAJE),
             'isAsignador' => $this->isAsignador($user),
@@ -153,13 +169,17 @@ class AlcaldiaUserProfile
 
     public function canEditRadicado(User $user): bool
     {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
         return $this->isOperationalRadicacion($user);
     }
 
     public function canAssignCase(User $user): bool
     {
         if ($user->isAdmin()) {
-            return false;
+            return true;
         }
 
         return $this->resolveHomeProfile($user) === 'asignador';
@@ -168,7 +188,7 @@ class AlcaldiaUserProfile
     public function isOperationalRadicacion(User $user): bool
     {
         if ($user->isAdmin()) {
-            return false;
+            return true;
         }
 
         if ($this->hasAnyRole($user, self::NAMES_INSPECCION)) {
