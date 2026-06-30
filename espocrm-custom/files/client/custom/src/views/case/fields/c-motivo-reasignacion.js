@@ -39,8 +39,7 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
                 || ''
             ).trim();
 
-            this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCaseOnOpen(this.model)
-                || !!this._baselineAssigneeId;
+            this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCaseOnOpen(this.model);
 
             const recordView = this.getRecordView && this.getRecordView();
 
@@ -50,20 +49,14 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
 
             this.listenTo(this.model, 'sync', function () {
                 if (!this._hadAssigneeOnOpen) {
-                    this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCaseOnOpen(this.model)
-                        || !!this._baselineAssigneeId;
+                    this._hadAssigneeOnOpen = AsignadorCaseFlow.isReasignacionCaseOnOpen(this.model);
                 }
 
                 this.manageVisibility();
             });
 
-            this.listenTo(this.model, 'change:assignedUserId', function (model, value) {
-                const fetchedId = String(
-                    typeof model.getFetched === 'function' ? (model.getFetched('assignedUserId') || '') : ''
-                ).trim();
-                const nextId = String(value || '').trim();
-
-                if ((fetchedId && nextId) || (this._baselineAssigneeId && nextId)) {
+            this.listenTo(this.model, 'change:assignedUserId', function (model) {
+                if (AsignadorCaseFlow.isReasignacionCaseOnOpen(model)) {
                     this._hadAssigneeOnOpen = true;
 
                     const rv = this.getRecordView && this.getRecordView();
@@ -92,16 +85,18 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
         },
 
         manageVisibility: function () {
-            const isReasignacion = this.isReasignacion();
-            const $cell = getCell(this);
             const recordView = this.getRecordView && this.getRecordView();
             const isEditing = recordView && (
                 recordView._asignacionEditMode
                 || recordView._asignarMode
                 || (typeof recordView.isEditMode === 'function' && recordView.isEditMode())
             );
+            const isReasignacion = this.isReasignacion();
+            const motivo = String(this.model.get('cMotivoReasignacion') || '').trim();
+            const shouldShow = (isEditing && isReasignacion) || !!motivo;
+            const $cell = getCell(this);
 
-            if (isReasignacion) {
+            if (shouldShow) {
                 if ($cell) {
                     $cell
                         .addClass(VISIBLE_CLASS)
@@ -117,9 +112,9 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
                     this.show();
                 }
 
-                this.readOnly = false;
+                this.readOnly = !isEditing;
 
-                if (typeof this.setNotReadOnly === 'function') {
+                if (isEditing && typeof this.setNotReadOnly === 'function') {
                     this.setNotReadOnly();
                 }
 
@@ -134,7 +129,7 @@ define('custom:views/case/fields/c-motivo-reasignacion', [
                 this.hide();
             }
 
-            if (this.mode === 'edit' || this.mode === 'detail') {
+            if (!isEditing && (this.mode === 'edit' || this.mode === 'detail')) {
                 this.model.set('cMotivoReasignacion', null, {silent: true});
             }
         },

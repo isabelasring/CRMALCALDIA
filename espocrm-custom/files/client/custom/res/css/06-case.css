@@ -315,6 +315,15 @@ body.alcaldia-asignacion-detail-edit .detail[data-scope="Case"] .cell[data-name=
   display: none !important;
 }
 
+body:not(.alcaldia-reasignacion-caso) .detail[data-scope="Case"] .cell[data-name="cMotivoReasignacion"],
+body:not(.alcaldia-reasignacion-caso) .detail[data-scope="Case"] .field[data-name="cMotivoReasignacion"] {
+  display: none !important;
+}
+
+.alcaldia-asignacion-panel-actions {
+  display: none !important;
+}
+
 body.alcaldia-reasignacion-caso .detail[data-scope="Case"] .panel[data-name="gestionPosteriorRadicacion"] .cell[data-name="cMotivoReasignacion"],
 body.alcaldia-reasignacion-caso .detail[data-scope="Case"] .cell[data-name="cMotivoReasignacion"].alcaldia-motivo-reasignacion-visible,
 body.alcaldia-reasignacion-caso .detail[data-scope="Case"] .field[data-name="cMotivoReasignacion"] {

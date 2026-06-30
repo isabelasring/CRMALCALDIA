@@ -156,89 +156,10 @@ define('custom:views/case/record/detail', [
             });
 
             this.bindAsignacionEditIntercept();
-            this.bindAsignacionPanelActions();
         },
 
-        bindAsignacionPanelActions: function () {
-            const self = this;
-
-            this.$el.on('click.alcaldiaPanelAsignacion', '[data-action="alcaldiaEditAsignacion"]', function (e) {
-                e.preventDefault();
-                self.enterAsignacionEditMode();
-            });
-
-            this.$el.on('click.alcaldiaPanelAsignacion', '[data-action="alcaldiaSaveAsignacion"]', function (e) {
-                e.preventDefault();
-                self.saveAsignacionEdit();
-            });
-
-            this.$el.on('click.alcaldiaPanelAsignacion', '[data-action="alcaldiaCancelAsignacion"]', function (e) {
-                e.preventDefault();
-                self.cancelAsignacionEdit();
-            });
-        },
-
-        ensureAsignacionPanelToolbar: function () {
-            if (!this.isAsignadorOperator() || !RadicacionFields.isCaseRadicado(this.model)) {
-                return;
-            }
-
-            const $panel = findPanel(this, PANEL_ASIGNACION);
-
-            if (!$panel.length) {
-                return;
-            }
-
-            let $toolbar = $panel.find('.alcaldia-asignacion-panel-actions').first();
-
-            if (!$toolbar.length) {
-                const $heading = $panel.find('.panel-heading, .panel-title').first();
-
-                if (!$heading.length) {
-                    return;
-                }
-
-                $heading.append(
-                    '<div class="alcaldia-asignacion-panel-actions pull-right" style="margin-top:-2px;">' +
-                    '<button type="button" class="btn btn-primary btn-sm" data-action="alcaldiaEditAsignacion">' +
-                    'Editar asignación</button>' +
-                    '<button type="button" class="btn btn-primary btn-sm hidden" data-action="alcaldiaSaveAsignacion">' +
-                    'Guardar</button>' +
-                    '<button type="button" class="btn btn-default btn-sm hidden" data-action="alcaldiaCancelAsignacion">' +
-                    'Cancelar</button>' +
-                    '</div>'
-                );
-
-                $toolbar = $panel.find('.alcaldia-asignacion-panel-actions').first();
-            }
-
-            this.updateAsignacionPanelToolbar($toolbar);
-        },
-
-        updateAsignacionPanelToolbar: function ($toolbar) {
-            if (!$toolbar || !$toolbar.length) {
-                $toolbar = this.$el.find('.alcaldia-asignacion-panel-actions').first();
-            }
-
-            if (!$toolbar.length) {
-                return;
-            }
-
-            const $edit = $toolbar.find('[data-action="alcaldiaEditAsignacion"]');
-            const $save = $toolbar.find('[data-action="alcaldiaSaveAsignacion"]');
-            const $cancel = $toolbar.find('[data-action="alcaldiaCancelAsignacion"]');
-
-            if (this._asignacionEditMode) {
-                $edit.addClass('hidden');
-                $save.removeClass('hidden');
-                $cancel.removeClass('hidden');
-
-                return;
-            }
-
-            $edit.removeClass('hidden');
-            $save.addClass('hidden');
-            $cancel.addClass('hidden');
+        removeAsignacionPanelToolbar: function () {
+            this.$el.find('.alcaldia-asignacion-panel-actions').remove();
         },
 
         scheduleAsignacionUiRefresh: function () {
@@ -254,7 +175,7 @@ define('custom:views/case/record/detail', [
                         return;
                     }
 
-                    self.ensureAsignacionPanelToolbar();
+                    self.removeAsignacionPanelToolbar();
                     self.updateAsignacionActionButtons();
                 }, delay);
             });
@@ -308,6 +229,7 @@ define('custom:views/case/record/detail', [
             if (this.isAsignadorOperator()) {
                 this._asignacionEditMode = false;
                 document.body.classList.remove('alcaldia-asignacion-detail-edit');
+                this.removeAsignacionPanelToolbar();
                 this.scheduleAsignacionUiRefresh();
             }
         },
@@ -359,7 +281,6 @@ define('custom:views/case/record/detail', [
             }
 
             this.updateAsignacionActionButtons();
-            this.ensureAsignacionPanelToolbar();
             AsignadorCaseFlow.schedule(this);
         },
 
@@ -477,7 +398,7 @@ define('custom:views/case/record/detail', [
                 return;
             }
 
-            this.ensureAsignacionPanelToolbar();
+            this.removeAsignacionPanelToolbar();
 
             const $editBtn = this.findAsignacionPrimaryButton();
 
@@ -513,13 +434,10 @@ define('custom:views/case/record/detail', [
             $editBtn.off('click.alcaldiaSave');
             this.setPrimaryActionButtonLabel($editBtn, this.translate('Edit', 'labels', 'Global'));
             this.setPrimaryActionButtonAction($editBtn, 'edit');
-
-            this.updateAsignacionPanelToolbar();
         },
 
         remove: function () {
             this.$el.off('click.alcaldiaAsignacion');
-            this.$el.off('click.alcaldiaPanelAsignacion');
             document.body.classList.remove('alcaldia-asignacion-detail-edit');
             document.body.classList.remove('alcaldia-reasignacion-caso');
             Dep.prototype.remove.call(this);

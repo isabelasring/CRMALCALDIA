@@ -17,6 +17,17 @@ define('custom:helpers/asignador-case-flow', [
         'Visita aprobada',
     ];
 
+    const PRE_ASSIGNMENT_STATUSES = [
+        'Radicado',
+        'Pendiente de asignación',
+        'Pendiente de radicación',
+        'Recibido',
+    ];
+
+    const isPreAssignmentStatus = function (status) {
+        return PRE_ASSIGNMENT_STATUSES.indexOf(String(status || '').trim()) !== -1;
+    };
+
     const ASIGNACION_PANEL = 'gestionPosteriorRadicacion';
 
     const isAsignadorUser = function (user) {
@@ -48,6 +59,10 @@ define('custom:helpers/asignador-case-flow', [
         }
 
         ASIGNACION_FIELDS.forEach(function (field) {
+            if (field === 'cMotivoReasignacion' && !isReasignacionCaseOnOpen(recordView.model)) {
+                return;
+            }
+
             recordView.$el
                 .find('.cell[data-name="' + field + '"], .field[data-name="' + field + '"]')
                 .closest('.cell, .field')
@@ -119,13 +134,19 @@ define('custom:helpers/asignador-case-flow', [
             return false;
         }
 
-        const assigneeId = String(getFetchedOrCurrent(model, 'assignedUserId') || '').trim();
-
-        if (assigneeId) {
+        if (hasPostAssignmentStatus(model, true)) {
             return true;
         }
 
-        return hasPostAssignmentStatus(model, true);
+        const status = String(getFetchedOrCurrent(model, 'status') || '').trim();
+
+        if (isPreAssignmentStatus(status)) {
+            return false;
+        }
+
+        const assigneeId = String(getFetchedOrCurrent(model, 'assignedUserId') || '').trim();
+
+        return !!assigneeId;
     };
 
     const isReasignacionCaseOnSave = function (model) {
@@ -133,13 +154,19 @@ define('custom:helpers/asignador-case-flow', [
             return false;
         }
 
-        const fetchedId = String(model.getFetched('assignedUserId') || '').trim();
-
-        if (fetchedId) {
+        if (hasPostAssignmentStatus(model, false)) {
             return true;
         }
 
-        return hasPostAssignmentStatus(model, false);
+        const fetchedStatus = String(model.getFetched('status') || '').trim();
+
+        if (isPreAssignmentStatus(fetchedStatus)) {
+            return false;
+        }
+
+        const fetchedId = String(model.getFetched('assignedUserId') || '').trim();
+
+        return !!fetchedId;
     };
 
     const captureOpenState = function (recordView) {
