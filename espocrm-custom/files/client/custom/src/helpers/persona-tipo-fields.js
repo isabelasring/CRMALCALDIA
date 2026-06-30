@@ -120,7 +120,7 @@ define('custom:helpers/persona-tipo-fields', [], function () {
         const juridica = isJuridica(tipo);
 
         if (party === 'peticionario') {
-            setFieldLabel(recordView, config.documento, 'Documento del peticionario');
+            setFieldLabel(recordView, config.documento, juridica ? 'NIT del peticionario' : 'Documento del peticionario');
             setFieldLabel(
                 recordView,
                 config.nombre,
@@ -132,7 +132,7 @@ define('custom:helpers/persona-tipo-fields', [], function () {
             return;
         }
 
-        setFieldLabel(recordView, config.documento, 'Documento del perjudicante');
+        setFieldLabel(recordView, config.documento, juridica ? 'NIT del perjudicante' : 'Documento del perjudicante');
         setFieldLabel(
             recordView,
             config.nombre,

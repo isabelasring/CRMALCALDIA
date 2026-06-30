@@ -157,7 +157,7 @@ class PartyRegistryService
         return $this->mergeAddressFromLatestCase([
             'cNombrePeticionario' => (string) $account->get('name'),
             'cApellidoPeticionario' => null,
-            'cDocumentoPeticionario' => (string) $account->get('cNit'),
+            'cDocumentoPeticionario' => DocumentNormalizer::formatNit((string) $account->get('cNit')),
             'cDireccionPeticionario' => (string) $account->get('billingAddressStreet'),
             'cTelefonoPeticionario' => (string) $account->get('phoneNumber'),
             'cCorreoPeticionario' => (string) $account->get('emailAddress'),
@@ -202,7 +202,7 @@ class PartyRegistryService
         return $this->mergeAddressFromLatestCase([
             'cNombrePerjudicante' => (string) $account->get('name'),
             'cApellidoPerjudicante' => null,
-            'cDocumentoPerjudicante' => (string) $account->get('cNit'),
+            'cDocumentoPerjudicante' => DocumentNormalizer::formatNit((string) $account->get('cNit')),
             'cDireccionPerjudicante' => (string) $account->get('billingAddressStreet'),
             'cTelefonoPerjudicante' => (string) $account->get('phoneNumber'),
             'cPerjudicanteCuentaId' => $account->getId(),

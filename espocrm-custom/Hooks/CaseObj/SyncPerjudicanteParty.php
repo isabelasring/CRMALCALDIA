@@ -228,7 +228,7 @@ class SyncPerjudicanteParty implements BeforeSave
         $nit = trim((string) $case->get('cDocumentoPerjudicante'));
 
         if ($nit !== '') {
-            $account->set('cNit', DocumentNormalizer::normalize($nit) ?: $nit);
+            $account->set('cNit', DocumentNormalizer::formatNit($nit));
         }
 
         $account->set('billingAddressStreet', trim((string) $case->get('cDireccionPerjudicante')));

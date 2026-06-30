@@ -84,7 +84,7 @@
             "maxLength": 100,
             "options": [],
             "isCustom": true,
-            "view": "custom:views/fields/numeric-only"
+            "view": "custom:views/case/fields/documento-peticionario"
         },
         "cNombrePeticionario": {
             "type": "varchar",
@@ -331,7 +331,7 @@
             "required": false,
             "options": [],
             "isCustom": true,
-            "view": "custom:views/fields/numeric-only"
+            "view": "custom:views/case/fields/documento-perjudicante"
         },
         "cNombrePerjudicante": {
             "type": "varchar",

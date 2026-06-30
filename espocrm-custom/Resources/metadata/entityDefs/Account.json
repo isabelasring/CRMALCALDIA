@@ -4,7 +4,7 @@
       "type": "varchar",
       "maxLength": 50,
       "isCustom": true,
-      "view": "custom:views/fields/numeric-only"
+      "view": "custom:views/fields/nit-formatted"
     },
     "cCasoRecursoTema": {
       "type": "enum",

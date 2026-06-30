@@ -33,10 +33,8 @@ class PreventDuplicateNit implements BeforeSave
             return;
         }
 
-        $normalized = DocumentNormalizer::normalize($nit);
-
-        if ($normalized !== '') {
-            $entity->set('cNit', $normalized);
+        if (DocumentNormalizer::normalize($nit) !== '') {
+            $entity->set('cNit', DocumentNormalizer::formatNit($nit));
         }
 
         $service = new PartyRegistryService($this->entityManager);
