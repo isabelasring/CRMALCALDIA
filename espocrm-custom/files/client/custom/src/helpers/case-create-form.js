@@ -48,7 +48,7 @@ define('custom:helpers/case-create-form', [], function () {
         }
 
         const dateTime = recordView.getDateTime();
-        const now = dateTime.toDisplay(dateTime.getNow(1));
+        const now = dateTime.getNow(1);
 
         if (now) {
             recordView.model.set('cFechaCaso', now, {silent: true});
@@ -139,6 +139,12 @@ define('custom:helpers/case-create-form', [], function () {
 
         Object.keys(data).forEach(function (key) {
             if (data[key] == null || data[key] === '') {
+                return;
+            }
+
+            if (key === 'cFechaCaso') {
+                recordView.model.set(key, data[key], {silent: true});
+
                 return;
             }
 

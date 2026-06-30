@@ -4,6 +4,9 @@ namespace Espo\Custom\Tools\App;
 
 /**
  * Fecha y hora oficiales del CRM Alcaldía: Bogotá, hora militar (24 h).
+ *
+ * EspoCRM guarda campos datetime en UTC. Siempre use espoStorageNowString()
+ * al escribir en entidades; use formatDisplay* al mostrar.
  */
 class AlcaldiaDateTimeHelper
 {
@@ -15,15 +18,16 @@ class AlcaldiaDateTimeHelper
     /** Formato EspoCRM (moment.js): HH:mm — hora militar */
     public const ESPO_TIME_FORMAT = AlcaldiaLocaleDefaults::TIME_FORMAT;
 
-    /** Almacenamiento interno / API */
+    /** Almacenamiento datetime en BD (UTC) */
+    public const PHP_ESPO_STORAGE_DATETIME = 'Y-m-d H:i:s';
+
+    /** Almacenamiento date en BD */
     public const PHP_STORAGE_DATE = 'Y-m-d';
 
-    public const PHP_STORAGE_DATETIME = 'Y-m-d H:i';
-
-    /** Pantalla CRM (equivalente a DD.MM.YYYY) */
+    /** Pantalla CRM en Bogotá (equivalente a DD.MM.YYYY) */
     public const PHP_DISPLAY_DATE = 'd.m.Y';
 
-    /** Pantalla CRM con hora militar */
+    /** Pantalla CRM en Bogotá con hora militar */
     public const PHP_DISPLAY_DATETIME = 'd.m.Y H:i';
 
     /** Documentos Word / Excel ciudadanos */
@@ -41,9 +45,14 @@ class AlcaldiaDateTimeHelper
         return new \DateTimeImmutable('now', self::timeZone());
     }
 
-    public static function storageNowString(): string
+    /**
+     * Valor para campos datetime de EspoCRM (UTC).
+     */
+    public static function espoStorageNowString(): string
     {
-        return self::now()->format(self::PHP_STORAGE_DATETIME);
+        return self::now()
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format(self::PHP_ESPO_STORAGE_DATETIME);
     }
 
     public static function storageDateString(): string
@@ -51,20 +60,38 @@ class AlcaldiaDateTimeHelper
         return self::now()->format(self::PHP_STORAGE_DATE);
     }
 
-    public static function toStorageDateTime(mixed $value): ?string
+    /**
+     * Texto legible en hora Bogotá (nombres, etiquetas).
+     */
+    public static function labelNowDateTime(): string
     {
-        $parsed = self::parse($value);
+        return self::now()->format(self::PHP_DISPLAY_DATETIME);
+    }
+
+    /**
+     * @deprecated Use espoStorageNowString() for entity datetime fields.
+     */
+    public static function storageNowString(): string
+    {
+        return self::espoStorageNowString();
+    }
+
+    public static function toEspoStorageDateTime(mixed $value): ?string
+    {
+        $parsed = self::parseFromEspo($value);
 
         if (!$parsed) {
             return null;
         }
 
-        return $parsed->setTimezone(self::timeZone())->format(self::PHP_STORAGE_DATETIME);
+        return $parsed
+            ->setTimezone(new \DateTimeZone('UTC'))
+            ->format(self::PHP_ESPO_STORAGE_DATETIME);
     }
 
     public static function formatDisplayDate(mixed $value): string
     {
-        $parsed = self::parse($value);
+        $parsed = self::parseFromEspo($value);
 
         return $parsed
             ? $parsed->setTimezone(self::timeZone())->format(self::PHP_DISPLAY_DATE)
@@ -73,7 +100,7 @@ class AlcaldiaDateTimeHelper
 
     public static function formatDisplayDateTime(mixed $value): string
     {
-        $parsed = self::parse($value);
+        $parsed = self::parseFromEspo($value);
 
         return $parsed
             ? $parsed->setTimezone(self::timeZone())->format(self::PHP_DISPLAY_DATETIME)
@@ -82,7 +109,7 @@ class AlcaldiaDateTimeHelper
 
     public static function formatDocumentDate(mixed $value): string
     {
-        $parsed = self::parse($value);
+        $parsed = self::parseFromEspo($value);
 
         return $parsed
             ? $parsed->setTimezone(self::timeZone())->format(self::PHP_DOCUMENT_DATE)
@@ -91,7 +118,7 @@ class AlcaldiaDateTimeHelper
 
     public static function formatDocumentDateTime(mixed $value): string
     {
-        $parsed = self::parse($value);
+        $parsed = self::parseFromEspo($value);
 
         return $parsed
             ? $parsed->setTimezone(self::timeZone())->format(self::PHP_DOCUMENT_DATETIME)
@@ -108,7 +135,7 @@ class AlcaldiaDateTimeHelper
         return self::now()->format(self::PHP_DOCUMENT_DATETIME);
     }
 
-    private static function parse(mixed $value): ?\DateTimeImmutable
+    private static function parseFromEspo(mixed $value): ?\DateTimeImmutable
     {
         if ($value === null || $value === '') {
             return null;

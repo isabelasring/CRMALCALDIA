@@ -24,7 +24,7 @@ class EarlyBeforeCreate implements SaveHook
             if ($description !== '') {
                 $entity->set('name', mb_substr($description, 0, 149));
             } else {
-                $entity->set('name', 'Solicitud ' . AlcaldiaDateTimeHelper::storageNowString());
+                $entity->set('name', 'Solicitud ' . AlcaldiaDateTimeHelper::labelNowDateTime());
             }
         }
     }

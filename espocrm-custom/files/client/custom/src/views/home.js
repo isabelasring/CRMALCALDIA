@@ -921,6 +921,9 @@ define('custom:views/home', ['views/dashboard'], function (Dep) {
                     .filter(Boolean)
                     .join(' ')
                     .trim() || '—';
+                var fechaCaso = model.get('cFechaCaso')
+                    ? (this.getDateTime().toDisplay(model.get('cFechaCaso')) || '—')
+                    : '—';
 
                 return '<tr>' +
                     '<td><a href="#Case/view/' + model.id + '">' + _.escape(model.get('cNumeroRadicado') || '—') + '</a></td>' +
@@ -928,9 +931,9 @@ define('custom:views/home', ['views/dashboard'], function (Dep) {
                     '<td>' + _.escape(model.get('status') || '—') + '</td>' +
                     '<td>' + _.escape(model.get('cExpediente') || '—') + '</td>' +
                     '<td>' + _.escape(model.get('assignedUserName') || '—') + '</td>' +
-                    '<td>' + _.escape(model.get('cFechaCaso') || '—') + '</td>' +
+                    '<td>' + _.escape(fechaCaso) + '</td>' +
                     '</tr>';
-            }).join('');
+            }.bind(this)).join('');
 
             $container.html(
                 '<div class="table-responsive"><table class="table table-condensed table-striped">' +

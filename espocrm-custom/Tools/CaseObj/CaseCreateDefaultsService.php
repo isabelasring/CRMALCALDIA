@@ -38,7 +38,7 @@ class CaseCreateDefaultsService
     public function build(): array
     {
         $defaults = [
-            'cFechaCaso' => AlcaldiaDateTimeHelper::storageNowString(),
+            'cFechaCaso' => AlcaldiaDateTimeHelper::espoStorageNowString(),
         ];
 
         $recibida = $this->resolveUserLinkDefault(self::RECIBIDA_ROLE_NAMES, self::RECIBIDA_USER_NAMES);

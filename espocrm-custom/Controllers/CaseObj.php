@@ -69,7 +69,7 @@ class CaseObj extends BaseCaseObj
                 ->build();
         } catch (\Throwable $e) {
             return [
-                'cFechaCaso' => AlcaldiaDateTimeHelper::storageNowString(),
+                'cFechaCaso' => AlcaldiaDateTimeHelper::espoStorageNowString(),
             ];
         }
     }
