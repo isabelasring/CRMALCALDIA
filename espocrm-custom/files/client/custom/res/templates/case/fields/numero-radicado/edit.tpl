@@ -20,7 +20,6 @@
                                 <span class="text-warning">{{translate 'Seleccione recurso/tema en la solicitud'}}</span>
                             {{/if}}
                         </p>
-                        <div class="text-muted small">{{translate 'radicadoSiglasFromRecursoHelp' scope='Case' default='Se toma automáticamente del campo Recurso/tema.'}}</div>
                     </div>
                 </div>
                 <div class="col-sm-5">
