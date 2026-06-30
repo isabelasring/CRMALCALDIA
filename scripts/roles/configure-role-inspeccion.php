@@ -7,6 +7,7 @@
  */
 
 require_once '/var/www/html/bootstrap.php';
+require_once __DIR__ . '/../includes/alcaldia-comunicacion-caso-permissions.php';
 
 use Espo\Core\Application;
 use Espo\Core\Utils\Metadata;
@@ -57,7 +58,6 @@ $readOnlyScopes = [
     'Task' => ['create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no'],
     'Team' => ['create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'no'],
     'ActuoArchivo' => ['create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no'],
-    'ComunicacionCaso' => ['create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no'],
     'AsignacionHistorial' => ['create' => 'no', 'read' => 'all', 'edit' => 'no', 'delete' => 'no', 'stream' => 'no'],
     'Case' => ['create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'all'],
     'ActaVisita' => ['create' => 'yes', 'read' => 'all', 'edit' => 'all', 'delete' => 'no', 'stream' => 'no'],
@@ -141,6 +141,7 @@ foreach ($caseApiActions as $action => $level) {
 }
 
 $data['Case'] = $caseData;
+alcaldiaApplyComunicacionCasoPermissions($metadata, $data, $fieldData);
 $role->set('data', $data);
 $role->set('tabList', null);
 $role->set('assignmentPermission', 'all');

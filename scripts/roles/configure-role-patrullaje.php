@@ -5,6 +5,7 @@
  */
 
 require_once '/var/www/html/bootstrap.php';
+require_once __DIR__ . '/../includes/alcaldia-comunicacion-caso-permissions.php';
 
 use Espo\Core\Application;
 use Espo\Core\Utils\Metadata;
@@ -76,14 +77,6 @@ $data['ActuoArchivo'] = [
     'stream' => 'no',
 ];
 
-$data['ComunicacionCaso'] = [
-    'create' => 'yes',
-    'read' => 'team',
-    'edit' => 'team',
-    'delete' => 'no',
-    'stream' => 'no',
-];
-
 $data['Calendar'] = true;
 
 $fieldData = $role->get('fieldData');
@@ -103,6 +96,8 @@ if ($actaFields !== []) {
         $fieldData['ActaVisita'][$field] = ['read' => 'yes', 'edit' => 'yes'];
     }
 }
+
+alcaldiaApplyComunicacionCasoPermissions($metadata, $data, $fieldData, 'team', 'team');
 
 $role->set('data', $data);
 $role->set('fieldData', $fieldData);

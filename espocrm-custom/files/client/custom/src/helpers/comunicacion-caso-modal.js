@@ -31,6 +31,38 @@ define('custom:helpers/comunicacion-caso-modal', [
         return null;
     };
 
+    var extractErrorMessage = function (error) {
+        if (!error) {
+            return 'No se pudo guardar la comunicación.';
+        }
+
+        if (error.responseJSON && error.responseJSON.message) {
+            return error.responseJSON.message;
+        }
+
+        if (error.message) {
+            return error.message;
+        }
+
+        return 'No se pudo guardar la comunicación.';
+    };
+
+    var ensureCaseLink = function (model, caseModel, defaults) {
+        if (!model || !caseModel || !caseModel.id) {
+            return;
+        }
+
+        model.set({
+            caseId: caseModel.id,
+            caseName: defaults.caseName || caseModel.get('cNumeroRadicado') || caseModel.get('name') || caseModel.id,
+            numeroRadicado: defaults.numeroRadicado || caseModel.get('cNumeroRadicado') || null,
+        }, {silent: true});
+
+        if (!model.get('fecha')) {
+            model.set('fecha', defaults.fecha, {silent: true});
+        }
+    };
+
     var openCreate = function (hostView, caseModel, options) {
         options = options || {};
 
@@ -42,9 +74,17 @@ define('custom:helpers/comunicacion-caso-modal', [
             return Promise.reject();
         }
 
+        if (host.getAcl && !host.getAcl().check('ComunicacionCaso', 'create')) {
+            Espo.Ui.error('No tiene permiso para registrar comunicaciones. Cierre sesión y vuelva a entrar.');
+
+            return Promise.reject();
+        }
+
         var helper = new RecordModalHelper();
-        var attributes = ComunicacionFromCase.buildDefaultsFromCase(caseModel);
+        var defaults = ComunicacionFromCase.buildDefaultsFromCase(caseModel);
         var afterSave = function () {
+            caseModel.fetch();
+
             if (typeof options.onAfterSave === 'function') {
                 options.onAfterSave();
             }
@@ -52,14 +92,27 @@ define('custom:helpers/comunicacion-caso-modal', [
 
         return helper.showCreate(host, {
             entityType: 'ComunicacionCaso',
-            attributes: attributes,
+            attributes: defaults,
             layoutName: 'edit',
             fullFormDisabled: true,
             relate: {
                 model: caseModel,
                 link: 'case',
             },
+            beforeSave: function (model) {
+                ensureCaseLink(model, caseModel, defaults);
+
+                if (!String(model.get('tipo') || '').trim()) {
+                    Espo.Ui.error('Seleccione el tipo de comunicación.');
+
+                    return false;
+                }
+            },
             afterSave: afterSave,
+        }).catch(function (error) {
+            Espo.Ui.error(extractErrorMessage(error));
+
+            return Promise.reject(error);
         });
     };
 
@@ -70,6 +123,12 @@ define('custom:helpers/comunicacion-caso-modal', [
 
         if (!host || !id) {
             Espo.Ui.error('No se pudo abrir la comunicación.');
+
+            return Promise.reject();
+        }
+
+        if (host.getAcl && !host.getAcl().check('ComunicacionCaso', 'edit')) {
+            Espo.Ui.error('No tiene permiso para editar comunicaciones.');
 
             return Promise.reject();
         }
@@ -87,6 +146,10 @@ define('custom:helpers/comunicacion-caso-modal', [
             layoutName: 'edit',
             fullFormDisabled: true,
             afterSave: afterSave,
+        }).catch(function (error) {
+            Espo.Ui.error(extractErrorMessage(error));
+
+            return Promise.reject(error);
         });
     };
 

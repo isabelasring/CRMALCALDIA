@@ -21,6 +21,15 @@ class FillFromCase implements BeforeSave
     {
         $caseId = $entity->get('caseId');
 
+        if (!$caseId && $entity->isNew()) {
+            $fetchedCaseId = $entity->getFetched('caseId');
+
+            if ($fetchedCaseId) {
+                $caseId = $fetchedCaseId;
+                $entity->set('caseId', $caseId);
+            }
+        }
+
         if ($caseId) {
             $case = $this->entityManager->getEntityById('Case', $caseId);
 
