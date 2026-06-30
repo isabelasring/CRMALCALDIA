@@ -73,3 +73,52 @@ deploy_run_legacy_migrations_docker() {
     echo 'BD nueva — migraciones legacy omitidas.'
   fi
 }
+
+# Vacía datos de negocio una sola vez por servidor (inicio desde cero).
+# Forzar de nuevo: ESPO_WIPE_BUSINESS_DATA=1
+deploy_maybe_wipe_business_data() {
+  local app_root="$1"
+  local scripts_source="$2"
+  local php_bin="${3:-php}"
+  local wipe_stamp="$app_root/data/.alcaldia-business-data-wiped-v1"
+  local force_wipe="${ESPO_WIPE_BUSINESS_DATA:-0}"
+  local wipe_script="$scripts_source/wipe-business-data.php"
+
+  if [ ! -f "$wipe_script" ]; then
+    echo "AVISO: wipe-business-data.php no encontrado — omitiendo wipe."
+    return 0
+  fi
+
+  if [ "$force_wipe" = "1" ] || [ ! -f "$wipe_stamp" ]; then
+    echo "Vacía datos de negocio (inicio desde cero)..."
+    "$php_bin" "$wipe_script"
+    mkdir -p "$app_root/data"
+    touch "$wipe_stamp"
+    echo "Wipe completado."
+  else
+    echo "Wipe omitido (ya ejecutado). Forzar: ESPO_WIPE_BUSINESS_DATA=1"
+  fi
+}
+
+deploy_maybe_wipe_business_data_docker() {
+  local root="$1"
+  local force_wipe="${ESPO_WIPE_BUSINESS_DATA:-0}"
+
+  docker cp "${root}/scripts/wipe-business-data.php" espocrm:/tmp/wipe-business-data.php
+
+  docker exec -e "ESPO_WIPE_BUSINESS_DATA=${force_wipe}" espocrm bash -c '
+    APP_ROOT=/var/www/html
+    STAMP="$APP_ROOT/data/.alcaldia-business-data-wiped-v1"
+    FORCE="${ESPO_WIPE_BUSINESS_DATA:-0}"
+
+    if [ "$FORCE" = "1" ] || [ ! -f "$STAMP" ]; then
+      echo "Vacía datos de negocio (inicio desde cero)..."
+      php /tmp/wipe-business-data.php
+      mkdir -p "$APP_ROOT/data"
+      touch "$STAMP"
+      echo "Wipe completado."
+    else
+      echo "Wipe omitido (ya ejecutado). Forzar: ESPO_WIPE_BUSINESS_DATA=1"
+    fi
+  '
+}

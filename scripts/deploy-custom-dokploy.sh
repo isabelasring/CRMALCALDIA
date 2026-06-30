@@ -159,6 +159,8 @@ echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 # shellcheck source=includes/deploy-steps.sh
 source "$SCRIPTS_SOURCE/includes/deploy-steps.sh"
 
+deploy_maybe_wipe_business_data "$APP_ROOT" "$SCRIPTS_SOURCE" "$PHP_BIN"
+
 for entry in "${DEPLOY_SETUP_STEPS[@]}"; do
   run_php_script "${entry#*|}"
 done

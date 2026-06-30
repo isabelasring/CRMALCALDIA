@@ -107,6 +107,8 @@ echo "appTimestamp=" . $state["appTimestamp"] . "\n";
 # shellcheck source=includes/deploy-steps.sh
 source "$ROOT/scripts/includes/deploy-steps.sh"
 
+deploy_maybe_wipe_business_data_docker "$ROOT"
+
 deploy_run_steps_docker "$ROOT" "${DEPLOY_SETUP_STEPS[@]}"
 deploy_run_legacy_migrations_docker "$ROOT" "${DEPLOY_LEGACY_MIGRATION_SCRIPTS[@]}"
 deploy_run_steps_docker "$ROOT" "${DEPLOY_POST_LEGACY_STEPS[@]}"

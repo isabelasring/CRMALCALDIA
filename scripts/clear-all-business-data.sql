@@ -2,10 +2,11 @@
 -- NO elimina la base de datos ni el esquema.
 -- CONSERVA: usuarios, roles, equipos, preferencias, jobs del sistema, plantillas, configuración.
 --
--- Uso (ajusta usuario/BD):
---   psql -U espocrm -d espocrm -f scripts/clear-all-business-data.sql
--- o dentro del contenedor:
---   docker exec -i postgres psql -U espocrm -d espocrm < scripts/clear-all-business-data.sql
+-- NOTA: En deploy (Dokploy) esto se ejecuta solo vía scripts/wipe-business-data.php
+-- la primera vez. No hace falta correr este SQL a mano salvo emergencia.
+--
+-- Uso manual (contenedor espocrm-db):
+--   docker exec -i espocrm-db psql -U espocrm -d espocrm < scripts/clear-all-business-data.sql
 
 BEGIN;
 
@@ -68,7 +69,8 @@ TRUNCATE TABLE
     public.knowledge_base_article_portal,
     public.knowledge_base_article,
     public.knowledge_base_category_path,
-    public.knowledge_base_category
+    public.knowledge_base_category,
+    public.c_location
 RESTART IDENTITY CASCADE;
 
 -- Stream, notas, adjuntos, historial
@@ -105,21 +107,27 @@ TRUNCATE TABLE
     public.webhook_queue_item,
     public.webhook_event_queue_item,
     public.auth_log_record,
+    public.auth_token,
     public.app_log_record,
     public.scheduled_job_log_record,
     public.job,
     public.kanban_order,
-    public.array_value
+    public.array_value,
+    public.password_change_request,
+    public.two_factor_code,
+    public.o_auth_account,
+    public.external_account,
+    public.phone_number
 RESTART IDENTITY CASCADE;
 
--- Reiniciar consecutivos de radicado/caso si existen
+-- Reiniciar consecutivos
 UPDATE public.next_number
 SET value = 1
-WHERE entity_type IN ('Case', 'ActaVisita', 'ActuoArchivo', 'ComunicacionCaso', 'AsignacionHistorial');
+WHERE entity_type IN (
+    'Case', 'ActaVisita', 'ActuoArchivo', 'ComunicacionCaso', 'AsignacionHistorial',
+    'Contact', 'Account', 'Document', 'Task', 'Lead', 'Opportunity'
+);
 
 COMMIT;
 
--- Tablas NO tocadas (configuración y acceso):
--- "user", role, role_user, role_team, team, team_user, preferences, user_data,
--- scheduled_job, extension, integration, template, email_template, email_account,
--- inbound_email, portal, layout_*, currency*, system_data, authentication_provider
+-- Tablas NO tocadas: user, role, team, preferences, scheduled_job, template, layout_*, etc.
