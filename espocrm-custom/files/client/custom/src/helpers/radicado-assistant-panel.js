@@ -253,7 +253,6 @@ define('custom:helpers/radicado-assistant-panel', [
         }
 
         applyDefaults(recordView.model);
-        hideNativeFields(recordView);
 
         recordView.$el.find('.' + PANEL_CLASS).remove();
 
@@ -265,6 +264,7 @@ define('custom:helpers/radicado-assistant-panel', [
         ).first();
         const $grid = recordView.$el.find('.record-grid').first();
         const $form = recordView.$el.find('form.record, .panel-body-form').first();
+        let mounted = false;
 
         if ($layoutHost.length) {
             $layoutHost.find('.' + PANEL_CLASS).remove();
@@ -274,13 +274,23 @@ define('custom:helpers/radicado-assistant-panel', [
                 '.panel[data-panel-name="radicacionCaso"], ' +
                 '.record-panel[data-name="radicacionCaso"]'
             ).show();
+            mounted = true;
         } else if ($grid.length) {
             $grid.before(html);
+            mounted = true;
         } else if ($form.length) {
             $form.prepend(html);
+            mounted = true;
         } else {
             recordView.$el.prepend(html);
+            mounted = true;
         }
+
+        if (!mounted) {
+            return;
+        }
+
+        hideNativeFields(recordView);
 
         const $panel = recordView.$el.find('.' + PANEL_CLASS).last();
 

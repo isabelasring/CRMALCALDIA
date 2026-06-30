@@ -135,14 +135,32 @@ define('custom:views/case/record/edit', [
                 return;
             }
 
+            this._alcaldiaRadicacionEdit = true;
+
             RadicadoAssistantPanel.mount(this, {force: true});
 
-            if (!this.$el.find('.radicado-assistant-panel-mount').length) {
-                return;
-            }
+            const hasAssistant = this.$el.find('.radicado-assistant-panel-mount').length;
 
             RadicacionFields.RADICADO_ALL_FIELDS.forEach((field) => {
-                this.$el.find('[data-name="' + field + '"]').closest('.cell').hide();
+                const $cell = this.$el.find('[data-name="' + field + '"]').closest('.cell');
+
+                if (!$cell.length) {
+                    return;
+                }
+
+                if (hasAssistant) {
+                    $cell.hide();
+
+                    return;
+                }
+
+                $cell.show();
+
+                const view = this.getFieldView(field);
+
+                if (view && typeof view.setNotReadOnly === 'function') {
+                    view.setNotReadOnly();
+                }
             });
         },
 
@@ -510,7 +528,7 @@ define('custom:views/case/record/edit', [
 
             applyRoleUi();
 
-            [150, 500, 1200].forEach(function (delay) {
+            [150, 500, 1200, 2000, 3500].forEach(function (delay) {
                 window.setTimeout(function () {
                     if (!self.isRendered || !self.isRendered()) {
                         return;
@@ -729,6 +747,16 @@ define('custom:views/case/record/edit', [
 
                     if (inspeccionView && typeof inspeccionView.setReadOnly === 'function') {
                         inspeccionView.setReadOnly();
+                    }
+
+                    return;
+                }
+
+                if (RadicacionFields.canEditRadicadoCase(user) || isRadicacion) {
+                    const radView = this.getFieldView(field);
+
+                    if (radView && typeof radView.setNotReadOnly === 'function') {
+                        radView.setNotReadOnly();
                     }
 
                     return;

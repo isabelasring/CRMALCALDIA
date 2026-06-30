@@ -256,7 +256,19 @@ define('custom:helpers/radicacion-fields', [], function () {
     };
 
     const hasRole = function (user, roleKey) {
-        return getAssignedRoleNames(user).some((name) => normalize(name) === roleKey);
+        return getAssignedRoleNames(user).some(function (name) {
+            const normalized = normalize(name);
+
+            return normalized === roleKey || normalized.indexOf(roleKey) !== -1;
+        });
+    };
+
+    const hasInspeccionRole = function (user) {
+        return hasRole(user, ROLE_INSPECCION);
+    };
+
+    const hasRadicacionRole = function (user) {
+        return hasRole(user, ROLE_RADICACION);
     };
 
     /**
@@ -351,6 +363,10 @@ define('custom:helpers/radicacion-fields', [], function () {
             return false;
         }
 
+        if (hasInspeccionRole(user) && !hasRadicacionRole(user)) {
+            return false;
+        }
+
         const profile = getActiveProfile(user);
 
         if (profile) {
@@ -367,7 +383,7 @@ define('custom:helpers/radicacion-fields', [], function () {
             return true;
         }
 
-        return hasRole(user, ROLE_RADICACION) && !hasRole(user, ROLE_INSPECCION);
+        return hasRadicacionRole(user);
     };
 
     const isOperationalRadicacionUser = function (user) {

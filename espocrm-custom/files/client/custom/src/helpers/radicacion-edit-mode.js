@@ -17,12 +17,16 @@ define('custom:helpers/radicacion-edit-mode', [
             && !RadicacionFields.isInspeccionUser(user);
     };
 
-    const isRadicacionOnlyEdit = function (recordView) {
+    const shouldUseRadicacionRestrictedEdit = function (recordView) {
         if (!recordView || !recordView.model || recordView.model.isNew()) {
             return false;
         }
 
         return RadicacionFields.canEditRadicadoCase(recordView.getUser());
+    };
+
+    const isRadicacionOnlyEdit = function (recordView) {
+        return shouldUseRadicacionRestrictedEdit(recordView);
     };
 
     const activateRadicarMode = function (caseId) {
@@ -163,22 +167,74 @@ define('custom:helpers/radicacion-edit-mode', [
             .removeAttr('readonly');
     };
 
+    const moveRadicacionPanelToTop = function (recordView) {
+        if (!recordView || typeof recordView.findPanel !== 'function') {
+            return;
+        }
+
+        const $panel = recordView.findPanel('radicacionCaso');
+
+        if (!$panel.length) {
+            return;
+        }
+
+        $panel.show();
+
+        const $container = $panel.parent();
+
+        if ($container.length && $panel.index() !== 0) {
+            $panel.detach().prependTo($container);
+        }
+
+        if ($panel[0] && typeof $panel[0].scrollIntoView === 'function') {
+            window.setTimeout(function () {
+                $panel[0].scrollIntoView({block: 'start', behavior: 'auto'});
+            }, 100);
+        }
+    };
+
+    const markReadonlyCells = function (recordView) {
+        if (!recordView || !recordView.$el) {
+            return;
+        }
+
+        const editable = getEditableFields();
+
+        recordView.$el.find('.cell[data-name], [data-name]').each(function () {
+            const $target = $(this);
+            const $cell = $target.hasClass('cell') ? $target : $target.closest('.cell');
+
+            if (!$cell.length || $cell.closest('.radicado-assistant-panel-mount').length) {
+                return;
+            }
+
+            const fieldName = String($cell.attr('data-name') || $target.attr('data-name') || '').trim();
+
+            if (!fieldName) {
+                return;
+            }
+
+            if (editable.indexOf(fieldName) !== -1) {
+                $cell.removeClass('alcaldia-radicacion-readonly');
+
+                return;
+            }
+
+            $cell.addClass('alcaldia-radicacion-readonly');
+        });
+    };
+
     const applyRestrictedEdit = function (recordView) {
-        if (!isRadicacionOnlyEdit(recordView)) {
+        if (!shouldUseRadicacionRestrictedEdit(recordView)) {
             return;
         }
 
         recordView._alcaldiaRadicacionEdit = true;
+        recordView._radicarMode = true;
+
+        moveRadicacionPanelToTop(recordView);
 
         const editable = getEditableFields();
-
-        if (typeof recordView.findPanel === 'function') {
-            const $panel = recordView.findPanel('radicacionCaso');
-
-            if ($panel && $panel.length) {
-                $panel.show();
-            }
-        }
 
         if (typeof recordView.setReadOnlyExcept === 'function') {
             recordView.setReadOnlyExcept(editable);
@@ -186,26 +242,29 @@ define('custom:helpers/radicacion-edit-mode', [
 
         lockAllFieldViewsExcept(recordView, editable);
         unlockEditableRadicacionFields(recordView);
+        markReadonlyCells(recordView);
 
         if (typeof recordView.mountRadicacionAssistant === 'function') {
             recordView.mountRadicacionAssistant();
         }
+
+        markReadonlyCells(recordView);
     };
 
     const scheduleRestrictedEdit = function (recordView) {
-        if (!isRadicacionOnlyEdit(recordView)) {
+        if (!shouldUseRadicacionRestrictedEdit(recordView)) {
             return;
         }
 
         applyRestrictedEdit(recordView);
 
-        [150, 450, 900].forEach(function (delay) {
+        [150, 450, 900, 1800].forEach(function (delay) {
             window.setTimeout(function () {
                 if (!recordView.isRendered || !recordView.isRendered()) {
                     return;
                 }
 
-                if (!isRadicacionOnlyEdit(recordView)) {
+                if (!shouldUseRadicacionRestrictedEdit(recordView)) {
                     return;
                 }
 
