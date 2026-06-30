@@ -8,10 +8,15 @@
  */
 
 require_once '/var/www/html/bootstrap.php';
+require_once __DIR__ . '/includes/alcaldia-deploy-roles.php';
 
 use Espo\Core\Application;
 use Espo\Core\DataManager;
 use Espo\ORM\EntityManager;
+
+if (alcaldiaDeploySkipIfRolesDisabled('configure-case-party-field-access.php')) {
+    exit(0);
+}
 
 $app = new Application();
 $app->setupSystemUser();

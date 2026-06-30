@@ -38,6 +38,7 @@ DEPLOY_POST_LEGACY_STEPS=(
   "Comunicaciones por caso (permisos por rol)|configure-comunicacion-caso-entity.php"
   "Defaults Recibida por / Remitido a (por rol)|configure-case-create-defaults.php"
   "Vínculos caso ↔ tercero (peticionario / infractor)|sync-case-party-links.php"
+  "Modo sin roles: permisos amplios automáticos|configure-alcaldia-no-roles-mode.php"
   "Auditoría usuarios y roles|audit-users-roles.php"
 )
 
