@@ -2,9 +2,6 @@
 
 namespace Espo\Custom\Tools\CaseObj;
 
-/**
- * Enlaces HTML para mensajes de notificación en campana (EspoCRM).
- */
 class AlcaldiaNotificationHtml
 {
     public static function userLink(?string $userId, ?string $name): string

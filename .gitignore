@@ -11,9 +11,10 @@ dump-espocrm-*.sql
 Untitled
 *.drawio
 
-# Documentación: solo README raíz
+# Documentación: README raíz + docs operativos
 *.md
 !README.md
+!docs/**/*.md
 
 # Artefactos de desarrollo / runtime
 __pycache__/

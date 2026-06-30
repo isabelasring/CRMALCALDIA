@@ -50,9 +50,25 @@ else
   echo "OK: sin rutas radicar/asignar"
 fi
 
-check_file "Vista record edit simplificada" \
+check_file "Vista record edit (Inspección)" \
   "$CLIENT/src/views/case/record/edit.js" \
-  "persona-tipo-fields" || errors=$((errors + 1))
+  "inspeccion-case-flow" || errors=$((errors + 1))
+
+check_file "Helper radicacion-fields" \
+  "$CLIENT/src/helpers/radicacion-fields.js" \
+  "isInspeccionUser" || errors=$((errors + 1))
+
+check_file "Helper inspeccion-case-flow" \
+  "$CLIENT/src/helpers/inspeccion-case-flow.js" \
+  "lockRadicadoFields" || errors=$((errors + 1))
+
+check_file "Perfil API AlcaldiaUserProfile" \
+  "$CUSTOM/Tools/User/AlcaldiaUserProfile.php" \
+  "ROLE_INSPECCION" || errors=$((errors + 1))
+
+check_file "Hook notificación Inspección→Radicación" \
+  "$CUSTOM/Hooks/CaseObj/NotifyRadicacionOnCaseCreated.php" \
+  "isInspeccion" || errors=$((errors + 1))
 
 check_file "Campo motivo reasignacion" \
   "$CLIENT/src/views/case/fields/c-motivo-reasignacion.js" \
@@ -87,4 +103,4 @@ if [ "$errors" -gt 0 ]; then
   exit 1
 fi
 
-echo "RESULTADO: custom base presente (modo admin, sin flujo por roles)."
+echo "RESULTADO: custom base presente (rol Inspección activo)."

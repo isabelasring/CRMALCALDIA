@@ -44,9 +44,8 @@ fi
 echo 'Copiando frontend client/custom...'
 docker cp "$ROOT/espocrm-custom/files/client/custom/." espocrm:/var/www/html/client/custom/
 
-echo 'Eliminando JS obsoleto de flujo por roles...'
+echo 'Eliminando JS obsoleto...'
 docker exec espocrm rm -f \
-  /var/www/html/client/custom/src/helpers/radicacion-fields.js \
   /var/www/html/client/custom/src/helpers/radicacion-edit-mode.js \
   /var/www/html/client/custom/src/helpers/post-radicacion-fields.js \
   /var/www/html/client/custom/src/helpers/asignador-edit-mode.js \

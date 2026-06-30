@@ -15,6 +15,7 @@ DEPLOY_SETUP_STEPS=(
   "Kanban de Casos (todos los usuarios)|configure-case-kanban.php"
   "Home: tablero custom (custom:views/home)|configure-user-dashboards.php"
   "Acceso completo — menú y permisos amplios|configure-full-access-all-roles.php"
+  "Rol Inspección — permisos y campos|roles/configure-role-inspeccion.php"
   "Documentos: plantillas oficiales (solicitud, acta, actuo)|configure-document-plantillas.php"
   "Documentos: Excel oficial (excelAlcaldia.xlsx)|configure-excel-alcaldia-document.php"
 )
@@ -30,7 +31,6 @@ DEPLOY_LEGACY_MIGRATION_SCRIPTS=(
 DEPLOY_POST_LEGACY_STEPS=(
   "Job alertas de vencimiento (campana)|configure-case-vencimiento-alerts.php"
   "Vínculos caso ↔ tercero (peticionario / infractor)|sync-case-party-links.php"
-  "Permisos amplios automáticos (modo sin flujo por roles)|configure-alcaldia-no-roles-mode.php"
 )
 
 deploy_run_steps_docker() {

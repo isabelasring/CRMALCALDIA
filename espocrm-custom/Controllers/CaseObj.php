@@ -13,6 +13,7 @@ use Espo\Custom\Tools\CaseObj\CaseTimelineService;
 use Espo\Custom\Tools\CaseObj\RadicadoCatalog;
 use Espo\Custom\Tools\CaseObj\RadicadoConsecutivoService;
 use Espo\Custom\Tools\Party\PartyRegistryService;
+use Espo\Custom\Tools\User\AlcaldiaUserProfile;
 use Espo\Entities\User;
 use Espo\Modules\Crm\Controllers\CaseObj as BaseCaseObj;
 
@@ -21,19 +22,15 @@ class CaseObj extends BaseCaseObj
     /**
      * GET Case/action/alcaldiaProfile
      *
-     * Compatibilidad con JS en caché del cliente; sin lógica por roles.
-     *
      * @return array<string, mixed>
      */
     public function getActionAlcaldiaProfile(Request $request): array
     {
-        return [
-            'homeProfile' => 'gestion',
-            'isInspeccion' => false,
-            'isRadicacion' => false,
-            'isAsignador' => false,
-            'isPatrullero' => false,
-        ];
+        $user = $this->getUser();
+
+        return $this->injectableFactory
+            ->create(AlcaldiaUserProfile::class)
+            ->build($user);
     }
 
     /**

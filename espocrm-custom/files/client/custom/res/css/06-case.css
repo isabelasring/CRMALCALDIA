@@ -120,6 +120,15 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* Inspección: panel radicado visible pero solo lectura */
+.record-edit .panel.alcaldia-inspeccion-radicado-readonly .alcaldia-field-readonly input,
+.record-edit .panel.alcaldia-inspeccion-radicado-readonly .alcaldia-field-readonly select,
+.record-edit .panel.alcaldia-inspeccion-radicado-readonly .alcaldia-field-readonly textarea,
+.record-edit .panel.alcaldia-inspeccion-radicado-readonly .alcaldia-field-readonly button {
+    pointer-events: none;
+    opacity: 0.72;
+}
+
 /* Radicación: solo panel asistente editable al radicar */
 body.alcaldia-radicacion-edit-mode .edit[data-scope="Case"] .cell.alcaldia-radicacion-readonly {
   pointer-events: none;

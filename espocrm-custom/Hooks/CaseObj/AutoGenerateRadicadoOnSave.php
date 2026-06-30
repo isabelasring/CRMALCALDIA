@@ -134,6 +134,12 @@ class AutoGenerateRadicadoOnSave implements BeforeSave
 
     private function canEditRadicado(User $user): bool
     {
-        return $user->isAdmin();
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $this->injectableFactory
+            ->create(\Espo\Custom\Tools\User\AlcaldiaUserProfile::class)
+            ->canEditRadicado($user);
     }
 }

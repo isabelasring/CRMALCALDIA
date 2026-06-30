@@ -2,12 +2,10 @@
 
 function alcaldiaDeployRolesDisabled(): bool
 {
-    return true;
+    return false;
 }
 
 function alcaldiaDeploySkipIfRolesDisabled(string $scriptLabel): bool
 {
-    echo "Flujo por roles desactivado — omitiendo {$scriptLabel}." . PHP_EOL;
-
-    return true;
+    return false;
 }
