@@ -1,27 +1,9 @@
-.env
-*.log
-backups/*
-!backups/despliegue-inicial/
-!backups/despliegue-inicial/**
+# Repo completo en Git para trabajar desde cualquier máquina (Mac/Windows).
+# Solo se ignoran artefactos locales regenerables o basura del sistema operativo.
+
 .DS_Store
 Thumbs.db
-~$*
-tmp_*.sql
-dump-espocrm-*.sql
-Untitled
-*.drawio
-
-# Documentación: README raíz + docs operativos
-*.md
-!README.md
-!docs/**/*.md
-
-# Artefactos de desarrollo / runtime
 __pycache__/
 *.pyc
 .venv-excel/
-test-formato-*.pdf
-*.docx
-!formatos/**
-espocrm-custom/files/templates/*-template.pdf
-espocrm-custom/files/templates/*.pdf
+*.log
