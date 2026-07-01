@@ -48,15 +48,38 @@
         '#64748b', '#475569', '#52667a', '#1d8a6e',
     ];
 
+    /* Pasteles por estado — mismos tonos que el listado de casos */
+    var ESTADO_PALETTE = {
+        'Pendiente de radicacion': {bg: '#ffedd5', text: '#9a3412'},
+        'Radicado': {bg: '#e0f2fe', text: '#0369a1'},
+        'Asignado': {bg: '#fce7f3', text: '#9d174d'},
+        'En proceso': {bg: '#ede9fe', text: '#5b21b6'},
+        'Visita realizada': {bg: '#fef9c3', text: '#854d0e'},
+        'Visita aprobada': {bg: '#dcfce7', text: '#166534'},
+        'Finalizado': {bg: '#ede0d4', text: '#6b4423'},
+        'Proceso cerrado': {bg: '#e2e8f0', text: '#334155'},
+    };
+
     var COLORES_ESTADO = {
-        'Pendiente de radicacion': '#f97316',
-        'Radicado': '#0ea5e9',
-        'Asignado': '#ec4899',
-        'En proceso': '#8b5cf6',
-        'Visita realizada': '#eab308',
-        'Visita aprobada': '#22c55e',
-        'Finalizado': '#a18072',
-        'Proceso cerrado': '#64748b',
+        'Pendiente de radicacion': ESTADO_PALETTE['Pendiente de radicacion'].bg,
+        'Radicado': ESTADO_PALETTE['Radicado'].bg,
+        'Asignado': ESTADO_PALETTE['Asignado'].bg,
+        'En proceso': ESTADO_PALETTE['En proceso'].bg,
+        'Visita realizada': ESTADO_PALETTE['Visita realizada'].bg,
+        'Visita aprobada': ESTADO_PALETTE['Visita aprobada'].bg,
+        'Finalizado': ESTADO_PALETTE['Finalizado'].bg,
+        'Proceso cerrado': ESTADO_PALETTE['Proceso cerrado'].bg,
+    };
+
+    var COLORES_ESTADO_TEXTO = {
+        'Pendiente de radicacion': ESTADO_PALETTE['Pendiente de radicacion'].text,
+        'Radicado': ESTADO_PALETTE['Radicado'].text,
+        'Asignado': ESTADO_PALETTE['Asignado'].text,
+        'En proceso': ESTADO_PALETTE['En proceso'].text,
+        'Visita realizada': ESTADO_PALETTE['Visita realizada'].text,
+        'Visita aprobada': ESTADO_PALETTE['Visita aprobada'].text,
+        'Finalizado': ESTADO_PALETTE['Finalizado'].text,
+        'Proceso cerrado': ESTADO_PALETTE['Proceso cerrado'].text,
     };
 
     var COLORES_SEMAFORO = {
@@ -345,7 +368,8 @@
                 status: etapa.status,
                 label: etapa.label,
                 valor: conteoPorEstado[etapa.status] || 0,
-                color: COLORES_ESTADO[etapa.status] || '#9ca3af',
+                color: COLORES_ESTADO[etapa.status] || '#e2e8f0',
+                textColor: COLORES_ESTADO_TEXTO[etapa.status] || '#475569',
             };
         });
 
@@ -376,10 +400,8 @@
             var barra = document.createElement('div');
             barra.className = 'funnel-barra';
             barra.style.backgroundColor = paso.color;
-
-            if (paso.status === 'Finalizado' || paso.status === 'Proceso cerrado') {
-                barra.style.color = '#f9fafb';
-            }
+            barra.style.color = paso.textColor;
+            barra.style.border = '1px solid rgba(15, 23, 42, 0.08)';
 
             var etiqueta = document.createElement('span');
             etiqueta.className = 'funnel-etiqueta';

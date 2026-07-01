@@ -42,20 +42,28 @@
   /* Estados del caso — 8 familias distintas: naranja, azul, rosa, violeta, amarillo, verde, marrón, gris */
   --crm-case-pendiente: #9a3412;
   --crm-case-pendiente-soft: #ffedd5;
+  --crm-case-pendiente-border: #fdba74;
   --crm-case-radicado: #0369a1;
   --crm-case-radicado-soft: #e0f2fe;
+  --crm-case-radicado-border: #7dd3fc;
   --crm-case-asignado: #9d174d;
   --crm-case-asignado-soft: #fce7f3;
+  --crm-case-asignado-border: #f9a8d4;
   --crm-case-en-proceso: #5b21b6;
   --crm-case-en-proceso-soft: #ede9fe;
+  --crm-case-en-proceso-border: #c4b5fd;
   --crm-case-visita: #854d0e;
   --crm-case-visita-soft: #fef9c3;
+  --crm-case-visita-border: #fde047;
   --crm-case-aprobada: #166534;
   --crm-case-aprobada-soft: #dcfce7;
+  --crm-case-aprobada-border: #86efac;
   --crm-case-finalizado: #6b4423;
   --crm-case-finalizado-soft: #ede0d4;
+  --crm-case-finalizado-border: #c4a484;
   --crm-case-cerrado: #334155;
   --crm-case-cerrado-soft: #e2e8f0;
+  --crm-case-cerrado-border: #94a3b8;
 
   /* Geometría */
   --crm-radius-sm: 8px;

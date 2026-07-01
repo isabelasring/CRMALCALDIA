@@ -13,73 +13,49 @@ define('custom:helpers/case-status-colors', [], function () {
     ];
 
     /**
-     * Pasteles — una familia cromática distinta por etapa (sin repetir verdes/azules parecidos).
-     * Naranja · Azul · Rosa · Violeta · Amarillo · Verde · Marrón · Gris
+     * Pasteles — una familia cromática distinta por etapa.
+     * Lista, kanban y dashboard comparten bg / text / border.
      */
     const PALETTE = {
         'Pendiente de radicacion': {
             bg: '#ffedd5',
             text: '#9a3412',
             border: '#fdba74',
-            kanban: '#f97316',
-            kanbanCol: '#fff7ed',
-            kanbanText: '#9a3412',
         },
         'Radicado': {
             bg: '#e0f2fe',
             text: '#0369a1',
             border: '#7dd3fc',
-            kanban: '#0ea5e9',
-            kanbanCol: '#f0f9ff',
-            kanbanText: '#0284c7',
         },
         'Asignado': {
             bg: '#fce7f3',
             text: '#9d174d',
             border: '#f9a8d4',
-            kanban: '#ec4899',
-            kanbanCol: '#fdf2f8',
-            kanbanText: '#9d174d',
         },
         'En proceso': {
             bg: '#ede9fe',
             text: '#5b21b6',
             border: '#c4b5fd',
-            kanban: '#8b5cf6',
-            kanbanCol: '#f5f3ff',
-            kanbanText: '#6d28d9',
         },
         'Visita realizada': {
             bg: '#fef9c3',
             text: '#854d0e',
             border: '#fde047',
-            kanban: '#eab308',
-            kanbanCol: '#fefce8',
-            kanbanText: '#a16207',
         },
         'Visita aprobada': {
             bg: '#dcfce7',
             text: '#166534',
             border: '#86efac',
-            kanban: '#22c55e',
-            kanbanCol: '#f0fdf4',
-            kanbanText: '#15803d',
         },
         'Finalizado': {
             bg: '#ede0d4',
             text: '#6b4423',
             border: '#c4a484',
-            kanban: '#a18072',
-            kanbanCol: '#faf5f0',
-            kanbanText: '#78350f',
         },
         'Proceso cerrado': {
             bg: '#e2e8f0',
             text: '#334155',
             border: '#94a3b8',
-            kanban: '#64748b',
-            kanbanCol: '#f8fafc',
-            kanbanText: '#475569',
         },
     };
 
@@ -155,7 +131,7 @@ define('custom:helpers/case-status-colors', [], function () {
     };
 
   /**
-   * Pinta columna y encabezado del kanban con colores pastel (inline, sin depender de ::before).
+   * Pinta columna y encabezado del kanban con los mismos tonos del listado (pasteles opacos).
    */
     const applyKanbanColumn = function ($column, $header, $label, status) {
         const colors = get(status);
@@ -168,11 +144,16 @@ define('custom:helpers/case-status-colors', [], function () {
         $header.attr('data-case-status', status).addClass('case-kanban-status-header');
 
         $column.css({
-            backgroundColor: colors.kanbanCol,
+            backgroundColor: colors.bg,
         });
 
         $header.css({
-            backgroundColor: colors.kanbanCol,
+            backgroundColor: colors.bg,
+        });
+
+        $header.children('div').css({
+            backgroundColor: colors.bg,
+            borderColor: colors.border,
         });
 
         if ($label && $label.length) {
@@ -184,16 +165,16 @@ define('custom:helpers/case-status-colors', [], function () {
             }
 
             $dot.css({
-                backgroundColor: colors.kanban,
+                backgroundColor: colors.border,
             });
 
             $label.find('.kanban-group-title').css({
-                color: colors.kanbanText,
+                color: colors.text,
             });
         }
 
         $column.find('.item .panel').css({
-            borderLeft: '4px solid ' + colors.kanban,
+            borderLeft: '4px solid ' + colors.border,
         });
     };
 
