@@ -141,6 +141,9 @@
         ]
     },
     "fields": {
+        "status": {
+            "view": "custom:views/case/fields/status"
+        },
         "assignedUser": {
             "view": "custom:views/case/fields/assigned-user"
         },

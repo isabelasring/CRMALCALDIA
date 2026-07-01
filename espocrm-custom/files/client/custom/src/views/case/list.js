@@ -1,4 +1,7 @@
-define('custom:views/case/list', ['views/list'], function (Dep) {
+define('custom:views/case/list', [
+    'views/list',
+    'custom:helpers/case-status-colors',
+], function (Dep, CaseStatusColors) {
 
     return Dep.extend({
 
@@ -91,6 +94,13 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
 
                     $column.attr('data-case-status', statusKey);
                     $header.attr('data-case-status', statusKey);
+
+                    var statusColors = CaseStatusColors.get(statusKey);
+
+                    if (statusColors) {
+                        $column.css('--kanban-status-color', statusColors.kanban);
+                        $header.css('--kanban-status-color', statusColors.kanban);
+                    }
 
                     var shortLabel = statusKey
                         ? (self.translate(statusKey, 'caseTimelineShort', 'Case') || self.translate(statusKey, 'options', 'Case', 'status'))
@@ -187,29 +197,16 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
             return parsed;
         },
 
-        STATUS_LABEL_CLASSES: {
-            'Pendiente de radicacion': 'casePendiente',
-            'Radicado': 'caseRadicado',
-            'Asignado': 'caseAsignado',
-            'En proceso': 'caseEnProceso',
-            'Visita realizada': 'caseVisitaRealizada',
-            'Visita aprobada': 'caseVisitaAprobada',
-            'Finalizado': 'caseFinalizado',
-            'Proceso cerrado': 'caseCerrado',
-        },
-
         decorateListStatusLabels: function () {
             if (!this.$el || !this.$el.length || !this.collection) {
                 return;
             }
 
             var self = this;
-            var allClasses = Object.keys(this.STATUS_LABEL_CLASSES).map(function (status) {
-                return 'label-' + self.STATUS_LABEL_CLASSES[status];
-            }).join(' ');
 
-            this.$el.find('tr[data-id]').each(function () {
-                var $row = $(this);
+            this.$el.find('.cell[data-name="status"], td[data-name="status"]').each(function () {
+                var $cell = $(this);
+                var $row = $cell.closest('tr');
                 var id = $row.attr('data-id');
                 var model = id ? self.collection.get(id) : null;
 
@@ -218,15 +215,10 @@ define('custom:views/case/list', ['views/list'], function (Dep) {
                 }
 
                 var status = String(model.get('status') || '').trim();
-                var styleClass = self.STATUS_LABEL_CLASSES[status];
 
-                if (!styleClass) {
-                    return;
-                }
-
-                $row.find('.cell[data-name="status"] .label')
-                    .removeClass(allClasses)
-                    .addClass('label-' + styleClass);
+                $cell.find('.label').each(function () {
+                    CaseStatusColors.applyToLabel($(this), status);
+                });
             });
         },
     });

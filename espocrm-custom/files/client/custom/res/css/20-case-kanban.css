@@ -173,6 +173,33 @@
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
 }
 
+/* Kanban — color por estado (variable inline desde list.js + respaldo por data-case-status) */
+th.group-header[data-case-status] .kanban-group-label::before,
+td.group-column[data-case-status]::before {
+  background: var(--kanban-status-color) !important;
+}
+
+th.group-header[data-case-status] .kanban-group-title {
+  color: var(--kanban-status-color) !important;
+}
+
+th.group-header[data-case-status="Pendiente de radicacion"],
+td.group-column[data-case-status="Pendiente de radicacion"] { --kanban-status-color: #ea580c; }
+th.group-header[data-case-status="Radicado"],
+td.group-column[data-case-status="Radicado"] { --kanban-status-color: #2563eb; }
+th.group-header[data-case-status="Asignado"],
+td.group-column[data-case-status="Asignado"] { --kanban-status-color: #0891b2; }
+th.group-header[data-case-status="En proceso"],
+td.group-column[data-case-status="En proceso"] { --kanban-status-color: #c026d3; }
+th.group-header[data-case-status="Visita realizada"],
+td.group-column[data-case-status="Visita realizada"] { --kanban-status-color: #65a30d; }
+th.group-header[data-case-status="Visita aprobada"],
+td.group-column[data-case-status="Visita aprobada"] { --kanban-status-color: #16a34a; }
+th.group-header[data-case-status="Finalizado"],
+td.group-column[data-case-status="Finalizado"] { --kanban-status-color: #0d9488; }
+th.group-header[data-case-status="Proceso cerrado"],
+td.group-column[data-case-status="Proceso cerrado"] { --kanban-status-color: #78716c; }
+
 /* Kanban — color por estado (data-case-status desde list.js) */
 th.group-header[data-case-status="Pendiente de radicacion"] .kanban-group-label::before,
 td.group-column[data-case-status="Pendiente de radicacion"]::before { background: var(--crm-kanban-col-pendiente); }
