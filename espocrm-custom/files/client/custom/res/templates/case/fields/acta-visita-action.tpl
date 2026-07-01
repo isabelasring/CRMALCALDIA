@@ -1,19 +1,17 @@
 {{#if showPanel}}
 {{#if showVisitaCheck}}
 <div class="case-visita-realizada-check form-group">
-    <label class="control-label case-visita-realizada-check-label">
+    <label class="case-visita-realizada-check-label">
         <input
             type="checkbox"
-            class="form-checkbox case-visita-realizada-checkbox"
+            class="case-visita-realizada-checkbox"
             data-action="confirmarVisita"
-            {{#if visitaConfirmada}}checked{{/if}}
+            {{#if visitaHabilitada}}checked{{/if}}
             {{#if visitaCheckDisabled}}disabled{{/if}}
         />
         <span>{{visitaCheckLabel}}</span>
     </label>
-    {{#unless visitaConfirmada}}
     <p class="text-muted small case-visita-visita-check-help">{{visitaCheckHelp}}</p>
-    {{/unless}}
 </div>
 {{/if}}
 {{#if showActions}}

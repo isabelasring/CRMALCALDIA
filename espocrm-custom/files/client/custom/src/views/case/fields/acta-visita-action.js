@@ -21,7 +21,7 @@ define('custom:views/case/fields/acta-visita-action', [
             this.showPrintManual = false;
             this.stateReady = false;
             this._actaStateLoading = false;
-            this._confirmingVisita = false;
+            this._visitaMarcadaLocal = false;
 
             if (!this.model.id) {
                 return;
@@ -38,22 +38,32 @@ define('custom:views/case/fields/acta-visita-action', [
                 || key;
         },
 
-        isPrivilegedActaUser: function (user) {
-            return !!(user && user.isAdmin && user.isAdmin())
-                || RadicacionFields.isInspeccionUser(user);
+        isOperadorVisitaCampo: function (user) {
+            if (!user || (user.isAdmin && user.isAdmin())) {
+                return false;
+            }
+
+            return RadicacionFields.isInspeccionUser(user)
+                || PatrulleroActa.isPatrulleroUser(user);
         },
 
-        resolveRequiresVisitaCheck: function (user) {
-            return PatrulleroActa.isPatrulleroUser(user)
-                && !this.isPrivilegedActaUser(user)
-                && String(this.model.get('status') || '').trim() === 'Asignado';
+        resolveRequiresVisitaCheck: function () {
+            return this.canUseTools
+                && String(this.model.get('status') || '').trim() === 'Asignado'
+                && !this.actaIsEditMode;
         },
 
         resolveVisitaConfirmada: function () {
             return ActaVisitaCaseStatus.isVisitaConfirmada(this.model);
         },
 
-        canEnableActaActions: function (user) {
+        isVisitaHabilitada: function () {
+            return this.visitaConfirmada
+                || this.actaIsEditMode
+                || this._visitaMarcadaLocal;
+        },
+
+        canEnableActaActions: function () {
             if (!this.canUseTools) {
                 return false;
             }
@@ -62,7 +72,7 @@ define('custom:views/case/fields/acta-visita-action', [
                 return true;
             }
 
-            return this.visitaConfirmada;
+            return this.isVisitaHabilitada();
         },
 
         data: function () {
@@ -87,8 +97,8 @@ define('custom:views/case/fields/acta-visita-action', [
                 showPanel: showPanel,
                 showVisitaCheck: this.showVisitaCheck,
                 showActions: showActions,
-                visitaConfirmada: this.visitaConfirmada,
-                visitaCheckDisabled: this.visitaConfirmada || this._confirmingVisita,
+                visitaHabilitada: this.isVisitaHabilitada(),
+                visitaCheckDisabled: this.visitaConfirmada || this.actaIsEditMode,
                 visitaCheckLabel: this.translateCaseLabel('visitaRealizadaCheck'),
                 visitaCheckHelp: this.translateCaseLabel('visitaRealizadaCheckHelp'),
                 showLlenarActa: this.showButton,
@@ -161,7 +171,8 @@ define('custom:views/case/fields/acta-visita-action', [
 
                     ActaVisitaCaseStatus.fetchActaForCase(self.model.id, user, self.model)
                         .then(function (acta) {
-                            const canUse = PatrulleroActa.canUseActaVisitaTools(user, self.model);
+                            const canUse = self.isOperadorVisitaCampo(user)
+                                && PatrulleroActa.canUseActaVisitaTools(user, self.model);
                             self.applyActaState(acta, canUse);
                         })
                         .catch(function () {
@@ -178,25 +189,18 @@ define('custom:views/case/fields/acta-visita-action', [
         },
 
         applyActaState: function (acta, canUse) {
-            const user = this.getUser();
-
             this.actaIsEditMode = ActaVisitaCaseStatus.isActaDiligenciada(acta);
             this.canUseTools = !!canUse;
             this.visitaConfirmada = this.resolveVisitaConfirmada();
 
-            if (this.actaIsEditMode) {
-                this.visitaConfirmada = true;
+            if (this.actaIsEditMode || this.visitaConfirmada) {
+                this._visitaMarcadaLocal = true;
             }
 
-            this.requiresVisitaCheck = canUse && this.resolveRequiresVisitaCheck(user);
-            this.showVisitaCheck = this.requiresVisitaCheck || (
-                canUse
-                && PatrulleroActa.isPatrulleroUser(user)
-                && !this.isPrivilegedActaUser(user)
-                && this.visitaConfirmada
-            );
+            this.requiresVisitaCheck = this.resolveRequiresVisitaCheck();
+            this.showVisitaCheck = this.requiresVisitaCheck;
 
-            const actionsEnabled = this.canEnableActaActions(user);
+            const actionsEnabled = this.canEnableActaActions();
 
             this.showButton = actionsEnabled;
             this.showPrintManual = actionsEnabled;
@@ -234,7 +238,7 @@ define('custom:views/case/fields/acta-visita-action', [
             this.updatePanelVisibility(showPanel);
 
             this.$el.find('.case-visita-realizada-checkbox')
-                .prop('checked', !!data.visitaConfirmada)
+                .prop('checked', !!data.visitaHabilitada)
                 .prop('disabled', !!data.visitaCheckDisabled);
 
             this.$el.find('.case-visita-visita-check-help').text(data.visitaCheckHelp || '');
@@ -292,52 +296,15 @@ define('custom:views/case/fields/acta-visita-action', [
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (self.visitaConfirmada || self._confirmingVisita) {
+                if (self.visitaConfirmada || self.actaIsEditMode) {
                     $(e.currentTarget).prop('checked', true);
 
                     return;
                 }
 
-                if (!$(e.currentTarget).is(':checked')) {
-                    $(e.currentTarget).prop('checked', false);
-
-                    return;
-                }
-
-                self.confirmarVisitaRealizada();
-            });
-        },
-
-        confirmarVisitaRealizada: function () {
-            const self = this;
-
-            if (!this.model.id || this._confirmingVisita) {
-                return;
-            }
-
-            this._confirmingVisita = true;
-            this.refreshViewState();
-
-            Espo.Ajax.postRequest('Case/action/confirmarVisitaRealizada', {
-                id: this.model.id,
-            }).then(function (response) {
-                const status = response && response.status
-                    ? response.status
-                    : 'Visita realizada';
-
-                self.model.set('status', status, {silent: true});
-                self.visitaConfirmada = true;
-                self.showButton = true;
-                self.showPrintManual = true;
-                self.model.fetch().then(function () {
-                    self.scheduleLoadActaState();
-                });
-                Espo.Ui.success(self.translateCaseLabel('visitaRealizadaConfirmSuccess'));
-            }).catch(function () {
-                self.$el.find('[data-action="confirmarVisita"]').prop('checked', false);
-                Espo.Ui.error(self.translateCaseLabel('visitaRealizadaConfirmError'));
-            }).finally(function () {
-                self._confirmingVisita = false;
+                self._visitaMarcadaLocal = $(e.currentTarget).is(':checked');
+                self.showButton = self.canEnableActaActions();
+                self.showPrintManual = self.showButton;
                 self.refreshViewState();
             });
         },
@@ -356,7 +323,7 @@ define('custom:views/case/fields/acta-visita-action', [
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (!self.canEnableActaActions(self.getUser())) {
+                if (!self.canEnableActaActions()) {
                     Espo.Ui.warning(self.translateCaseLabel('visitaRealizadaCheckHelp'));
 
                     return;
@@ -369,7 +336,7 @@ define('custom:views/case/fields/acta-visita-action', [
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (!self.canEnableActaActions(self.getUser())) {
+                if (!self.canEnableActaActions()) {
                     Espo.Ui.warning(self.translateCaseLabel('visitaRealizadaCheckHelp'));
 
                     return;
