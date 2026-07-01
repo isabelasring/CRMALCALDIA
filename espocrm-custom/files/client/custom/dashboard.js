@@ -42,23 +42,23 @@
             timeZone: 'America/Bogota',
         });
 
-    /* Paleta apagada — gráficas del dashboard (pasteles suaves, sin neón) */
+    /* Paleta apagada — solo gráficas Chart.js (barras, donuts, polar, líneas) */
     var PALETA = [
         '#9eb8a8', '#9eb5c8', '#b5a8b8', '#ada8c4',
         '#c4b88a', '#c9b8a8', '#a8b0a0', '#b0b8c0',
         '#9eb0b0', '#c4a8a0', '#b0a8c0', '#b0b89e',
     ];
 
-    /* Tonos apagados por estado — embudo del dashboard */
+    /* Pasteles por estado — embudo (igual que el listado de casos) */
     var ESTADO_PALETTE = {
-        'Pendiente de radicacion': {bg: '#d4c4b0', text: '#6b5340'},
-        'Radicado': {bg: '#a8c0d4', text: '#3d5a6e'},
-        'Asignado': {bg: '#c4a8b8', text: '#6e4a58'},
-        'En proceso': {bg: '#b0a8c4', text: '#524a66'},
-        'Visita realizada': {bg: '#c9c0a0', text: '#6b6240'},
-        'Visita aprobada': {bg: '#9eb8a8', text: '#3d5a48'},
-        'Finalizado': {bg: '#c4b8a8', text: '#5c5040'},
-        'Proceso cerrado': {bg: '#b0b8c0', text: '#4a525a'},
+        'Pendiente de radicacion': {bg: '#ffedd5', text: '#9a3412'},
+        'Radicado': {bg: '#e0f2fe', text: '#0369a1'},
+        'Asignado': {bg: '#fce7f3', text: '#9d174d'},
+        'En proceso': {bg: '#ede9fe', text: '#5b21b6'},
+        'Visita realizada': {bg: '#fef9c3', text: '#854d0e'},
+        'Visita aprobada': {bg: '#dcfce7', text: '#166534'},
+        'Finalizado': {bg: '#ede0d4', text: '#6b4423'},
+        'Proceso cerrado': {bg: '#e2e8f0', text: '#334155'},
     };
 
     var COLORES_ESTADO = {
