@@ -20,9 +20,99 @@ define('custom:helpers/radicacion-case-flow', [
         return RadicacionFields.resolveHomeProfile(user) === 'radicacion';
     };
 
+    const RADICAR_SKIP_PREFIX = 'alcaldiaSkipRadicacionAutoEdit:';
+
     const syncBodyClass = function (recordView, enabled) {
         document.body.classList.toggle(BODY_CLASS, enabled);
         document.body.classList.toggle(DETAIL_CLASS, enabled && recordView.mode === 'detail');
+    };
+
+    const isRadicacionPendingCaseForUser = function (recordView) {
+        if (!recordView || !recordView.model || recordView.model.isNew()) {
+            return false;
+        }
+
+        const user = recordView.getUser();
+
+        if (!isRadicacionOnlyUser(user)) {
+            return false;
+        }
+
+        if (RadicacionFields.isCaseRadicado(recordView.model)) {
+            return false;
+        }
+
+        const status = String(recordView.model.get('status') || '').trim();
+
+        if (status && status !== 'Pendiente de radicacion') {
+            return false;
+        }
+
+        return true;
+    };
+
+    const shouldAutoEnterRadicacionEdit = function (recordView) {
+        if (!isRadicacionPendingCaseForUser(recordView) || recordView.mode !== 'detail') {
+            return false;
+        }
+
+        const caseId = recordView.model.id;
+
+        if (
+            caseId
+            && typeof sessionStorage !== 'undefined'
+            && sessionStorage.getItem(RADICAR_SKIP_PREFIX + caseId) === '1'
+        ) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const shouldUseRadicarMode = function (recordView) {
+        return isRadicacionPendingCaseForUser(recordView);
+    };
+
+    const navigateToRadicacionEdit = function (recordView) {
+        if (!recordView || !recordView.model || !recordView.model.id) {
+            return;
+        }
+
+        if (recordView._radicacionAutoEditTriggered) {
+            return;
+        }
+
+        recordView._radicacionAutoEditTriggered = true;
+
+        const scope = recordView.scope || recordView.entityType || 'Case';
+        const url = '#' + scope + '/edit/' + recordView.model.id;
+        const router = typeof recordView.getRouter === 'function'
+            ? recordView.getRouter()
+            : null;
+
+        if (router && typeof router.navigate === 'function') {
+            router.navigate(url, {trigger: true});
+
+            return;
+        }
+
+        window.location.hash = url;
+    };
+
+    const markSkipRadicacionAutoEdit = function (caseId) {
+        if (!caseId || typeof sessionStorage === 'undefined') {
+            return;
+        }
+
+        sessionStorage.setItem(RADICAR_SKIP_PREFIX + caseId, '1');
+    };
+
+    const clearSkipRadicacionAutoEdit = function (caseId) {
+        if (!caseId || typeof sessionStorage === 'undefined') {
+            return;
+        }
+
+        sessionStorage.removeItem(RADICAR_SKIP_PREFIX + caseId);
     };
 
     const lockNonRadicadoFields = function (recordView) {
@@ -120,8 +210,16 @@ define('custom:helpers/radicacion-case-flow', [
 
         if (recordView.mode === 'detail') {
             document.body.classList.remove(BODY_CLASS);
-            document.body.classList.remove(DETAIL_CLASS);
             document.body.classList.remove(SOLO_RADICAR_CLASS);
+
+            if (shouldAutoEnterRadicacionEdit(recordView)) {
+                navigateToRadicacionEdit(recordView);
+            } else if (isRadicacionOnlyUser(user) && !RadicacionFields.isCaseRadicado(recordView.model)) {
+                document.body.classList.add(DETAIL_CLASS);
+            } else {
+                document.body.classList.remove(DETAIL_CLASS);
+            }
+
             return;
         }
 
@@ -167,5 +265,9 @@ define('custom:helpers/radicacion-case-flow', [
         schedule: schedule,
         prepareModelForSave: prepareModelForSave,
         lockNonRadicadoFields: lockNonRadicadoFields,
+        shouldAutoEnterRadicacionEdit: shouldAutoEnterRadicacionEdit,
+        shouldUseRadicarMode: shouldUseRadicarMode,
+        markSkipRadicacionAutoEdit: markSkipRadicacionAutoEdit,
+        clearSkipRadicacionAutoEdit: clearSkipRadicacionAutoEdit,
     };
 });

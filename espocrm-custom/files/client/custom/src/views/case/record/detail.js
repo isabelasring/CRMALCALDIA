@@ -232,6 +232,53 @@ define('custom:views/case/record/detail', [
                 this.removeAsignacionPanelToolbar();
                 this.scheduleAsignacionUiRefresh();
             }
+
+            this.scheduleRadicacionDetailButtons();
+        },
+
+        scheduleRadicacionDetailButtons: function () {
+            const self = this;
+
+            [0, 150, 500].forEach(function (delay) {
+                window.setTimeout(function () {
+                    if (!self.isRendered || !self.isRendered()) {
+                        return;
+                    }
+
+                    self.updateRadicacionDetailButtons();
+                }, delay);
+            });
+        },
+
+        updateRadicacionDetailButtons: function () {
+            if (RadicacionCaseFlow.shouldAutoEnterRadicacionEdit(this)) {
+                return;
+            }
+
+            if (!RadicacionFields.canEditRadicadoCase(this.getUser())) {
+                return;
+            }
+
+            if (RadicacionFields.isCaseRadicado(this.model)) {
+                return;
+            }
+
+            const status = String(this.model.get('status') || '').trim();
+
+            if (status && status !== 'Pendiente de radicacion') {
+                return;
+            }
+
+            const $btn = this.findPrimaryActionButton('edit');
+
+            if (!$btn.length) {
+                return;
+            }
+
+            const label = this.translate('radicarCaso', 'labels', 'Case') || 'Radicar';
+
+            this.setPrimaryActionButtonLabel($btn, label);
+            this.setPrimaryActionButtonAction($btn, 'edit');
         },
 
         actionEdit: function () {
@@ -239,6 +286,13 @@ define('custom:views/case/record/detail', [
                 AsignadorAssignmentUi.openAssignmentModal(this);
 
                 return;
+            }
+
+            if (
+                RadicacionFields.canEditRadicadoCase(this.getUser())
+                && !RadicacionFields.isCaseRadicado(this.model)
+            ) {
+                RadicacionCaseFlow.clearSkipRadicacionAutoEdit(this.model.id);
             }
 
             Dep.prototype.actionEdit.call(this);

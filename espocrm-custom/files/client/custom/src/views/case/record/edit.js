@@ -51,6 +51,15 @@ define('custom:views/case/record/edit', [
                         }, 0);
                     };
                 }
+            } else if (
+                !this.model.isNew()
+                && RadicacionCaseFlow.shouldUseRadicarMode(this)
+            ) {
+                this._radicarMode = true;
+                this.sideDisabled = true;
+                this.bottomDisabled = true;
+                document.body.classList.add('alcaldia-radicacion-radicar-page');
+                RadicacionCaseFlow.clearSkipRadicacionAutoEdit(this.model.id);
             }
 
             PersonaTipoFields.setup(this);
@@ -81,6 +90,10 @@ define('custom:views/case/record/edit', [
                 || !RadicacionFields.isAsignadorUser(this.getUser())
                 || !RadicacionFields.isCaseRadicado(this.model)
             ) {
+                if (this._radicarMode && this.model.id) {
+                    RadicacionCaseFlow.clearSkipRadicacionAutoEdit(this.model.id);
+                }
+
                 return Dep.prototype.actionSave.apply(this, arguments);
             }
 
@@ -130,6 +143,28 @@ define('custom:views/case/record/edit', [
 
         actionCancel: function () {
             if (
+                this._radicarMode
+                && !this.model.isNew()
+                && RadicacionFields.isRadicacionUser(this.getUser())
+            ) {
+                RadicacionCaseFlow.markSkipRadicacionAutoEdit(this.model.id);
+
+                const scope = this.scope || this.entityType || 'Case';
+                const url = '#' + scope + '/view/' + this.model.id;
+                const router = typeof this.getRouter === 'function' ? this.getRouter() : null;
+
+                if (router && typeof router.navigate === 'function') {
+                    router.navigate(url, {trigger: true});
+
+                    return;
+                }
+
+                window.location.hash = url;
+
+                return;
+            }
+
+            if (
                 this._asignarMode
                 && !this.model.isNew()
                 && RadicacionFields.isAsignadorUser(this.getUser())
@@ -173,6 +208,10 @@ define('custom:views/case/record/edit', [
         remove: function () {
             if (this._asignarMode) {
                 AsignadorAssignmentUi.clearAssignmentSession();
+            }
+
+            if (this._radicarMode) {
+                document.body.classList.remove('alcaldia-radicacion-radicar-page');
             }
 
             Dep.prototype.remove.call(this);
