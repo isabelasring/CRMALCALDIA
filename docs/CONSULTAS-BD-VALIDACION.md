@@ -1,87 +1,76 @@
-# Consultas SQL — Validación de datos (CRM Alcaldía)
+# Consultas SQL — Validación de base de datos (CRM Alcaldía)
 
-Consultas para validar en la base de datos que todo se esté guardando bien.
+Guía de consultas SQL para validar datos y verificar el despliegue en **Dokploy**.
 
-**Dónde ejecutarlas:** terminal del contenedor `**espocrm-db`** en **Dokploy** (producción).
+**Entorno:** PostgreSQL 16 en el contenedor `espocrm-db`  
+**CRM:** EspoCRM custom — gestión de quejas ambientales
 
 ---
 
-## Dónde y cómo ejecutarlas
+## Dónde ejecutar las consultas en Dokploy
 
-### 1. Abrir la terminal en Dokploy
+### Opción A — Terminal del contenedor de base de datos (recomendada)
 
-1. Entra a **Dokploy**.
-2. Abre el proyecto **CRM Alcaldía**.
-3. Entra al servicio `**espocrm-db`**.
-4. Haz clic en **Terminal**.
-
-Ahí es donde debes correr todo. No uses otra terminal ni tu PC.
-
-### 2. Conectarte a PostgreSQL
-
-En esa terminal escribe:
+1. Entra a **Dokploy** → proyecto **CRM Alcaldía**.
+2. Abre el servicio **`espocrm-db`**.
+3. Haz clic en **Terminal**.
+4. Conéctate a PostgreSQL:
 
 ```bash
-psql -U "$POSTGRES_USER" -d "$POSTGRESpuedes p_DB"
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 ```
 
-Te pedirá la contraseña: es el valor de `**POSTGRES_PASSWORD**` (en Dokploy → proyecto → **Environment** / variables del stack).
+5. Cuando veas el prompt `nombre_base=#`, pega las consultas SQL.
+6. Para salir: `\q`
 
-Cuando veas el prompt `nombre_base=#`, ya estás dentro y egar las consultas.
+La contraseña es el valor de **`POSTGRES_PASSWORD`** (Dokploy → Environment).
 
-### 3. Ejecutar una consulta
+### Opción B — Desde el contenedor `espocrm` (si no tienes terminal en la BD)
 
-1. Copia el bloque SQL de este documento (desde `SELECT` hasta el `;`).
-2. Pégalo en la terminal.
-3. Presiona **Enter**.
+```bash
+psql -h espocrm-db -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+```
 
-Prueba con esta:
+### Prueba de conexión rápida
 
 ```sql
-SELECT COUNT(*) AS casos_activos FROM "case" WHERE deleted = false;
-```
-
-### 4. Salir
-
-Cuando termines, escribe:
-
-```bash
-\q
+SELECT current_database() AS base, current_user AS usuario, NOW() AS ahora;
 ```
 
 ---
 
-## Comandos útiles (dentro de psql)
+## Comandos útiles dentro de `psql`
 
-
-| Comando     | Para qué sirve                            |
-| ----------- | ----------------------------------------- |
-| `\dt`       | Ver tablas                                |
-| `\d "case"` | Ver columnas de casos                     |
-| `\x`        | Vista expandida (filas con muchos campos) |
-| `\q`        | Salir                                     |
-
+| Comando | Para qué sirve |
+|---------|----------------|
+| `\dt` | Listar tablas |
+| `\d "case"` | Ver columnas de la tabla de casos |
+| `\d acta_visita` | Ver columnas de actas de visita |
+| `\x` | Vista expandida (filas con muchos campos) |
+| `\timing` | Mostrar tiempo de ejecución |
+| `\q` | Salir |
 
 ---
 
 ## Convenciones importantes
 
-
-| Tema           | Detalle                                                                                                       |
-| -------------- | ------------------------------------------------------------------------------------------------------------- |
-| Tabla de casos | Se llama `"case"` (palabra reservada). Siempre usar comillas: `"case"`.                                       |
-| Borrado lógico | EspoCRM no borra filas; marca `deleted = true`. Filtra `deleted = false` en casi todas las consultas.         |
-| IDs            | Formato EspoCRM, 17 caracteres (ej. `664a1b2c3d4e5f678`).                                                     |
-| Campos custom  | Prefijo `c_` en BD (ej. `cNumeroRadicado` → `c_numero_radicado`).                                             |
-| Fechas         | `created_at` / `modified_at` en UTC; campos de negocio como `c_fecha_caso` en hora local según configuración. |
-
+| Tema | Detalle |
+|------|---------|
+| Tabla de casos | Se llama `"case"` (palabra reservada). Siempre usar comillas dobles. |
+| Borrado lógico | EspoCRM marca `deleted = true`. Filtra `deleted = false` en casi todas las consultas. |
+| IDs | Formato EspoCRM de 17 caracteres (ej. `664a1b2c3d4e5f678`). |
+| Campos custom | Prefijo `c_` en BD (`cNumeroRadicado` → `c_numero_radicado`). |
+| Fechas | `created_at` / `modified_at` en UTC; `c_fecha_caso` según zona horaria del CRM. |
 
 ---
 
-## 1. Resumen general del sistema
+## 0. Verificación post-deploy en Dokploy
+
+Ejecuta estas consultas después de un **Redeploy** para confirmar que la base de datos está sana.
+
+### 0.1 Resumen ejecutivo del sistema
 
 ```sql
--- Conteo rápido por entidad principal
 SELECT 'case' AS entidad, COUNT(*) AS total
 FROM "case" WHERE deleted = false
 UNION ALL
@@ -99,27 +88,31 @@ SELECT 'account', COUNT(*) FROM account WHERE deleted = false
 UNION ALL
 SELECT 'document', COUNT(*) FROM document WHERE deleted = false
 UNION ALL
+SELECT 'notification', COUNT(*) FROM notification WHERE deleted = false
+UNION ALL
 SELECT 'user', COUNT(*) FROM "user" WHERE deleted = false
 UNION ALL
-SELECT 'role', COUNT(*) FROM role WHERE deleted = false;
+SELECT 'role', COUNT(*) FROM role WHERE deleted = false
+UNION ALL
+SELECT 'team', COUNT(*) FROM team WHERE deleted = false
+ORDER BY entidad;
 ```
 
----
-
-## 2. Roles operativos
+### 0.2 Roles operativos (deben existir los 4)
 
 ```sql
--- Los 4 roles base deben existir
 SELECT id, name, created_at
 FROM role
 WHERE deleted = false
+  AND name IN ('Inspección', 'Radicación', 'Asignación', 'Patrullaje')
 ORDER BY name;
 ```
 
-Esperado: **Inspección**, **Radicación**, **Asignación**, **Patrullaje**.
+Esperado: **4 filas**.
+
+### 0.3 Usuarios activos con rol
 
 ```sql
--- Usuarios y sus roles
 SELECT
     u.user_name,
     u.first_name,
@@ -130,12 +123,14 @@ FROM "user" u
 JOIN role_user ru ON ru.user_id = u.id AND ru.deleted = false
 JOIN role r ON r.id = ru.role_id AND r.deleted = false
 WHERE u.deleted = false
+  AND u.type = 'regular'
 ORDER BY u.user_name, r.name;
 ```
 
+### 0.4 Usuarios sin rol (alerta)
+
 ```sql
--- Usuarios sin rol asignado
-SELECT u.id, u.user_name, u.first_name, u.last_name
+SELECT u.id, u.user_name, u.first_name, u.last_name, u.is_active
 FROM "user" u
 LEFT JOIN role_user ru ON ru.user_id = u.id AND ru.deleted = false
 WHERE u.deleted = false
@@ -143,11 +138,72 @@ WHERE u.deleted = false
   AND ru.id IS NULL;
 ```
 
+### 0.5 Equipos institucionales
+
+```sql
+SELECT
+    t.name AS equipo,
+    COUNT(tu.user_id) AS usuarios
+FROM team t
+LEFT JOIN team_user tu ON tu.team_id = t.id AND tu.deleted = false
+WHERE t.deleted = false
+GROUP BY t.id, t.name
+ORDER BY t.name;
+```
+
+### 0.6 Job programado de alertas de vencimiento
+
+```sql
+SELECT
+    id,
+    name,
+    job,
+    status,
+    scheduling,
+    last_run
+FROM scheduled_job
+WHERE deleted = false
+  AND job = 'CheckCaseVencimientoAlerts';
+```
+
+Esperado: `status = Active`, `scheduling = 0 7 * * *`.
+
+### 0.7 Últimas ejecuciones del job de vencimientos
+
+```sql
+SELECT
+    sjlr.status,
+    sjlr.execution_time,
+    sjlr.created_at,
+    sj.name AS job
+FROM scheduled_job_log_record sjlr
+JOIN scheduled_job sj ON sj.id = sjlr.scheduled_job_id AND sj.deleted = false
+WHERE sjlr.deleted = false
+  AND sj.job = 'CheckCaseVencimientoAlerts'
+ORDER BY sjlr.created_at DESC
+LIMIT 10;
+```
+
+### 0.8 Tablas custom del CRM (sanidad estructural)
+
+```sql
+SELECT table_name
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_name IN (
+    'case', 'acta_visita', 'actuo_archivo',
+    'comunicacion_caso', 'asignacion_historial'
+  )
+ORDER BY table_name;
+```
+
+Esperado: **5 filas**.
+
 ---
 
-## 3. Casos — listado y detalle
+## 1. Casos — listado y estados
 
-### Últimos casos creados
+### Últimos 20 casos creados
 
 ```sql
 SELECT
@@ -170,17 +226,7 @@ ORDER BY c.created_at DESC
 LIMIT 20;
 ```
 
-### Un caso específico (por radicado)
-
-```sql
--- Cambia el valor del radicado
-SELECT *
-FROM "case"
-WHERE deleted = false
-  AND c_numero_radicado = 'ENV-AIR-001-2026';
-```
-
-### Casos por estado
+### Casos por estado (embudo)
 
 ```sql
 SELECT
@@ -192,7 +238,7 @@ GROUP BY status
 ORDER BY cantidad DESC;
 ```
 
-Estados esperados en el flujo:
+Estados esperados del flujo:
 
 - `Pendiente de radicacion`
 - `Radicado`
@@ -203,11 +249,34 @@ Estados esperados en el flujo:
 - `Finalizado`
 - `Proceso cerrado`
 
+### Un caso por número de radicado
+
+```sql
+-- Cambia el valor del radicado
+SELECT
+    id,
+    c_numero_radicado,
+    c_expediente,
+    status,
+    c_fecha_caso,
+    c_fecha_vencimiento,
+    c_nombre_peticionario,
+    c_apellido_peticionario,
+    c_documento_peticionario,
+    c_recurso_tema,
+    assigned_user_id,
+    created_at,
+    modified_at
+FROM "case"
+WHERE deleted = false
+  AND c_numero_radicado = 'ENV-AIR-001-2026';
+```
+
 ---
 
-## 4. Validar campos obligatorios del caso
+## 2. Validación de campos del caso
 
-### Casos recién creados sin datos mínimos
+### Casos con datos mínimos incompletos
 
 ```sql
 SELECT
@@ -218,7 +287,7 @@ SELECT
     c_tipo_persona_peticionario,
     c_documento_peticionario,
     c_nombre_peticionario,
-    description IS NULL OR TRIM(description) = '' AS sin_descripcion,
+    (description IS NULL OR TRIM(description) = '') AS sin_descripcion,
     created_at
 FROM "case"
 WHERE deleted = false
@@ -249,8 +318,9 @@ ORDER BY created_at DESC
 LIMIT 30;
 ```
 
+### Radicados duplicados (no debería haber)
+
 ```sql
--- Radicados duplicados (no debería haber)
 SELECT c_numero_radicado, COUNT(*) AS veces
 FROM "case"
 WHERE deleted = false
@@ -260,7 +330,7 @@ GROUP BY c_numero_radicado
 HAVING COUNT(*) > 1;
 ```
 
-### Peticionario e infractor (perjudicante)
+### Peticionario e infractor
 
 ```sql
 SELECT
@@ -302,7 +372,7 @@ WHERE c.deleted = false
 ORDER BY c.modified_at DESC;
 ```
 
-### Vencimientos
+### Semáforo de vencimientos
 
 ```sql
 SELECT
@@ -321,9 +391,25 @@ WHERE deleted = false
 ORDER BY c_fecha_vencimiento;
 ```
 
+### Casos vencidos (para alertas)
+
+```sql
+SELECT
+    c_numero_radicado,
+    status,
+    c_fecha_vencimiento,
+    u.user_name AS responsable
+FROM "case" c
+LEFT JOIN "user" u ON u.id = c.assigned_user_id AND u.deleted = false
+WHERE c.deleted = false
+  AND c_fecha_vencimiento < CURRENT_DATE
+  AND status NOT IN ('Finalizado', 'Proceso cerrado')
+ORDER BY c_fecha_vencimiento;
+```
+
 ---
 
-## 5. Actas de visita
+## 3. Actas de visita
 
 ```sql
 SELECT
@@ -344,8 +430,9 @@ ORDER BY av.created_at DESC
 LIMIT 20;
 ```
 
+### Casos con cantidad de actas
+
 ```sql
--- Casos con acta vinculada
 SELECT
     c.c_numero_radicado,
     COUNT(av.id) AS actas
@@ -356,8 +443,9 @@ GROUP BY c.c_numero_radicado
 ORDER BY actas DESC;
 ```
 
+### Actas sin PDF generado
+
 ```sql
--- Actas sin PDF generado
 SELECT id, numero_radicado, case_id, estado, created_at
 FROM acta_visita
 WHERE deleted = false
@@ -366,7 +454,7 @@ WHERE deleted = false
 
 ---
 
-## 6. Autos de archivo (ActuoArchivo)
+## 4. Autos de archivo (ActuoArchivo)
 
 ```sql
 SELECT
@@ -384,9 +472,23 @@ ORDER BY aa.created_at DESC
 LIMIT 20;
 ```
 
+### Casos finalizados sin acto de archivo
+
+```sql
+SELECT
+    c.id,
+    c.c_numero_radicado,
+    c.status
+FROM "case" c
+LEFT JOIN actuo_archivo aa ON aa.case_id = c.id AND aa.deleted = false
+WHERE c.deleted = false
+  AND c.status IN ('Finalizado', 'Proceso cerrado')
+  AND aa.id IS NULL;
+```
+
 ---
 
-## 7. Comunicaciones del caso
+## 5. Comunicaciones del caso
 
 ```sql
 SELECT
@@ -407,8 +509,19 @@ ORDER BY cc.created_at DESC
 LIMIT 30;
 ```
 
+### Comunicaciones por tipo
+
 ```sql
--- Comunicaciones huérfanas (sin caso)
+SELECT tipo, COUNT(*) AS cantidad
+FROM comunicacion_caso
+WHERE deleted = false
+GROUP BY tipo
+ORDER BY cantidad DESC;
+```
+
+### Comunicaciones huérfanas (sin caso)
+
+```sql
 SELECT id, numero_radicado, asunto, case_id
 FROM comunicacion_caso
 WHERE deleted = false
@@ -417,7 +530,7 @@ WHERE deleted = false
 
 ---
 
-## 8. Historial de asignaciones
+## 6. Historial de asignaciones
 
 ```sql
 SELECT
@@ -440,10 +553,11 @@ LIMIT 30;
 
 ---
 
-## 9. Documentos y formatos PDF
+## 7. Documentos y formatos PDF
+
+### Documentos por categoría
 
 ```sql
--- Documentos por categoría
 SELECT
     c_categoria,
     COUNT(*) AS cantidad
@@ -453,8 +567,9 @@ GROUP BY c_categoria
 ORDER BY cantidad DESC;
 ```
 
+### Casos con PDF de solicitud
+
 ```sql
--- Casos con formato de solicitud PDF
 SELECT
     c.c_numero_radicado,
     c.status,
@@ -468,8 +583,9 @@ ORDER BY d.created_at DESC
 LIMIT 20;
 ```
 
+### Casos radicados sin PDF de solicitud
+
 ```sql
--- Casos radicados sin PDF de solicitud
 SELECT id, c_numero_radicado, status, c_formato_solicitud_pdf_id
 FROM "case"
 WHERE deleted = false
@@ -481,9 +597,9 @@ WHERE deleted = false
 
 ---
 
-## 10. Personas naturales y jurídicas (Contact / Account)
+## 8. Terceros (Contact / Account)
 
-### Contactos (personas naturales)
+### Contactos — personas naturales
 
 ```sql
 SELECT
@@ -501,8 +617,9 @@ ORDER BY created_at DESC
 LIMIT 20;
 ```
 
+### Documentos duplicados en contactos
+
 ```sql
--- Documentos duplicados en contactos
 SELECT c_numero_de_documento, COUNT(*) AS veces
 FROM contact
 WHERE deleted = false
@@ -512,7 +629,7 @@ GROUP BY c_numero_de_documento
 HAVING COUNT(*) > 1;
 ```
 
-### Cuentas (personas jurídicas / NIT)
+### Cuentas — personas jurídicas (NIT)
 
 ```sql
 SELECT
@@ -527,12 +644,77 @@ ORDER BY created_at DESC
 LIMIT 20;
 ```
 
----
-
-## 11. Integridad entre entidades
+### NIT duplicados
 
 ```sql
--- Acta / actuo / comunicación apuntando a caso inexistente o borrado
+SELECT c_nit, COUNT(*) AS veces
+FROM account
+WHERE deleted = false
+  AND c_nit IS NOT NULL
+  AND TRIM(c_nit) <> ''
+GROUP BY c_nit
+HAVING COUNT(*) > 1;
+```
+
+### Terceros vinculados a casos
+
+```sql
+SELECT
+    c.c_numero_radicado,
+    c.c_documento_peticionario,
+    ct.first_name || ' ' || ct.last_name AS contacto_vinculado,
+    ct.c_numero_de_documento AS doc_contacto
+FROM "case" c
+LEFT JOIN contact ct ON ct.id = c.contact_id AND ct.deleted = false
+WHERE c.deleted = false
+  AND c.contact_id IS NOT NULL
+ORDER BY c.created_at DESC
+LIMIT 20;
+```
+
+---
+
+## 9. Notificaciones
+
+### Últimas notificaciones generadas
+
+```sql
+SELECT
+    n.created_at,
+    u.user_name AS destinatario,
+    n.type,
+    n.read AS leida,
+    LEFT(n.message, 120) AS mensaje_corto,
+    n.related_type,
+    n.related_id
+FROM notification n
+LEFT JOIN "user" u ON u.id = n.user_id AND u.deleted = false
+WHERE n.deleted = false
+ORDER BY n.created_at DESC
+LIMIT 30;
+```
+
+### Notificaciones no leídas por usuario
+
+```sql
+SELECT
+    u.user_name,
+    COUNT(*) AS sin_leer
+FROM notification n
+JOIN "user" u ON u.id = n.user_id AND u.deleted = false
+WHERE n.deleted = false
+  AND n.read = false
+GROUP BY u.user_name
+ORDER BY sin_leer DESC;
+```
+
+---
+
+## 10. Integridad entre entidades
+
+### Registros huérfanos (sin caso válido)
+
+```sql
 SELECT 'acta_visita' AS origen, av.id, av.case_id
 FROM acta_visita av
 LEFT JOIN "case" c ON c.id = av.case_id AND c.deleted = false
@@ -550,11 +732,19 @@ UNION ALL
 SELECT 'comunicacion_caso', cc.id, cc.case_id
 FROM comunicacion_caso cc
 LEFT JOIN "case" c ON c.id = cc.case_id AND c.deleted = false
-WHERE cc.deleted = false AND c.id IS NULL;
+WHERE cc.deleted = false AND c.id IS NULL
+
+UNION ALL
+
+SELECT 'asignacion_historial', ah.id, ah.case_id
+FROM asignacion_historial ah
+LEFT JOIN "case" c ON c.id = ah.case_id AND c.deleted = false
+WHERE ah.deleted = false AND c.id IS NULL;
 ```
 
+### Radicado en caso vs radicado en acta (deben coincidir)
+
 ```sql
--- Radicado en caso vs radicado en acta (deben coincidir)
 SELECT
     c.id,
     c.c_numero_radicado AS radicado_caso,
@@ -568,10 +758,9 @@ WHERE c.deleted = false
 
 ---
 
-## 12. Actividad reciente (auditoría)
+## 11. Actividad reciente (auditoría)
 
 ```sql
--- Últimos cambios registrados en casos
 SELECT
     ahr.created_at,
     u.user_name,
@@ -589,25 +778,11 @@ LIMIT 30;
 
 ---
 
-## 13. Checklist rápido después de probar en la UI
+## 12. Consultas por ID de caso
 
+El ID aparece en la URL del CRM: `#Case/view/XXXXXXXXXXXXXXX`
 
-| Acción en CRM         | Qué validar en BD                                                                        |
-| --------------------- | ---------------------------------------------------------------------------------------- |
-| Crear caso            | Nueva fila en `"case"`, `c_fecha_caso`, peticionario, `status = Pendiente de radicacion` |
-| Radicar               | `c_numero_radicado`, `c_expediente`, cambio de `status`, `c_formato_solicitud_pdf_id`    |
-| Asignar patrullero    | `assigned_user_id`, fila en `asignacion_historial` si hubo reasignación                  |
-| Acta de visita        | Fila en `acta_visita` con `case_id`, `c_formato_acta_visita_pdf_id`                      |
-| Auto de archivo       | Fila en `actuo_archivo` con `case_id`                                                    |
-| Comunicación          | Fila en `comunicacion_caso` con `case_id`                                                |
-| Crear usuario con rol | Fila en `role_user` enlazando `user` y `role`                                            |
-
-
----
-
-## 14. Consultas útiles por ID de caso
-
-Si tienes el ID del caso (visible en la URL: `#Case/view/XXXXXXXX`), sustituye `'CASE_ID_AQUI'` y pégalo en la terminal de `**espocrm-db**` (ya dentro de `psql`):
+Sustituye `'CASE_ID_AQUI'` por el ID real:
 
 ```sql
 SELECT * FROM "case" WHERE id = 'CASE_ID_AQUI' AND deleted = false;
@@ -618,12 +793,81 @@ SELECT * FROM comunicacion_caso WHERE case_id = 'CASE_ID_AQUI' AND deleted = fal
 SELECT * FROM asignacion_historial WHERE case_id = 'CASE_ID_AQUI' AND deleted = false;
 ```
 
+### Vista consolidada de un caso
+
+```sql
+SELECT
+    c.id,
+    c.c_numero_radicado,
+    c.c_expediente,
+    c.status,
+    c.c_fecha_caso,
+    c.c_fecha_vencimiento,
+    c.c_recurso_tema,
+    u.user_name AS asignado,
+    (SELECT COUNT(*) FROM acta_visita av WHERE av.case_id = c.id AND av.deleted = false) AS actas,
+    (SELECT COUNT(*) FROM actuo_archivo aa WHERE aa.case_id = c.id AND aa.deleted = false) AS actuos,
+    (SELECT COUNT(*) FROM comunicacion_caso cc WHERE cc.case_id = c.id AND cc.deleted = false) AS comunicaciones,
+    (SELECT COUNT(*) FROM asignacion_historial ah WHERE ah.case_id = c.id AND ah.deleted = false) AS reasignaciones
+FROM "case" c
+LEFT JOIN "user" u ON u.id = c.assigned_user_id AND u.deleted = false
+WHERE c.id = 'CASE_ID_AQUI'
+  AND c.deleted = false;
+```
+
 ---
 
-## Notas
+## 13. Checklist rápido — acción en UI vs validación en BD
 
-- Todas las consultas van en la terminal de `**espocrm-db**` en Dokploy, después de entrar con `psql`.
-- La contraseña está en Dokploy → variables del proyecto → `**POSTGRES_PASSWORD**`.
-- Si ves 0 filas pero hay datos en el CRM, revisa que estés en el proyecto correcto de Dokploy.
-- Tras un wipe de datos, solo quedarán configuración, roles y el usuario admin.
+| Acción en el CRM | Qué validar en BD |
+|------------------|-------------------|
+| Crear caso | Nueva fila en `"case"`, `c_fecha_caso`, peticionario, `status = Pendiente de radicacion` |
+| Radicar | `c_numero_radicado`, `c_expediente`, cambio de `status`, `c_formato_solicitud_pdf_id` |
+| Asignar patrullero | `assigned_user_id`, fila en `asignacion_historial` si hubo reasignación |
+| Acta de visita | Fila en `acta_visita` con `case_id`, `c_formato_acta_visita_pdf_id` |
+| Auto de archivo | Fila en `actuo_archivo` con `case_id` |
+| Comunicación | Fila en `comunicacion_caso` con `case_id` |
+| Notificación | Fila en `notification` con `related_type` y `user_id` |
+| Crear usuario con rol | Fila en `role_user` enlazando `user` y `role` |
 
+---
+
+## 14. Checklist post-deploy en Dokploy
+
+Después de **Redeploy**, ejecuta en orden:
+
+1. **Conexión:** `SELECT current_database(), current_user, NOW();`
+2. **Resumen:** consulta **0.1** (conteos por entidad)
+3. **Roles:** consulta **0.2** (4 roles operativos)
+4. **Usuarios:** consulta **0.3** (usuarios con rol asignado)
+5. **Job vencimientos:** consulta **0.6** (job activo)
+6. **Integridad:** consulta **10** (registros huérfanos = 0 filas)
+7. **Radicados duplicados:** consulta de la sección **2** (= 0 filas)
+
+En logs del contenedor `espocrm` debe aparecer:
+
+```
+==> Auto-deploy completado.
+```
+
+Verificación manual desde el contenedor `espocrm`:
+
+```bash
+bash /opt/bootstrap/repo/scripts/verify-custom-deploy.sh
+```
+
+---
+
+## Notas finales
+
+- Ejecuta las consultas en la terminal de **`espocrm-db`** en Dokploy (o vía `psql` desde `espocrm`).
+- La contraseña está en Dokploy → **Environment** → `POSTGRES_PASSWORD`.
+- Si ves 0 filas pero hay datos en el CRM, confirma que estás en el proyecto y base correctos.
+- Tras un wipe de datos operativos, quedarán roles, configuración y usuario admin; los conteos de casos/actas serán 0.
+- Para exportar resultados a CSV desde `psql`:
+
+```sql
+\copy (SELECT c_numero_radicado, status, c_fecha_caso FROM "case" WHERE deleted = false) TO '/tmp/casos.csv' CSV HEADER;
+```
+
+> En Dokploy la ruta `/tmp` es temporal dentro del contenedor; descarga el archivo antes de reiniciar el servicio.
