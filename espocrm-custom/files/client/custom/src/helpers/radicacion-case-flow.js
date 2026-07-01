@@ -73,6 +73,30 @@ define('custom:helpers/radicacion-case-flow', [
         return isRadicacionPendingCaseForUser(recordView);
     };
 
+    const findRadicacionPanel = function (recordView) {
+        return recordView.$el.find(
+            '.panel[data-name="' + PANEL_RADICACION + '"], ' +
+            '.panel[data-panel-name="' + PANEL_RADICACION + '"], ' +
+            '.record-panel[data-name="' + PANEL_RADICACION + '"], ' +
+            '.record-panel[data-panel-name="' + PANEL_RADICACION + '"]'
+        );
+    };
+
+    const showRadicacionPanel = function (recordView) {
+        const $panel = findRadicacionPanel(recordView);
+
+        if ($panel.length) {
+            $panel.show().css('display', 'block');
+        }
+    };
+
+    const clearRadicacionPageClasses = function () {
+        document.body.classList.remove(BODY_CLASS);
+        document.body.classList.remove(DETAIL_CLASS);
+        document.body.classList.remove(SOLO_RADICAR_CLASS);
+        document.body.classList.remove('alcaldia-radicacion-radicar-page');
+    };
+
     const navigateToRadicacionEdit = function (recordView) {
         if (!recordView || !recordView.model || !recordView.model.id) {
             return;
@@ -84,19 +108,33 @@ define('custom:helpers/radicacion-case-flow', [
 
         recordView._radicacionAutoEditTriggered = true;
 
-        const scope = recordView.scope || recordView.entityType || 'Case';
-        const url = '#' + scope + '/edit/' + recordView.model.id;
-        const router = typeof recordView.getRouter === 'function'
-            ? recordView.getRouter()
-            : null;
+        const openEdit = function () {
+            if (recordView.mode !== 'detail') {
+                return;
+            }
 
-        if (router && typeof router.navigate === 'function') {
-            router.navigate(url, {trigger: true});
+            if (typeof recordView.actionEdit === 'function') {
+                recordView.actionEdit();
 
-            return;
-        }
+                return;
+            }
 
-        window.location.hash = url;
+            const scope = recordView.scope || recordView.entityType || 'Case';
+            const url = '#' + scope + '/edit/' + recordView.model.id;
+            const router = typeof recordView.getRouter === 'function'
+                ? recordView.getRouter()
+                : null;
+
+            if (router && typeof router.navigate === 'function') {
+                router.navigate(url, {trigger: true});
+
+                return;
+            }
+
+            window.location.hash = url;
+        };
+
+        window.setTimeout(openEdit, 0);
     };
 
     const markSkipRadicacionAutoEdit = function (caseId) {
@@ -145,13 +183,10 @@ define('custom:helpers/radicacion-case-flow', [
             }
         });
 
-        const $panel = recordView.$el.find(
-            '.panel[data-name="' + PANEL_RADICACION + '"], ' +
-            '.panel[data-panel-name="' + PANEL_RADICACION + '"]'
-        );
+        const $panel = findRadicacionPanel(recordView);
 
         if ($panel.length) {
-            $panel.show();
+            $panel.show().css('display', 'block');
         }
 
         const radicadoView = recordView.getFieldView('cNumeroRadicado');
@@ -203,18 +238,18 @@ define('custom:helpers/radicacion-case-flow', [
         const user = recordView.getUser();
 
         if (!isRadicacionOnlyUser(user)) {
-            syncBodyClass(recordView, false);
-            document.body.classList.remove(DETAIL_CLASS);
+            clearRadicacionPageClasses();
             return;
         }
 
         if (recordView.mode === 'detail') {
             document.body.classList.remove(BODY_CLASS);
             document.body.classList.remove(SOLO_RADICAR_CLASS);
+            document.body.classList.remove('alcaldia-radicacion-radicar-page');
 
             if (shouldAutoEnterRadicacionEdit(recordView)) {
                 navigateToRadicacionEdit(recordView);
-            } else if (isRadicacionOnlyUser(user) && !RadicacionFields.isCaseRadicado(recordView.model)) {
+            } else if (!RadicacionFields.isCaseRadicado(recordView.model)) {
                 document.body.classList.add(DETAIL_CLASS);
             } else {
                 document.body.classList.remove(DETAIL_CLASS);
@@ -223,10 +258,19 @@ define('custom:helpers/radicacion-case-flow', [
             return;
         }
 
-        if (recordView.mode === 'edit') {
+        if (recordView.mode === 'edit' && isRadicacionPendingCaseForUser(recordView)) {
+            document.body.classList.add('alcaldia-radicacion-radicar-page');
             document.body.classList.add(SOLO_RADICAR_CLASS);
             lockNonRadicadoFields(recordView);
+            showRadicacionPanel(recordView);
+
             return;
+        }
+
+        if (recordView.mode === 'edit') {
+            document.body.classList.remove('alcaldia-radicacion-radicar-page');
+            document.body.classList.remove(SOLO_RADICAR_CLASS);
+            syncBodyClass(recordView, false);
         }
     };
 
@@ -254,9 +298,7 @@ define('custom:helpers/radicacion-case-flow', [
         });
 
         self.once('remove', function () {
-            document.body.classList.remove(BODY_CLASS);
-            document.body.classList.remove(DETAIL_CLASS);
-            document.body.classList.remove(SOLO_RADICAR_CLASS);
+            clearRadicacionPageClasses();
         });
     };
 

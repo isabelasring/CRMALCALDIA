@@ -51,16 +51,27 @@ define('custom:views/case/record/edit', [
                         }, 0);
                     };
                 }
-            } else if (
-                !this.model.isNew()
-                && RadicacionCaseFlow.shouldUseRadicarMode(this)
-            ) {
-                this._radicarMode = true;
-                this.sideDisabled = true;
-                this.bottomDisabled = true;
-                document.body.classList.add('alcaldia-radicacion-radicar-page');
-                RadicacionCaseFlow.clearSkipRadicacionAutoEdit(this.model.id);
             }
+
+            const self = this;
+
+            RadicacionFields.onProfileReady(function () {
+                if (
+                    self.model.isNew()
+                    || !RadicacionCaseFlow.shouldUseRadicarMode(self)
+                ) {
+                    return;
+                }
+
+                self._radicarMode = true;
+                self.sideDisabled = true;
+                self.bottomDisabled = true;
+                RadicacionCaseFlow.clearSkipRadicacionAutoEdit(self.model.id);
+
+                if (self.isRendered && self.isRendered()) {
+                    RadicacionCaseFlow.schedule(self);
+                }
+            });
 
             PersonaTipoFields.setup(this);
             PartyDocumentLookup.setup(this);
@@ -208,10 +219,6 @@ define('custom:views/case/record/edit', [
         remove: function () {
             if (this._asignarMode) {
                 AsignadorAssignmentUi.clearAssignmentSession();
-            }
-
-            if (this._radicarMode) {
-                document.body.classList.remove('alcaldia-radicacion-radicar-page');
             }
 
             Dep.prototype.remove.call(this);
